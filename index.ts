@@ -1,11 +1,19 @@
 import MAIN_LOGGER from 'pino'
 import NodeCache from '@cacheable/node-cache'
 import readline from 'readline'
-import makeWASocket, { delay, DisconnectReason, fetchLatestBaileysVersion, makeCacheableSignalKeyStore, proto, useMultiFileAuthState, } from 'baileys'
-import type { AnyMessageContent, CacheStore, WAMessageContent, WAMessageKey } from 'baileys'
-import { log } from './lib'
+import makeWASocket, { delay, DisconnectReason, fetchLatestBaileysVersion, jidNormalizedUser, makeCacheableSignalKeyStore, } from 'baileys'
+import type { AnyMessageContent, CacheStore } from 'baileys'
+import { log, bridge_store, defaultWelcomeMessage, findEnvFile, parseEnv, version } from './lib'
 
-log.info('Starting WhatsApp Client...')
+log.info(`Activating Client ::: ${version}`)
+
+const { getMessage, authstate } = bridge_store
+
+const config = findEnvFile('./')
+
+if (!config) {
+    log.warn("No configuration file found in the current directory. Please create a .env file to configure the middleware.");
+}
 
 const logger = MAIN_LOGGER({ level: "silent" })
 const msgRetryCounterCache = new NodeCache() as CacheStore
@@ -13,7 +21,7 @@ const rl = readline.createInterface({ input: process.stdin, output: process.stdo
 const question = (text: string) => new Promise<string>((resolve) => rl.question(text, resolve))
 
 const startSock = async () => {
-    const { state, saveCreds } = await useMultiFileAuthState('baileys_auth_info')
+    const { state, saveCreds } = await authstate()
     const { version, isLatest } = await fetchLatestBaileysVersion()
     log.info(`using WA v${version.join('.')}, isLatest: ${isLatest}`)
 
@@ -30,12 +38,27 @@ const startSock = async () => {
     })
 
     if (!sock.authState.creds.registered) {
-        const phoneNumber = await question('Please enter your phone number:\n')
-        const code = await sock.requestPairingCode(phoneNumber)
+        let phoneNumber
+        if (config) {
+            phoneNumber = parseEnv(config || '').PHONE_NUMBER || null
+        }
+
+        if (!phoneNumber) {
+            log.warn("No phone number found in configuration. You will be prompted to enter it.");
+            phoneNumber = await question('Please enter your phone number:\n')
+        }
+        if (phoneNumber && phoneNumber.length < 10) {
+            log.error("The provided phone number is invalid. It should include the country code and be at least 10 digits long.");
+            phoneNumber = await question('Please enter your phone number:\n')
+        }
+
+        const code = await sock.requestPairingCode(phoneNumber.replace(/\D+/g, ''))
         log.info(`Pair Code: ${code.slice(0, 4)}-${code.slice(4)}`)
     }
 
     const sendMessageWTyping = async (msg: AnyMessageContent, jid: string) => {
+        jid = jidNormalizedUser(jid)
+
         await sock.presenceSubscribe(jid)
         await delay(500)
 
@@ -59,7 +82,11 @@ const startSock = async () => {
                         log.error('Connection closed. You are logged out.')
                     }
                 }
-                connection === 'open' ? log.info(`Bridge Connected to WhatsApp`) : undefined
+                const isConnected = connection === 'open'
+                isConnected
+                    ? log.info(`Bridge Connected to WhatsApp`) : undefined;
+
+                isConnected ? await sendMessageWTyping({ text: defaultWelcomeMessage }, sock.user?.id!) : undefined;
             }
             if (events['creds.update']) {
                 await saveCreds()
@@ -83,10 +110,6 @@ const startSock = async () => {
     )
 
     return sock
-
-    async function getMessage(key: WAMessageKey): Promise<WAMessageContent | undefined> {
-        return proto.Message.create({ conversation: 'test' })
-    }
 }
 
 startSock()

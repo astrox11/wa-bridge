@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readdirSync, readFileSync } from 'fs';
 import { resolve } from 'path';
 import { Worker } from 'worker_threads';
 
@@ -131,4 +131,20 @@ export function runIndependentTasks(...tasks: Array<() => any>): Array<Promise<O
     };
 
     return tasks.map((t) => runInWorker(t));
+}
+
+export function findEnvFile(dir: string): string | null {
+    try {
+        const files: string[] = readdirSync(dir);
+        for (const f of files) {
+            if (f.startsWith('.env')) {
+                const p = resolve(dir, f);
+                if (existsSync(p)) return p;
+            }
+        }
+    } catch {
+        // ignore errors (e.g. missing directory / permissions)
+    }
+
+    return null;
 }
