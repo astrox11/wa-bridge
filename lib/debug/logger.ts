@@ -1,11 +1,13 @@
 import { findEnvFile, parseEnv } from "../utils";
 
 const config = findEnvFile(process.cwd());
+const envConfig = parseEnv(config || "");
+const logLevel = envConfig.LOGS;
 
-const debug = parseEnv(config || "").LOGS === "debug";
-const warn = parseEnv(config || "").LOGS === "warn";
-const info = parseEnv(config || "").LOGS === "info";
-const error = parseEnv(config || "").LOGS === "error";
+const debug = logLevel === "debug";
+const warn = logLevel === "warn";
+const info = logLevel === "info";
+const error = logLevel === "error";
 
 const COLORS = {
   reset: "\x1b[0m",

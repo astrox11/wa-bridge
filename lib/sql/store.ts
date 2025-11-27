@@ -28,33 +28,61 @@ type WriteAbleAuthStore =
       timestamp?: string;
     };
 
-export const store = {
-  authstate: async () => {
-    sqlite.run(`
+// Initialize all tables once at module load
+sqlite.run(`
   CREATE TABLE IF NOT EXISTS user_session (
     name TEXT PRIMARY KEY,
     data TEXT NOT NULL
   );
 `);
+sqlite.run(`
+  CREATE TABLE IF NOT EXISTS user_messages (
+    id TEXT PRIMARY KEY,
+    message TEXT NOT NULL
+  );
+`);
+sqlite.run(`
+  CREATE TABLE IF NOT EXISTS user_contacts (
+    pn TEXT PRIMARY KEY,
+    lid TEXT NOT NULL
+  );
+`);
 
-    const stmtGet = sqlite.prepare(
-      "SELECT data FROM user_session WHERE name = ?",
-    );
-    const stmtSet = sqlite.prepare(`
+// Prepare all statements once at module load for reuse
+const stmtSessionGet = sqlite.prepare(
+  "SELECT data FROM user_session WHERE name = ?",
+);
+const stmtSessionSet = sqlite.prepare(`
   INSERT INTO user_session (name, data) VALUES (?, ?)
   ON CONFLICT(name) DO UPDATE SET data = excluded.data
 `);
-    const stmtDelete = sqlite.prepare(
-      "DELETE FROM user_session WHERE name = ?",
-    );
+const stmtSessionDelete = sqlite.prepare(
+  "DELETE FROM user_session WHERE name = ?",
+);
+const stmtMessagesGet = sqlite.prepare(
+  "SELECT message FROM user_messages WHERE id = ?",
+);
+const stmtMessagesSet = sqlite.prepare(`
+  INSERT INTO user_messages (id, message) VALUES (?, ?)
+  ON CONFLICT(id) DO UPDATE SET message = excluded.message
+`);
+const stmtContactsGet = sqlite.prepare(
+  "SELECT lid FROM user_contacts WHERE pn = ?",
+);
+const stmtContactsSet = sqlite.prepare(`
+  INSERT INTO user_contacts (pn, lid) VALUES (?, ?)
+  ON CONFLICT(pn) DO UPDATE SET lid = excluded.lid
+`);
 
+export const store = {
+  authstate: async () => {
     const fixFileName = (name?: string) =>
       name?.replace(/\//g, "__")?.replace(/:/g, "-");
 
     const readData = async (file: string) => {
       try {
         const name = fixFileName(file)!;
-        const row = stmtGet.get(name) as { data: string } | null;
+        const row = stmtSessionGet.get(name) as { data: string } | null;
         if (!row) return null;
         return JSON.parse(row.data, BufferJSON.reviver);
       } catch {
@@ -65,12 +93,12 @@ export const store = {
     const writeData = async (data: WriteAbleAuthStore, file: string) => {
       const name = fixFileName(file)!;
       const json = JSON.stringify(data, BufferJSON.replacer);
-      await Promise.resolve(stmtSet.run(name, json));
+      await Promise.resolve(stmtSessionSet.run(name, json));
     };
 
     const removeData = async (file: string) => {
       const name = fixFileName(file)!;
-      await Promise.resolve(stmtDelete.run(name));
+      await Promise.resolve(stmtSessionDelete.run(name));
     };
 
     const creds: AuthenticationCreds =
@@ -115,31 +143,16 @@ export const store = {
     };
   },
   save_wa_messages: async (msg: WAMessage) => {
-    sqlite.run(`
-  CREATE TABLE IF NOT EXISTS user_messages (
-    id TEXT PRIMARY KEY,
-    message TEXT NOT NULL
-  );
-`);
-
-    const stmtSet = sqlite.prepare(`
-  INSERT INTO user_messages (id, message) VALUES (?, ?)
-  ON CONFLICT(id) DO UPDATE SET message = excluded.message
-`);
-
     const id = msg?.key?.id;
     if (typeof id != "string") return;
     const json = JSON.stringify(msg, null, 2);
-    await Promise.resolve(stmtSet.run(id, json));
+    await Promise.resolve(stmtMessagesSet.run(id, json));
   },
   getMessage: async (key: WAMessageKey) => {
     const id = key?.id;
     if (typeof id !== "string") return undefined;
 
-    const stmtGet = sqlite.prepare(
-      "SELECT message FROM user_messages WHERE id = ?",
-    );
-    const row = stmtGet.get(id) as { message: string } | undefined;
+    const row = stmtMessagesGet.get(id) as { message: string } | undefined;
     if (!row) return undefined;
 
     let parsed;
@@ -168,29 +181,10 @@ export const store = {
     }
   },
   save_contact: async (pn: string, lid: string) => {
-    sqlite.run(`
-  CREATE TABLE IF NOT EXISTS user_contacts (
-    pn TEXT PRIMARY KEY,
-    lid TEXT NOT NULL
-  );
-`);
-    const stmtSet = sqlite.prepare(`
-  INSERT INTO user_contacts (pn, lid) VALUES (?, ?)
-  ON CONFLICT(pn) DO UPDATE SET lid = excluded.lid
-`);
-    await Promise.resolve(stmtSet.run(pn, lid));
+    await Promise.resolve(stmtContactsSet.run(pn, lid));
   },
   get_contact: async (id: string) => {
-    sqlite.run(`
-  CREATE TABLE IF NOT EXISTS user_contacts (
-    pn TEXT PRIMARY KEY,
-    lid TEXT NOT NULL
-  );
-`);
-    const stmtGet = sqlite.prepare(
-      "SELECT lid FROM user_contacts WHERE pn = ?",
-    );
-    const row = stmtGet.get(id) as { lid: string } | null;
+    const row = stmtContactsGet.get(id) as { lid: string } | null;
     if (!row) return null;
     return row.lid;
   },

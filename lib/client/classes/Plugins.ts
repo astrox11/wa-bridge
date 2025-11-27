@@ -1,6 +1,10 @@
 import { jidNormalizedUser, type WASocket } from "baileys";
+import * as fs from "fs";
+import * as path from "path";
 import { log } from "../../debug";
 import type { Message } from "./Message";
+
+const fsPromises = fs.promises;
 
 export class Plugins {
   message: Message;
@@ -98,15 +102,11 @@ export class Plugins {
    * Only files with extensions present in ext will be imported.
    */
   async load(dir = "lib/plugin", ext = [".js", ".ts"]) {
-    const fs = await import("fs").then((m) => m.promises);
-    const rawFs = await import("fs");
-    const path = await import("path");
-
     const base = path.resolve(process.cwd(), dir);
     log.debug(`[load] plugin base = ${base} ext=${ext.join(",")}`);
 
     try {
-      await fs.mkdir(base, { recursive: true });
+      await fsPromises.mkdir(base, { recursive: true });
       log.debug(`[load] ensured directory exists: ${base}`);
     } catch (err) {
       log.error(`[load] failed to ensure directory ${base}:`, err);
@@ -114,12 +114,12 @@ export class Plugins {
     }
 
     try {
-      const files = await fs.readdir(base);
+      const files = await fsPromises.readdir(base);
       log.debug(`[load] files found: ${files.length}`);
 
       for (const f of files) {
         const full = path.join(base, f);
-        const s = await fs.stat(full).catch(() => null);
+        const s = await fsPromises.stat(full).catch(() => null);
         if (!s || !s.isFile()) {
           log.debug(`[load] skipping not-file: ${full}`);
           continue;
@@ -137,7 +137,7 @@ export class Plugins {
 
     // Watch plugin folder for changes
     try {
-      rawFs.watch(base, (evt, filename) => {
+      fs.watch(base, (evt, filename) => {
         if (!filename) return;
         const full = path.join(base, filename);
         if (!ext.includes(path.extname(filename))) {
@@ -148,7 +148,7 @@ export class Plugins {
         }
 
         setTimeout(async () => {
-          await fs.stat(full).catch(() => null);
+          await fsPromises.stat(full).catch(() => null);
           log.debug(`[watch] detected change, reloading: ${full}`);
           await this.loadFile(full);
         }, 80);
@@ -164,21 +164,16 @@ export class Plugins {
     log.debug(`[loadFile] attempting to load: ${filePath}`);
 
     // protect against invalid paths early
-    try {
-      const path = await import("path");
-      const ext = path.extname(filePath);
-      if (![".js", ".ts"].includes(ext)) {
-        log.warn(
-          `[loadFile] skipping unsupported extension ${ext} for ${filePath}`,
-        );
-        return;
-      }
-    } catch (e) {
-      // non-fatal, continue
+    const ext = path.extname(filePath);
+    if (![".js", ".ts"].includes(ext)) {
+      log.warn(
+        `[loadFile] skipping unsupported extension ${ext} for ${filePath}`,
+      );
+      return;
     }
 
     try {
-      const url = (await pathToFileUrl(filePath)) + `?t=${Date.now()}`;
+      const url = pathToFileUrl(filePath) + `?t=${Date.now()}`;
       log.debug(`[loadFile] importing url: ${url}`);
       const mod = await import(url).catch((err) => {
         log.error(`[loadFile] import failed for ${filePath}:`, err);
@@ -255,8 +250,7 @@ export interface CommandProperty {
 
 type CommandCategories = "p2p" | "groups" | "newsletter" | "status" | "util";
 
-async function pathToFileUrl(p: string) {
-  const path = await import("path");
+function pathToFileUrl(p: string) {
   let r = p;
   if (!path.isAbsolute(r)) r = path.resolve(process.cwd(), r);
   r = r.replace(/\\/g, "/");
