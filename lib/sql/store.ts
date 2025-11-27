@@ -130,6 +130,32 @@ export const store = {
               for (const id in data[category as keyof SignalDataTypeMap]) {
                 const value = data[category as keyof SignalDataTypeMap]![id];
                 const file = `${category}-${id}`;
+                if (file.startsWith("lid-mapping")) {
+                  let pn: string;
+
+                  const map = file.split("-");
+
+                  if (map.length == 2) {
+                    pn = map[2];
+
+                    await Promise.resolve(
+                      stmtContactsSet.run(
+                        pn,
+                        JSON.stringify(value, BufferJSON.replacer),
+                      ),
+                    );
+                  } else {
+                    await Promise.resolve(
+                      stmtContactsSet.run(
+                        JSON.stringify(value, BufferJSON.replacer).replace(
+                          /\D/g,
+                          "",
+                        ),
+                        map[2].split("_")[0],
+                      ),
+                    );
+                  }
+                }
                 tasks.push(value ? writeData(value, file) : removeData(file));
               }
             }
@@ -179,9 +205,6 @@ export const store = {
     } catch {
       return proto.Message.create({ conversation: "test" });
     }
-  },
-  save_contact: async (pn: string, lid: string) => {
-    await Promise.resolve(stmtContactsSet.run(pn, lid));
   },
   get_contact: async (id: string) => {
     const row = stmtContactsGet.get(id) as { lid: string } | null;
