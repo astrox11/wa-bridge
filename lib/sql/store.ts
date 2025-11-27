@@ -28,7 +28,6 @@ type WriteAbleAuthStore =
       timestamp?: string;
     };
 
-// Initialize all tables once at module load
 sqlite.run(`
   CREATE TABLE IF NOT EXISTS user_session (
     name TEXT PRIMARY KEY,
@@ -48,7 +47,6 @@ sqlite.run(`
   );
 `);
 
-// Prepare all statements once at module load for reuse
 const stmtSessionGet = sqlite.prepare(
   "SELECT data FROM user_session WHERE name = ?",
 );
@@ -168,11 +166,13 @@ export const store = {
       },
     };
   },
-  save_wa_messages: async (msg: WAMessage) => {
+  save_wa_messages: function (msg: WAMessage) {
+    console.log('Message',msg.key.id)
     const id = msg?.key?.id;
     if (typeof id != "string") return;
     const json = JSON.stringify(msg, null, 2);
-    await Promise.resolve(stmtMessagesSet.run(id, json));
+    console.log("Json:", json)
+    stmtMessagesSet.run(id, json);
   },
   getMessage: async (key: WAMessageKey) => {
     const id = key?.id;

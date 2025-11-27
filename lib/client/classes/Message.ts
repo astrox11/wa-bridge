@@ -5,6 +5,7 @@ import {
   normalizeMessageContent,
 } from "baileys";
 import type { WASocket, WAMessage, proto, WAMessageContent } from "baileys";
+import { store } from "../../sql";
 
 export class Message {
   client;
@@ -67,6 +68,7 @@ export class Message {
         configurable: true,
       },
     });
+    store.save_wa_messages(message);
   }
 
   async reply(text: string) {
