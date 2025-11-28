@@ -1,5 +1,6 @@
 import { join } from "path";
 import { readdir, unlink } from "fs/promises";
+import { Boom } from "@hapi/boom";
 import MAIN_LOGGER from "pino";
 import NodeCache from "@cacheable/node-cache";
 import readline from "readline";
@@ -48,7 +49,7 @@ const hasInternet = async () => {
 const question = (text: string) =>
   new Promise<string>((resolve) => rl.question(text, resolve));
 
-const startSock = async () => {
+export const startSock = async () => {
   log.info(`Astro Middleware ${bot_version}`);
   if (!(await hasInternet()))
     return log.warn("You are not connected to Internet");
@@ -69,7 +70,7 @@ const startSock = async () => {
   });
 
   if (!sock.authState.creds.registered) {
-    let phoneNumber;
+    let phoneNumber: string;
 
     if (config) {
       phoneNumber = parseEnv(config || "").PHONE_NUMBER || null;
@@ -112,21 +113,33 @@ const startSock = async () => {
     if (events["connection.update"]) {
       const update = events["connection.update"];
       const { connection, lastDisconnect } = update;
+      const status = (lastDisconnect?.error as Boom)?.output?.statusCode;
       if (connection === "close") {
-        if (
-          (lastDisconnect?.error as { output: { statusCode: number } })?.output
-            ?.statusCode !== DisconnectReason.loggedOut
-        ) {
-          cleanup();
-          startSock();
-        } else {
-          log.error("Connection closed. You are logged out.");
-        }
+        const restart = [
+          DisconnectReason.restartRequired,
+          DisconnectReason.connectionLost,
+          DisconnectReason.connectionClosed,
+          DisconnectReason.connectionReplaced,
+        ];
+
+        const reset = [
+          DisconnectReason.badSession,
+          DisconnectReason.multideviceMismatch,
+          DisconnectReason.loggedOut,
+        ];
+
+        if (restart.includes(status)) await delay(5000);
+        startSock();
+        log.info("Restarting Client...");
+
+        if (reset.includes(status)) log.info("Please, Relogin Again.");
+        await cleanup();
+        startSock();
       }
       const isConnected = connection === "open";
 
       if (isConnected && sock.user?.id) {
-        log.info(`Bridge Connected to WhatsApp`);
+        log.info(`Connected to WhatsApp`);
         await sendMessageWTyping(
           { text: defaultWelcomeMessage },
           sock.user?.id,
@@ -146,35 +159,6 @@ const startSock = async () => {
 
         await p.load();
 
-        p.register({
-          pattern: "menu",
-          alias: ["help"],
-          category: "util",
-          async exec(msg) {
-            const commands = p.findAll();
-            const categories: Record<string, Set<string>> = {};
-
-            for (const cmd of commands) {
-              const cat = cmd.category;
-              if (!categories[cat]) categories[cat] = new Set();
-              categories[cat].add(cmd.pattern);
-            }
-
-            let reply = `ᗰIᗪᗪᒪᗴᗯᗩᖇᗴ ᗰᗴᑎᑌ\n\n`;
-
-            for (const category in categories) {
-              reply += `${category.toUpperCase()}\n`;
-
-              for (const pattern of categories[category]) {
-                reply += `. ${pattern}\n`;
-              }
-
-              reply += `\n`;
-            }
-
-            await msg.reply(`\`\`\`${reply.trim()}\`\`\``);
-          },
-        });
         await p.text();
       }
     }
@@ -183,7 +167,7 @@ const startSock = async () => {
   return sock;
 };
 
-const cleanup = async () => {
+const cleanup = async (reset?: boolean) => {
   try {
     const cwd = process.cwd();
     const files = await readdir(cwd);
@@ -193,13 +177,14 @@ const cleanup = async () => {
     await Promise.all(
       targets.map((f) => unlink(join(cwd, f)).catch(() => undefined)),
     );
+    if (reset) await unlink(join(cwd, "astrobridge.db")).catch(() => undefined);
     if (targets.length) log.info("Closed Client...");
   } catch (e) {
     log.warn("Failed to remove shm/wal files: " + String(e));
   }
 };
 
-const exit = async (signal?: string) => {
+export const exit = async (signal?: string) => {
   if (!signal) signal = undefined;
   try {
     try {
