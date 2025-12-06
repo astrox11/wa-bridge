@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AstroBridge Dashboard - Monitor and manage your WhatsApp middleware">
+  <title>Dashboard - AstroBridge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="container header__inner">
+      <a href="index.html" class="header__logo">AstroBridge</a>
+      <nav class="nav">
+        <a href="index.html" class="nav__link">Home</a>
+        <a href="dashboard.html" class="nav__link active">Dashboard</a>
+        <a href="docs.html" class="nav__link">Documentation</a>
+        <a href="about.html" class="nav__link">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Dashboard Hero -->
+  <section class="hero" style="padding: 3rem 0;">
+    <div class="container">
+      <h1 class="hero__title" style="font-size: 2.5rem;">Dashboard</h1>
+      <p class="hero__subtitle">Monitor your middleware status and manage connections</p>
+    </div>
+  </section>
+
+  <!-- Status Overview -->
+  <section class="section">
+    <div class="container">
+      <h2 class="section__title">Status Overview</h2>
+      <div class="grid grid--4">
+        <div class="card text-center">
+          <h5 class="card__title">Connection</h5>
+          <span class="status status--active">Online</span>
+        </div>
+        <div class="card text-center">
+          <h5 class="card__title">Messages Today</h5>
+          <p style="font-size: 2rem; font-weight: 700;">128</p>
+        </div>
+        <div class="card text-center">
+          <h5 class="card__title">Commands Run</h5>
+          <p style="font-size: 2rem; font-weight: 700;">45</p>
+        </div>
+        <div class="card text-center">
+          <h5 class="card__title">Uptime</h5>
+          <p style="font-size: 2rem; font-weight: 700;">24h</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recent Activity -->
+  <section class="section section--alt">
+    <div class="container">
+      <h2 class="section__title">Recent Activity</h2>
+      <div class="table-wrapper">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Type</th>
+              <th>From</th>
+              <th>Message</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>12:45 PM</td>
+              <td>Command</td>
+              <td>+1234567890</td>
+              <td>.ping</td>
+              <td><span class="status status--active">Processed</span></td>
+            </tr>
+            <tr>
+              <td>12:43 PM</td>
+              <td>Message</td>
+              <td>+9876543210</td>
+              <td>Hello there!</td>
+              <td><span class="status status--active">Delivered</span></td>
+            </tr>
+            <tr>
+              <td>12:40 PM</td>
+              <td>Command</td>
+              <td>+1234567890</td>
+              <td>.menu</td>
+              <td><span class="status status--active">Processed</span></td>
+            </tr>
+            <tr>
+              <td>12:35 PM</td>
+              <td>Message</td>
+              <td>+5555555555</td>
+              <td>Testing the bot</td>
+              <td><span class="status status--pending">Pending</span></td>
+            </tr>
+            <tr>
+              <td>12:30 PM</td>
+              <td>System</td>
+              <td>System</td>
+              <td>Middleware connected</td>
+              <td><span class="status status--active">Success</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Actions -->
+  <section class="section">
+    <div class="container">
+      <h2 class="section__title">Quick Actions</h2>
+      <div class="grid grid--3">
+        <div class="card">
+          <h4 class="card__title">Restart Middleware</h4>
+          <p class="card__content">Restart the WhatsApp connection without losing session data.</p>
+          <button class="btn mt-3">Restart</button>
+        </div>
+        <div class="card">
+          <h4 class="card__title">Clear Session</h4>
+          <p class="card__content">Clear all session data and start fresh. You'll need to re-authenticate.</p>
+          <button class="btn mt-3">Clear Session</button>
+        </div>
+        <div class="card">
+          <h4 class="card__title">View Logs</h4>
+          <p class="card__content">View detailed system logs for debugging and monitoring.</p>
+          <button class="btn mt-3">View Logs</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Configuration Form -->
+  <section class="section section--alt">
+    <div class="container">
+      <h2 class="section__title">Configuration</h2>
+      <div class="card" style="max-width: 600px; margin: 0 auto;">
+        <form>
+          <div class="form-group">
+            <label class="form-label" for="phone">Phone Number</label>
+            <input type="tel" id="phone" class="form-input" placeholder="+1234567890">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="prefix">Command Prefix</label>
+            <input type="text" id="prefix" class="form-input" value="." placeholder=".">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="loglevel">Log Level</label>
+            <select id="loglevel" class="form-select">
+              <option value="silent">Silent</option>
+              <option value="error">Error</option>
+              <option value="warn">Warning</option>
+              <option value="info" selected>Info</option>
+              <option value="debug">Debug</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn--primary">Save Configuration</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container text-center">
+      <p class="footer__text">
+        &copy; 2024 AstroBridge. Open source middleware for WhatsApp.
+      </p>
+      <p class="footer__text mt-2">
+        <a href="https://github.com/astrox11/astrobridge">GitHub</a>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
