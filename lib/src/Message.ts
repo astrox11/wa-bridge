@@ -4,25 +4,32 @@ import {
   isJidGroup,
   normalizeMessageContent,
 } from "baileys";
-import type { WASocket, WAMessage, proto, WAMessageContent } from "baileys";
+import type {
+  WASocket,
+  WAMessage,
+  proto,
+  WAMessageContent,
+  WAMessageKey,
+} from "baileys";
 import { store } from "../sql";
+import { fileTypeFromBuffer } from "file-type";
 
 export class Message {
-  client;
-  chat;
-  key;
-  message;
-  isGroup;
-  sender;
-  sender_alt;
-  type;
-  image;
-  video;
-  audio;
-  sticker;
-  contextInfo;
-  quoted;
-  text;
+  client: WASocket;
+  chat: string;
+  key: WAMessageKey;
+  message: WAMessageContent;
+  isGroup: boolean;
+  sender: string;
+  sender_alt: string | undefined;
+  type: string | undefined;
+  image: boolean;
+  video: boolean;
+  audio: boolean;
+  sticker: boolean;
+  contextInfo: proto.IContextInfo | undefined;
+  quoted: Quoted | undefined;
+  text: string | undefined;
 
   constructor(client: WASocket, message: WAMessage) {
     this.client = client;
@@ -80,8 +87,6 @@ export class Message {
     return new Message(this.client, msg!);
   }
 
-  // async send(content: any, opts: {}) {}
-
   async edit(text: string) {
     if (this.image) {
       return await this.client.sendMessage(this.chat, {
@@ -99,18 +104,119 @@ export class Message {
       return await this.client.sendMessage(this.chat, { edit: this.key, text });
     }
   }
+
+  async send(
+    content: string | Buffer,
+    options: {
+      caption?: string;
+      mimetype?: string;
+      filename?: string;
+      gifPlayback?: boolean;
+    } = {},
+  ) {
+    const isBuffer = Buffer.isBuffer(content);
+    const isUrl = typeof content === "string" && /^https?:\/\//i.test(content);
+    const isText = typeof content === "string" && !isUrl;
+
+    if (isText) {
+      const msg = await this.client.sendMessage(
+        this.chat,
+        { text: content },
+        { quoted: this },
+      );
+      return new Message(this.client, msg!);
+    }
+
+    let mediaType: string;
+    let detectedMimetype: string | undefined = options.mimetype;
+
+    if (isBuffer) {
+      try {
+        const fileType = await fileTypeFromBuffer(content);
+        if (fileType) {
+          detectedMimetype = detectedMimetype || fileType.mime;
+          mediaType = this.mimetypeToMediaType(fileType.mime);
+        } else {
+          // Fallback for text-based or unrecognized formats
+          mediaType = "document";
+          detectedMimetype = detectedMimetype || "application/octet-stream";
+        }
+      } catch {
+        mediaType = "document";
+        detectedMimetype = detectedMimetype || "application/octet-stream";
+      }
+    } else {
+      const detection = this.detectFromUrl(content, options.mimetype);
+      mediaType = detection.type;
+      detectedMimetype = detectedMimetype || detection.mimetype;
+    }
+    const mediaContent: any = isUrl ? { url: content } : content;
+    const messageData: any = {
+      [mediaType]: mediaContent,
+      ...(options.caption && { caption: options.caption }),
+      ...(detectedMimetype && { mimetype: detectedMimetype }),
+      ...(options.filename &&
+        mediaType === "document" && { fileName: options.filename }),
+      ...(options.gifPlayback &&
+        mediaType === "video" && { gifPlayback: true }),
+    };
+
+    const msg = await this.client.sendMessage(this.chat, messageData, {
+      quoted: this,
+    });
+    return new Message(this.client, msg!);
+  }
+
+  private mimetypeToMediaType(mimetype: string): string {
+    if (mimetype.startsWith("image/")) return "image";
+    if (mimetype.startsWith("video/")) return "video";
+    if (mimetype.startsWith("audio/")) return "audio";
+    return "document";
+  }
+
+  private detectFromUrl(
+    url: string,
+    mimetype?: string,
+  ): { type: string; mimetype?: string } {
+    if (mimetype) {
+      return { type: this.mimetypeToMediaType(mimetype), mimetype };
+    }
+
+    // Extension-based fallback
+    const ext = url.split("?")[0].split(".").pop()?.toLowerCase();
+    const extMap: Record<string, { type: string; mimetype: string }> = {
+      jpg: { type: "image", mimetype: "image/jpeg" },
+      jpeg: { type: "image", mimetype: "image/jpeg" },
+      png: { type: "image", mimetype: "image/png" },
+      gif: { type: "image", mimetype: "image/gif" },
+      webp: { type: "image", mimetype: "image/webp" },
+      mp4: { type: "video", mimetype: "video/mp4" },
+      webm: { type: "video", mimetype: "video/webm" },
+      mkv: { type: "video", mimetype: "video/x-matroska" },
+      mp3: { type: "audio", mimetype: "audio/mpeg" },
+      ogg: { type: "audio", mimetype: "audio/ogg" },
+      wav: { type: "audio", mimetype: "audio/wav" },
+      m4a: { type: "audio", mimetype: "audio/mp4" },
+      pdf: { type: "document", mimetype: "application/pdf" },
+    };
+
+    return (
+      extMap[ext!] || { type: "document", mimetype: "application/octet-stream" }
+    );
+  }
 }
 
 class Quoted {
-  key;
-  message;
-  type;
-  image;
-  video;
-  audio;
-  sticker;
-  client;
-  media;
+  key: WAMessageKey;
+  message: WAMessageContent;
+  type: string | undefined;
+  image: boolean;
+  video: boolean;
+  audio: boolean;
+  sticker: boolean;
+  client: WASocket;
+  media: boolean;
+  viewonce: boolean;
 
   constructor(quoted: proto.IContextInfo, client: WASocket) {
     this.key = {
@@ -131,6 +237,7 @@ class Quoted {
     this.media = [this.image, this.video, this.audio, this.sticker].includes(
       true,
     );
+    this.viewonce = this.media && this.message?.[this.type!]?.viewOnce === true;
 
     Object.defineProperty(this, "client", { value: client, enumerable: false });
   }
