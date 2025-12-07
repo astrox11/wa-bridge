@@ -11,16 +11,7 @@ import makeWASocket, {
   jidNormalizedUser,
   makeCacheableSignalKeyStore,
 } from "baileys";
-import {
-  log,
-  parseEnv,
-  version as bot_version,
-  store,
-  findEnvFile,
-  Message,
-  defaultWelcomeMessage,
-  Plugins,
-} from "./lib";
+import { log, parseEnv, store, findEnvFile, Message, Plugins } from "./lib";
 import type { AnyMessageContent, CacheStore } from "baileys";
 
 const config = findEnvFile("./");
@@ -50,7 +41,7 @@ const question = (text: string) =>
   new Promise<string>((resolve) => rl.question(text, resolve));
 
 export const startSock = async () => {
-  log.info(`Astro Middleware ${bot_version}`);
+  log.info("Starting Client...");
   if (!(await hasInternet()))
     return log.warn("You are not connected to Internet");
   const { state, saveCreds } = await authstate();
@@ -140,10 +131,7 @@ export const startSock = async () => {
 
       if (isConnected && sock.user.id) {
         log.info(`Connected to WhatsApp`);
-        await sendMessageWTyping(
-          { text: defaultWelcomeMessage },
-          sock.user.id,
-        );
+        await sendMessageWTyping({ text: "```Connected```" }, sock.user.id);
       }
     }
     if (events["creds.update"]) {

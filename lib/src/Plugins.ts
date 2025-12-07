@@ -1,7 +1,7 @@
 import { jidNormalizedUser, type WASocket } from "baileys";
 import * as fs from "fs";
 import * as path from "path";
-import { log } from "../../debug";
+import { log } from "../debug";
 import type { Message } from "./Message";
 
 const fsPromises = fs.promises;

@@ -5,7 +5,7 @@ import {
   normalizeMessageContent,
 } from "baileys";
 import type { WASocket, WAMessage, proto, WAMessageContent } from "baileys";
-import { store } from "../../sql";
+import { store } from "../sql";
 
 export class Message {
   client;
