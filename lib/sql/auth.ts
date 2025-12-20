@@ -58,9 +58,6 @@ export const useBunqlAuth = async () => {
               let value = await readData(`${type}-${id}`);
 
               if (type === "app-state-sync-key" && value) {
-                console.log(
-                  `[keys.get] Converting app-state-sync-key for id: ${id}`,
-                );
                 value = proto.Message.AppStateSyncKeyData.fromObject(value);
               }
 
