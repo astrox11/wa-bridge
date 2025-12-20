@@ -107,7 +107,7 @@ const start = async () => {
       }
 
       const p = new Plugins(m, sock);
-      await p.load("./lib/cmd");
+      await p.load("./lib/modules");
       p.text();
       p.sticker();
       p.event();

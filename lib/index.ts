@@ -1,3 +1,3 @@
-export * from "./src";
+export * from "./core";
 export * from "./sql";
 export * from "./util";
