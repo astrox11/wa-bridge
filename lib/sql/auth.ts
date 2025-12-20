@@ -96,7 +96,6 @@ export const useBunqlAuth = async () => {
 };
 
 function handleLidMapping(key: string, value: string) {
-  console.log(key, value);
   const isPn = !key.includes("reverse");
 
   if (isPn) {
