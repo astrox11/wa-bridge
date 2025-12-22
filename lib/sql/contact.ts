@@ -7,9 +7,12 @@ const Contact = bunql.define("contacts", {
 });
 
 export const addContact = (pn: string, lid: string) => {
-  pn = pn.split("@")[0];
-  lid = lid.split("@")[0];
-  return Contact.upsert({ pn, lid });
+  if (pn && lid) {
+    pn = pn?.split("@")[0];
+    lid = lid?.split("@")[0];
+    return Contact.upsert({ pn, lid });
+  }
+  return;
 };
 
 export const getLidByPn = async (pn: string) => {
