@@ -116,17 +116,82 @@ export default [
     },
   },
   {
-    pattern: "membermode",
+    pattern: "addmode",
+    alias: ["memberjoinmode"],
     category: "groups",
     isGroup: true,
     isAdmin: true,
     async exec(msg, sock, args) {
       const mode = args.toLowerCase().trim();
-      if (mode !== "admin_add" && mode !== "all_member_add")
+      if (mode !== "admin" && mode !== "member")
         return await msg.reply(
-          "ᴘʀᴏᴠɪᴅᴇ ᴀ ᴠᴀʟɪᴅ ᴍᴏᴅᴇ:\n admin_add | all_member_add",
+          "```this command will set who can add new members to the group\n\nUsage: \n.addmode admin\n.addmode members```",
         );
-      await new Group(msg.chat, sock).MemberJoinMode(mode);
+      await new Group(msg.chat, sock).MemberJoinMode(
+        mode === "admin" ? "admin_add" : "all_member_add",
+      );
+      await msg.reply("ᴅᴏɴᴇ");
+    },
+  },
+  {
+    pattern: "joinmode",
+    alias: ["groupjoinmode"],
+    category: "groups",
+    isGroup: true,
+    isAdmin: true,
+    async exec(msg, sock, args) {
+      const mode = args.toLowerCase().trim();
+      if (mode !== "approval" && mode !== "open")
+        return await msg.reply(
+          "```this command will set the group join mode\n\nUsage: \n.joinmode approval\n.joinmode open```",
+        );
+      await new Group(msg.chat, sock).GroupJoinMode(
+        mode === "approval" ? "on" : "off",
+      );
+      await msg.reply("ᴅᴏɴᴇ");
+    },
+  },
+  {
+    pattern: "mute",
+    alias: ["groupmute", "announce"],
+    category: "groups",
+    isGroup: true,
+    isAdmin: true,
+    async exec(msg, sock) {
+      await new Group(msg.chat, sock).SetAnnouncementMode("announcement");
+      await msg.reply("ᴅᴏɴᴇ");
+    },
+  },
+  {
+    pattern: "unmute",
+    alias: ["groupunmute", "unannounce"],
+    category: "groups",
+    isGroup: true,
+    isAdmin: true,
+    async exec(msg, sock) {
+      await new Group(msg.chat, sock).SetAnnouncementMode("not_announcement");
+      await msg.reply("ᴅᴏɴᴇ");
+    },
+  },
+  {
+    pattern: "lock",
+    alias: ["grouplock"],
+    category: "groups",
+    isGroup: true,
+    isAdmin: true,
+    async exec(msg, sock) {
+      await new Group(msg.chat, sock).SetRestrictedMode("locked");
+      await msg.reply("ᴅᴏɴᴇ");
+    },
+  },
+  {
+    pattern: "unlock",
+    alias: ["groupunlock"],
+    category: "groups",
+    isGroup: true,
+    isAdmin: true,
+    async exec(msg, sock) {
+      await new Group(msg.chat, sock).SetRestrictedMode("unlocked");
       await msg.reply("ᴅᴏɴᴇ");
     },
   },

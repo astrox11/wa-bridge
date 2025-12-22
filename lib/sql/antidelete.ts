@@ -8,12 +8,22 @@ const Antidelete = bunql.define("antidelete", {
 type AntideleteModes = "all" | "groups" | "p2p";
 
 export const setAntidelete = (active: boolean, mode: AntideleteModes) => {
-  Antidelete.query().where("active", "=", 1).orWhere("active", "=", 0);
+  const current = Antidelete.all()[0];
+  const activeValue = active ? 1 : 0;
+
+  if (current && current.active === activeValue && current.mode === mode) {
+    return null;
+  }
+  if (current) {
+    Antidelete.delete().where("active", "=", current.active);
+  }
+
   return Antidelete.insert({
-    active: active ? 1 : 0,
+    active: activeValue,
     mode: mode,
   });
 };
+
 export const getAntidelete = () => {
   return Antidelete.all()[0];
 };

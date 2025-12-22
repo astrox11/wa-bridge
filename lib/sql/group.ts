@@ -1,6 +1,7 @@
 import type { GroupMetadata, WASocket } from "baileys";
 import { bunql } from "./_sql";
 import { log } from "../util";
+import { syncGroupParticipantsToContactList } from "./contact";
 
 const Group = bunql.define("groups", {
   id: { type: "TEXT", primary: true },
@@ -52,11 +53,12 @@ export const cacheGroupMetadata = async (
           ? metadata.participants
           : existingData.participants,
     };
-
+    syncGroupParticipantsToContactList(metadata.participants);
     return Group.update({ data: JSON.stringify(mergedData) })
       .where("id", "=", metadata.id)
       .run();
   } else {
+    syncGroupParticipantsToContactList(metadata.participants);
     return Group.insert({
       id: metadata.id,
       data: JSON.stringify(metadata),
@@ -100,6 +102,7 @@ export const syncGroupMetadata = async (client: WASocket) => {
     const groups = await client.groupFetchAllParticipating();
     for (const [id, metadata] of Object.entries(groups)) {
       metadata.id = id;
+      syncGroupParticipantsToContactList(metadata.participants);
       await cacheGroupMetadata(metadata);
     }
   } catch (error) {

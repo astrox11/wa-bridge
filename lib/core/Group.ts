@@ -99,4 +99,16 @@ export class Group {
     const invite = await this.client.groupRevokeInvite(this.metadata.id);
     return `https://chat.whatsapp.com/${invite}`;
   }
+
+  async GroupJoinMode(mode: "on" | "off") {
+    return await this.client.groupJoinApprovalMode(this.metadata.id, mode);
+  }
+
+  async SetAnnouncementMode(mode: "announcement" | "not_announcement") {
+    return await this.client.groupSettingUpdate(this.metadata.id, mode);
+  }
+
+  async SetRestrictedMode(mode: "locked" | "unlocked") {
+    return await this.client.groupSettingUpdate(this.metadata.id, mode);
+  }
 }

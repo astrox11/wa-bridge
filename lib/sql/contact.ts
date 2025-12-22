@@ -1,3 +1,4 @@
+import type { GroupParticipant } from "baileys";
 import { bunql } from "./_sql";
 
 const Contact = bunql.define("contacts", {
@@ -6,6 +7,8 @@ const Contact = bunql.define("contacts", {
 });
 
 export const addContact = (pn: string, lid: string) => {
+  pn = pn.split("@")[0];
+  lid = lid.split("@")[0];
   return Contact.upsert({ pn, lid });
 };
 
@@ -32,4 +35,12 @@ export const getAlternateId = (id: string) => {
 
 export const removeContact = (id: string) => {
   return Contact.delete().where("pn", "=", id).orWhere("lid", "=", id).run();
+};
+
+export const syncGroupParticipantsToContactList = (
+  participants: GroupParticipant[],
+) => {
+  for (const participant of participants) {
+    addContact(participant.phoneNumber, participant.id);
+  }
 };
