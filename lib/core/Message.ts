@@ -115,17 +115,19 @@ export class Message {
       mimetype?: string;
       filename?: string;
       gifPlayback?: boolean;
+      mentions?: string[];
     } = {},
   ) {
     const isBuffer = Buffer.isBuffer(content);
-    const isUrl = typeof content === "string" && /^https?:\/\//i.test(content);
+    const isUrl =
+      typeof content === "string" && /^\s*https?:\/\/\S+/i.test(content);
     const isText = typeof content === "string" && !isUrl;
 
     if (isText) {
       const msg = await this.client.sendMessage(
         this.chat,
-        { text: content },
-        { quoted: this },
+        { text: content, ...options },
+        { quoted: this, ...options },
       );
       return new Message(this.client, msg!);
     }

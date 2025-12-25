@@ -1,7 +1,7 @@
 import { readdirSync } from "fs";
 import { join, resolve } from "path";
 import { pathToFileURL } from "url";
-import { type WASocket } from "baileys";
+import { type MessageUpsertType, type WASocket } from "baileys";
 import type { Message } from "./Message";
 import { isAdmin, isSudo, log } from "../";
 
@@ -10,6 +10,7 @@ export class Plugins {
   client: WASocket;
   private static commands: Map<string, CommandProperty> = new Map();
   private static eventCommands: CommandProperty[] = [];
+  private static isLoaded = false;
 
   constructor(message: Message, client: WASocket) {
     this.message = message;
@@ -17,52 +18,41 @@ export class Plugins {
   }
 
   async text() {
-    if (this.message && this.message?.text) {
-      const text = this.message.text;
-      const cmd = this.find(
-        text
-          .split(" ")[0]
-          .toLowerCase()
-          .replace(/^\s+|\s+$/g, ""),
+    if (!this.message?.text) return;
+
+    const text = this.message.text.trim();
+    const firstWord = text.split(" ")[0].toLowerCase();
+    const cmd = this.find(firstWord);
+
+    if (!cmd) return;
+
+    const args = text.slice(firstWord.length).trim();
+
+    if (cmd.isSudo && !isSudo(this.message.sender)) return;
+
+    if (cmd.isGroup && !this.message.isGroup) {
+      return await this.message.reply("```this command is for groups only!```");
+    }
+
+    if (
+      cmd.isGroup &&
+      cmd.isAdmin &&
+      !isAdmin(this.message.chat, this.message.sender)
+    ) {
+      return await this.message.reply(
+        "```this command requires group admin privileges!```",
       );
-      const args = text.slice(cmd?.pattern?.length);
+    }
 
-      if (cmd?.isSudo && !isSudo(this.message.sender)) {
-        return;
-      }
-
-      if (cmd?.isGroup && !this.message.isGroup) {
-        return await this.message.reply(
-          "```this command is for groups only!```",
-        );
-      }
-
-      if (
-        cmd?.isGroup &&
-        cmd?.isAdmin &&
-        !isAdmin(this.message.chat, this.message.sender)
-      ) {
-        return await this.message.reply(
-          "```this command requires group admin privileges!```",
-        );
-      }
-
-      if (cmd) {
-        try {
-          await cmd.exec(this.message, this.client, args);
-        } catch (error) {
-          log.error("[text] CMD ERROR:", error);
-        }
-      }
+    try {
+      await cmd.exec(this.message, this.client, args);
+    } catch (error) {
+      log.error("[text] CMD ERROR:", error);
     }
   }
 
-  async sticker() {
-    // Implement for sticker based trigger
-  }
-
-  async event() {
-    if (this.message) {
+  async event(type: MessageUpsertType) {
+    if (this.message && type === "notify") {
       for (const cmd of Plugins.eventCommands) {
         try {
           await cmd.exec(this.message, this.client);
@@ -74,6 +64,8 @@ export class Plugins {
   }
 
   async load(pluginsFolder: string) {
+    if (Plugins.isLoaded) return;
+
     const files = readdirSync(pluginsFolder).filter(
       (file) => file.endsWith(".js") || file.endsWith(".ts"),
     );
@@ -96,16 +88,20 @@ export class Plugins {
         log.error(`Failed to load plugin ${file}:`, error);
       }
     }
+    Plugins.isLoaded = true;
+    log.info("Plugins loaded successfully");
   }
 
   private registerCommand(cmd: CommandProperty) {
     if (cmd.event) {
-      Plugins.eventCommands.push(cmd);
-      return;
+      if (!Plugins.eventCommands.some((c) => c.pattern === cmd.pattern)) {
+        Plugins.eventCommands.push(cmd);
+      }
     }
 
     if (cmd.pattern) {
-      Plugins.commands.set(cmd.pattern.toLowerCase(), cmd);
+      const pattern = cmd.pattern.toLowerCase();
+      Plugins.commands.set(pattern, cmd);
 
       if (cmd.alias) {
         for (const alias of cmd.alias) {
@@ -116,25 +112,7 @@ export class Plugins {
   }
 
   find(patternOrAlias: string): CommandProperty | undefined {
-    return Plugins.commands.get(patternOrAlias.toLowerCase());
-  }
-
-  findAll(): CommandProperty[] {
-    const unique = new Map<string, CommandProperty>();
-
-    for (const cmd of Plugins.commands.values()) {
-      if (cmd.pattern) {
-        unique.set(cmd.pattern, cmd);
-      }
-    }
-
-    for (const cmd of Plugins.eventCommands) {
-      if (cmd.pattern) {
-        unique.set(cmd.pattern, cmd);
-      }
-    }
-
-    return Array.from(unique.values());
+    return Plugins.commands.get(patternOrAlias);
   }
 }
 
