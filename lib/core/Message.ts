@@ -4,6 +4,7 @@ import {
   getContentType,
   downloadMediaMessage,
   normalizeMessageContent,
+  jidNormalizedUser,
 } from "baileys";
 import type {
   proto,
@@ -41,7 +42,11 @@ export class Message {
     this.key = message.key;
     this.message = normalizeMessageContent(message.message!);
     this.isGroup = isJidGroup(message.key.remoteJid!);
-    this.sender = !this.isGroup ? this.key.remoteJid : this.key.participant;
+    this.sender = !this.isGroup
+      ? !this.key.fromMe
+        ? this.key.remoteJid
+        : jidNormalizedUser(this.client.user.id)
+      : this.key.participant;
     this.sender_alt = getAlternateId(this.sender);
     this.type = getContentType(this.message);
     this.image = this.type === "imageMessage";

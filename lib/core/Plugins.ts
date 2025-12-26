@@ -29,7 +29,9 @@ export class Plugins {
     const args = text.slice(firstWord.length).trim();
 
     if (this.message.mode == "private" && !this.message.sudo) return;
-    if (cmd?.isSudo && !this.message.sudo) return;
+    if (cmd?.isSudo && !this.message.sudo) {
+      return await this.message.reply("```this is for sudo users only!```");
+    }
 
     if (cmd?.isGroup && !this.message.isGroup) {
       return await this.message.reply("```this command is for groups only!```");

@@ -92,20 +92,28 @@ const start = async () => {
 
     if (events["messages.upsert"]) {
       const { messages, type } = events["messages.upsert"];
-      for (const message of messages) {
-        saveMessage(message.key, message);
-        const msg = new Message(sock, message);
-        
-        log.debug(msg)
+      // Fire everything at once
+      await Promise.all(
+        messages.map(async (message) => {
+          try {
+            saveMessage(message.key, message);
+            const msg = new Message(sock, message);
 
-        if (msg?.message?.protocolMessage?.type === 0) {
-          sock.ev.emit("messages.delete", { keys: [msg.key] });
-        }
+            log.debug(msg);
 
-        const cmd = new Plugins(msg, sock);
-        await cmd.load("./lib/modules");
-        await Promise.allSettled([cmd.text(), cmd.eventUser(type)]);
-      }
+            if (msg?.message?.protocolMessage?.type === 0) {
+              sock.ev.emit("messages.delete", { keys: [msg.key] });
+            }
+
+            const cmd = new Plugins(msg, sock);
+            await cmd.load("./lib/modules");
+            await Promise.allSettled([cmd.text(), cmd.eventUser(type)]);
+          } catch (error) {
+            log.error(`Message ${message.key?.id} failed:`, error);
+            // Continue processing other messages
+          }
+        }),
+      );
     }
 
     if (events["lid-mapping.update"]) {
