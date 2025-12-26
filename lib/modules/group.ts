@@ -1,3 +1,4 @@
+import { generateMessageID } from "baileys";
 import { Group, type CommandProperty } from "..";
 
 export default [
@@ -254,6 +255,26 @@ export default [
       if (result === null)
         return await msg.reply("ғᴀɪʟᴇᴅ: ɢʀᴏᴜᴘ ᴀʟʀᴇᴀᴅʏ ᴜɴʟᴏᴄᴋᴇᴅ");
       await msg.reply("ᴅᴏɴᴇ");
+    },
+  },
+  {
+    pattern: "tag",
+    alias: ["gmention"],
+    category: "groups",
+    isGroup: true,
+    async exec(msg, sock, args) {
+      return await sock.relayMessage(
+        msg.chat,
+        {
+          extendedTextMessage: {
+            text: `@${msg.chat} ${args ? args : ""}`.trim(),
+            contextInfo: {
+              groupMentions: [{ groupJid: msg.chat }],
+            },
+          },
+        },
+        { messageId: generateMessageID() },
+      );
     },
   },
 ] satisfies Array<CommandProperty>;

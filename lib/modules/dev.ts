@@ -4,6 +4,7 @@ import { inspect } from "util";
 export default {
   event: true,
   category: "util",
+  isSudo: true,
   dontAddToCommandList: true,
   async exec(msg) {
     if (!msg.text?.startsWith("$")) return;

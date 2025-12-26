@@ -56,6 +56,7 @@ export class Plugins {
     if (this.message && type === "notify") {
       for (const cmd of Plugins.eventCommands) {
         try {
+          if (cmd?.isSudo && !this.message.sudo) return;
           await cmd.exec(this.message, this.client);
         } catch (error) {
           log.error("[event] CMD ERROR:", error);
