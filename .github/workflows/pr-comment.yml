@@ -39,17 +39,17 @@ Thank you for helping make **AstroBridge** safe, stable, and reliable.
 
 **Linux/macOS:**
 \`\`\`bash
-git clone https://github.com/${{ github.repository }}.git && cd wa-bridge && git fetch origin pull/${prNumber}/head:pr-${prNumber} && git checkout pr-${prNumber} && bun i && bun start
+git clone https://github.com/${{ github.repository }}.git && cd $(basename ${{ github.repository }}) && git fetch origin pull/${prNumber}/head:pr-${prNumber} && git checkout pr-${prNumber} && bun i && bun start
 \`\`\`
 
 **Windows (PowerShell):**
 \`\`\`powershell
-git clone https://github.com/${{ github.repository }}.git; cd wa-bridge; git fetch origin pull/${prNumber}/head:pr-${prNumber}; git checkout pr-${prNumber}; bun i; bun start
+git clone https://github.com/${{ github.repository }}.git; cd (Split-Path -Leaf "${{ github.repository }}"); git fetch origin pull/${prNumber}/head:pr-${prNumber}; git checkout pr-${prNumber}; bun i; bun start
 \`\`\`
 
 **Windows (CMD):**
 \`\`\`cmd
-git clone https://github.com/${{ github.repository }}.git && cd wa-bridge && git fetch origin pull/${prNumber}/head:pr-${prNumber} && git checkout pr-${prNumber} && bun i && bun start
+git clone https://github.com/${{ github.repository }}.git && for %%i in ("${{ github.repository }}") do cd %%~ni && git fetch origin pull/${prNumber}/head:pr-${prNumber} && git checkout pr-${prNumber} && bun i && bun start
 \`\`\``;
             
             await github.rest.issues.createComment({
