@@ -27,10 +27,10 @@ Send reports to
 
 When reporting a vulnerability, include:
 
-* A clear description of the issue
-* Steps to reproduce it, if applicable
-* Any relevant logs, screenshots, or proof of concept
-* The version affected
+- A clear description of the issue
+- Steps to reproduce it, if applicable
+- Any relevant logs, screenshots, or proof of concept
+- The version affected
 
 Anonymous reports are accepted. However, reports must include sufficient evidence to be considered actionable.
 
@@ -44,9 +44,9 @@ Reports must include credible evidence. Claims without verifiable information wi
 
 If a report is validated, we may:
 
-* Investigate the issue internally
-* Notify the community when appropriate
-* Take reasonable steps to mitigate misuse
+- Investigate the issue internally
+- Notify the community when appropriate
+- Take reasonable steps to mitigate misuse
 
 We are not law enforcement, but we are also not pretending misuse is “not our problem”.
 
@@ -54,9 +54,9 @@ We are not law enforcement, but we are also not pretending misuse is “not our 
 
 We aim to:
 
-* Acknowledge valid security reports within 72 hours
-* Provide updates as the issue is investigated
-* Push fixes or mitigations when necessary
+- Acknowledge valid security reports within 72 hours
+- Provide updates as the issue is investigated
+- Push fixes or mitigations when necessary
 
 Response times may vary depending on severity and complexity.
 

@@ -8,11 +8,11 @@ By participating in this project, you agree to follow the Code of Conduct and th
 
 You can contribute by:
 
-* Reporting bugs
-* Proposing features or improvements
-* Submitting pull requests
-* Improving documentation
-* Reviewing code and discussions
+- Reporting bugs
+- Proposing features or improvements
+- Submitting pull requests
+- Improving documentation
+- Reviewing code and discussions
 
 Low effort contributions that add noise rather than value may be declined.
 
@@ -20,9 +20,9 @@ Low effort contributions that add noise rather than value may be declined.
 
 Before opening an issue or pull request:
 
-* Check existing issues and pull requests to avoid duplicates
-* Make sure your contribution aligns with the project’s goals
-* Read the documentation and existing code
+- Check existing issues and pull requests to avoid duplicates
+- Make sure your contribution aligns with the project’s goals
+- Read the documentation and existing code
 
 If you are unsure, open a discussion first. Guessing is inefficient.
 
@@ -30,11 +30,11 @@ If you are unsure, open a discussion first. Guessing is inefficient.
 
 When reporting a bug, include:
 
-* A clear and concise description
-* Steps to reproduce the issue
-* Expected behavior vs actual behavior
-* Relevant logs, screenshots, or error messages
-* The affected version
+- A clear and concise description
+- Steps to reproduce the issue
+- Expected behavior vs actual behavior
+- Relevant logs, screenshots, or error messages
+- The affected version
 
 Incomplete bug reports may be closed without action.
 
@@ -44,9 +44,9 @@ Security vulnerabilities must **not** be reported publicly. Follow the instructi
 
 Feature requests should:
 
-* Solve a real problem
-* Be consistent with the project’s scope
-* Avoid unnecessary complexity
+- Solve a real problem
+- Be consistent with the project’s scope
+- Avoid unnecessary complexity
 
 Not every idea needs to exist. Well argued ideas have better odds.
 
@@ -54,11 +54,11 @@ Not every idea needs to exist. Well argued ideas have better odds.
 
 Pull requests must:
 
-* Be focused on a single change
-* Include tests when applicable
-* Pass existing tests and checks
-* Follow the project’s coding style
-* Avoid introducing breaking changes without discussion
+- Be focused on a single change
+- Include tests when applicable
+- Pass existing tests and checks
+- Follow the project’s coding style
+- Avoid introducing breaking changes without discussion
 
 Large or invasive changes should be discussed before implementation.
 
@@ -66,10 +66,10 @@ Large or invasive changes should be discussed before implementation.
 
 All contributions should:
 
-* Be readable and maintainable
-* Avoid unnecessary abstractions
-* Prefer clarity over cleverness
-* Not introduce security risks
+- Be readable and maintainable
+- Avoid unnecessary abstractions
+- Prefer clarity over cleverness
+- Not introduce security risks
 
 If your code is hard to understand, it will not be merged.
 
@@ -85,9 +85,9 @@ All contributions are reviewed by maintainers. Feedback is part of the process.
 
 Maintainers may:
 
-* Request changes
-* Ask for clarification
-* Reject contributions that do not meet project standards
+- Request changes
+- Ask for clarification
+- Reject contributions that do not meet project standards
 
 Decisions are final. This is not a democracy.
 

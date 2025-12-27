@@ -3,8 +3,7 @@ name: Bug report
 about: Create a report to help us improve
 title: BUG
 labels: bug
-assignees: ''
-
+assignees: ""
 ---
 
 ## Bug Report
@@ -34,10 +33,10 @@ Describe what actually happened, including error messages or unexpected output.
 
 If applicable, include:
 
-* Error logs
-* Stack traces
-* Console output
-* Relevant configuration snippets
+- Error logs
+- Stack traces
+- Console output
+- Relevant configuration snippets
 
 Redact sensitive information before posting.
 
@@ -51,13 +50,13 @@ Please complete the relevant sections.
 
 **Server**
 
-* Hosting environment (local, VPS, cloud provider):
+- Hosting environment (local, VPS, cloud provider):
 
 **Mobile (if applicable)**
 
-* Device:
-* OS:
-* Browser or client:
+- Device:
+- OS:
+- Browser or client:
 
 ### Additional context
 
