@@ -45,9 +45,9 @@ export function parseEnv(file: string): Record<string, string> {
         .replace(/\\n/g, "\n")
         .replace(/\\r/g, "\r")
         .replace(/\\t/g, "\t")
-        .replace(/\\\\/g, "\\")
         .replace(/\\"/g, '"')
-        .replace(/\\'/g, "'");
+        .replace(/\\'/g, "'")
+        .replace(/\\\\/g, "\\");
     } else {
       const hashIndex = val.indexOf("#");
       if (hashIndex !== -1) {
