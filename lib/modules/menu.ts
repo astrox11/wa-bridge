@@ -122,7 +122,7 @@ export default [
           const m = msg?.quoted?.message;
 
           if (m?.buttonsMessage?.buttons[0]?.buttonId === "0") {
-            await msg.reply("```Contact: devastrowork@gmail.com```");
+            await msg.reply("```Contact: astrodevwork@gmail.com```");
             Reply.clear();
           }
         }
