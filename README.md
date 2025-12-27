@@ -4,4 +4,4 @@ AstroBridge provides an abstraction layer for programmatic control of WhatsApp i
 
 # Contributing
 
-Contributions are welcome! AstroBridge is evolving, and community input helps shape its direction.
+Contributions are welcome! We are evolving fast, Community input helps shape its direction quickly.
