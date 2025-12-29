@@ -193,17 +193,16 @@ const main = async () => {
   }
 
   // No CLI command - start in normal mode
-  // First, restore any existing sessions from database
-  const sessions = sessionManager.list();
+  // Always start the main session first (most important session)
+  log.info("Starting main session...");
+  await startLegacySession();
 
+  // Then restore any additional sessions from database
+  const sessions = sessionManager.list();
   if (sessions.length > 0) {
-    log.info(`Found ${sessions.length} existing session(s), restoring...`);
+    log.info(`Found ${sessions.length} additional session(s), restoring...`);
     await sessionManager.restoreAllSessions();
-    log.info("All sessions restored. Running in multi-session mode.");
-  } else {
-    // No sessions in database - start legacy single-session mode
-    log.info("Starting in single-session mode...");
-    await startLegacySession();
+    log.info("All additional sessions restored. Running in multi-session mode.");
   }
 };
 
