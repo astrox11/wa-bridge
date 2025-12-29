@@ -202,7 +202,9 @@ const main = async () => {
   if (sessions.length > 0) {
     log.info(`Found ${sessions.length} additional session(s), restoring...`);
     await sessionManager.restoreAllSessions();
-    log.info("All additional sessions restored. Running in multi-session mode.");
+    log.info(
+      "All additional sessions restored. Running in multi-session mode.",
+    );
   }
 };
 
