@@ -44,7 +44,6 @@ export default [
       });
     },
   },
-
   {
     pattern: "trim",
     category: "media",
