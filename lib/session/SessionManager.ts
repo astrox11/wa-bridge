@@ -92,19 +92,14 @@ class SessionManager {
       return { success: false, error: "Invalid phone number format" };
     }
 
-    // Check if session already exists
-    if (sessionExists(sanitized) || this.sessions.has(sanitized)) {
-      return {
     const sessionId = this.generateSessionId(sanitized);
 
     // Check if session already exists
     if (sessionExists(sessionId) || this.sessions.has(sessionId)) {
       return { success: false, error: "Session already exists for this number" };
     }
-    // Create session record in database
-    createSession(sessionId, sanitized);
 
-    // Initialize session
+    // Initialize session in memory first (before database record)
     const activeSession: ActiveSession = {
       id: sessionId,
       phoneNumber: sanitized,
@@ -117,11 +112,12 @@ class SessionManager {
 
     try {
       const code = await this.initializeSession(activeSession, true);
+      // Create database record only after successful initialization
+      createSession(sessionId, sanitized);
       return { success: true, code, id: sessionId };
     } catch (error) {
-      // Cleanup on failure
+      // Cleanup on failure - only need to remove from memory since DB record wasn't created
       this.sessions.delete(sessionId);
-      deleteSessionRecord(sessionId);
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
       return { success: false, error: errorMessage };
