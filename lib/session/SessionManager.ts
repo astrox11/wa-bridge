@@ -96,7 +96,10 @@ class SessionManager {
 
     // Check if session already exists
     if (sessionExists(sessionId) || this.sessions.has(sessionId)) {
-      return { success: false, error: "Session already exists for this number" };
+      return {
+        success: false,
+        error: "Session already exists for this number",
+      };
     }
 
     // Initialize session in memory first (before database record)

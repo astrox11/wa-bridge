@@ -57,7 +57,11 @@ export const getAllSessions = (): SessionRecord[] => {
   }));
 };
 
-const VALID_STATUSES: SessionRecord["status"][] = ["active", "inactive", "pairing"];
+const VALID_STATUSES: SessionRecord["status"][] = [
+  "active",
+  "inactive",
+  "pairing",
+];
 
 export const updateSessionStatus = (
   id: string,
