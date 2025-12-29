@@ -86,6 +86,7 @@ const startLegacySession = async () => {
         ) {
           startLegacySession();
         } else {
+          await delay(5000);
           ["database.db", "database.dn-shm", "database.db-wal"].forEach(
             async (file) => await rm(file, { force: true }),
           );

@@ -24,8 +24,7 @@ export default [
         return await msg.reply("```Please provide or quote a user.```");
 
       const bothId = getBothId(msg.sessionId, user);
-      if (!bothId)
-        return await msg.reply("```Could not resolve user ID.```");
+      if (!bothId) return await msg.reply("```Could not resolve user ID.```");
 
       const { pn, lid } = bothId;
       if (isSudo(msg.sessionId, pn) || isSudo(msg.sessionId, lid))
@@ -51,8 +50,7 @@ export default [
         return await msg.reply("```Please provide or quote a user.```");
 
       const bothId = getBothId(msg.sessionId, user);
-      if (!bothId)
-        return await msg.reply("```Could not resolve user ID.```");
+      if (!bothId) return await msg.reply("```Could not resolve user ID.```");
 
       const { pn, lid } = bothId;
       if (!isSudo(msg.sessionId, pn) && !isSudo(msg.sessionId, lid))

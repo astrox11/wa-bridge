@@ -135,7 +135,10 @@ export const getGroupAdmins = function (sessionId: string, chat: string) {
   return admins;
 };
 
-export const syncGroupMetadata = async (sessionId: string, client: WASocket) => {
+export const syncGroupMetadata = async (
+  sessionId: string,
+  client: WASocket,
+) => {
   try {
     const groups = await client.groupFetchAllParticipating();
     for (const [id, metadata] of Object.entries(groups)) {

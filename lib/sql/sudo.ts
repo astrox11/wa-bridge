@@ -9,9 +9,7 @@ const Sudo = bunql.define("sudo", {
 
 // Create index for efficient lookups by session
 try {
-  bunql.exec(
-    "CREATE INDEX IF NOT EXISTS idx_sudo_session ON sudo(session_id)",
-  );
+  bunql.exec("CREATE INDEX IF NOT EXISTS idx_sudo_session ON sudo(session_id)");
 } catch {
   // Index may already exist
 }

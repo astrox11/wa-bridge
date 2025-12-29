@@ -133,7 +133,11 @@ export class MiddlewareService extends EventEmitter {
     dispatched: DispatchResult | null;
     eventResults: DispatchResult[];
   }> {
-    const message = normalizeMessage(client, rawMessage, this.options.sessionId);
+    const message = normalizeMessage(
+      client,
+      rawMessage,
+      this.options.sessionId,
+    );
 
     if (this.options.debug) {
       log.debug("[middleware] Processing message:", {

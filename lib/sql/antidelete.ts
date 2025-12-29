@@ -13,7 +13,9 @@ export const setAntidelete = (
   active: boolean,
   mode: AntideleteModes,
 ) => {
-  const current = Antidelete.query().where("session_id", "=", sessionId).first();
+  const current = Antidelete.query()
+    .where("session_id", "=", sessionId)
+    .first();
   const activeValue = active ? 1 : 0;
 
   if (current && current.active === activeValue && current.mode === mode) {

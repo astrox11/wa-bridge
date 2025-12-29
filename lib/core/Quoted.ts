@@ -25,7 +25,11 @@ export class Quoted {
   viewonce: boolean;
   device: "web" | "unknown" | "android" | "ios" | "desktop";
 
-  constructor(quoted: proto.IContextInfo, client: WASocket, sessionId: string = "main") {
+  constructor(
+    quoted: proto.IContextInfo,
+    client: WASocket,
+    sessionId: string = "main",
+  ) {
     this.sessionId = sessionId;
     this.key = {
       remoteJid: quoted.remoteJid,

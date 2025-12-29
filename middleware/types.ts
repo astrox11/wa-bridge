@@ -126,7 +126,9 @@ export interface MiddlewareEvents {
   message: (message: NormalizedMessage, client: WASocket) => void;
   command: (message: NormalizedMessage, client: WASocket) => void;
   connection: (event: NormalizedEvent<ConnectionPayload>) => void;
-  group_participants: (event: NormalizedEvent<GroupParticipantsPayload>) => void;
+  group_participants: (
+    event: NormalizedEvent<GroupParticipantsPayload>,
+  ) => void;
   group_update: (event: NormalizedEvent<GroupUpdatePayload>) => void;
   lid_mapping: (event: NormalizedEvent<LidMappingPayload>) => void;
   message_delete: (event: NormalizedEvent<MessageDeletePayload>) => void;

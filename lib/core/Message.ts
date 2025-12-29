@@ -48,7 +48,11 @@ export class Message {
   sender_alt: string | undefined;
   contextInfo: proto.IContextInfo | undefined;
 
-  constructor(client: WASocket, message: WAMessage, sessionId: string = "main") {
+  constructor(
+    client: WASocket,
+    message: WAMessage,
+    sessionId: string = "main",
+  ) {
     this.client = client;
     this.sessionId = sessionId;
     this.chat = message.key.remoteJid!;

@@ -27,12 +27,12 @@ The middleware layer provides an abstraction between WhatsApp (Baileys) and the 
 
 ## Files
 
-| File | Description |
-|------|-------------|
-| `index.ts` | Main entry point with `MiddlewareService` class (EventEmitter-based) |
-| `types.ts` | TypeScript interfaces and type definitions |
-| `messageHandler.ts` | Message normalization and classification |
-| `commandDispatcher.ts` | Command routing and permission checking |
+| File                   | Description                                                          |
+| ---------------------- | -------------------------------------------------------------------- |
+| `index.ts`             | Main entry point with `MiddlewareService` class (EventEmitter-based) |
+| `types.ts`             | TypeScript interfaces and type definitions                           |
+| `messageHandler.ts`    | Message normalization and classification                             |
+| `commandDispatcher.ts` | Command routing and permission checking                              |
 
 ## Quick Start
 
@@ -105,39 +105,39 @@ The main class extending `EventEmitter` for processing WhatsApp events.
 
 ```typescript
 interface MiddlewareOptions {
-  sessionId?: string;    // Session identifier (default: "main")
-  ignoreSelf?: boolean;  // Skip self-sent messages (default: false)
-  debug?: boolean;       // Enable debug logging (default: false)
+  sessionId?: string; // Session identifier (default: "main")
+  ignoreSelf?: boolean; // Skip self-sent messages (default: false)
+  debug?: boolean; // Enable debug logging (default: false)
 }
 ```
 
 #### Methods
 
-| Method | Description |
-|--------|-------------|
-| `setRegistry(registry)` | Set the command registry for routing |
-| `setEventHandlers(handlers)` | Set event-based command handlers |
-| `processMessage(client, message, mode)` | Process a raw WhatsApp message |
-| `processConnectionUpdate(update)` | Process connection state changes |
-| `processGroupParticipantsUpdate(update)` | Process group participant changes |
-| `processGroupUpdate(update)` | Process group metadata updates |
-| `processLidMappingUpdate(update)` | Process LID mapping updates |
-| `processMessageDelete(deleteInfo)` | Process message deletions |
-| `emitError(error, context)` | Emit an error event |
+| Method                                   | Description                          |
+| ---------------------------------------- | ------------------------------------ |
+| `setRegistry(registry)`                  | Set the command registry for routing |
+| `setEventHandlers(handlers)`             | Set event-based command handlers     |
+| `processMessage(client, message, mode)`  | Process a raw WhatsApp message       |
+| `processConnectionUpdate(update)`        | Process connection state changes     |
+| `processGroupParticipantsUpdate(update)` | Process group participant changes    |
+| `processGroupUpdate(update)`             | Process group metadata updates       |
+| `processLidMappingUpdate(update)`        | Process LID mapping updates          |
+| `processMessageDelete(deleteInfo)`       | Process message deletions            |
+| `emitError(error, context)`              | Emit an error event                  |
 
 #### Events
 
-| Event | Payload | Description |
-|-------|---------|-------------|
-| `message` | `(NormalizedMessage, WASocket)` | Any valid message received |
-| `command` | `(NormalizedMessage, WASocket)` | Command detected in message |
-| `connection` | `NormalizedEvent<ConnectionPayload>` | Connection state change |
-| `group_participants` | `NormalizedEvent<GroupParticipantsPayload>` | Group member changes |
-| `group_update` | `NormalizedEvent<GroupUpdatePayload>` | Group metadata changes |
-| `lid_mapping` | `NormalizedEvent<LidMappingPayload>` | LID mapping updates |
-| `message_delete` | `NormalizedEvent<MessageDeletePayload>` | Message deletions |
-| `credentials` | `NormalizedEvent<void>` | Credentials updated |
-| `error` | `(Error, string)` | Error occurred |
+| Event                | Payload                                     | Description                 |
+| -------------------- | ------------------------------------------- | --------------------------- |
+| `message`            | `(NormalizedMessage, WASocket)`             | Any valid message received  |
+| `command`            | `(NormalizedMessage, WASocket)`             | Command detected in message |
+| `connection`         | `NormalizedEvent<ConnectionPayload>`        | Connection state change     |
+| `group_participants` | `NormalizedEvent<GroupParticipantsPayload>` | Group member changes        |
+| `group_update`       | `NormalizedEvent<GroupUpdatePayload>`       | Group metadata changes      |
+| `lid_mapping`        | `NormalizedEvent<LidMappingPayload>`        | LID mapping updates         |
+| `message_delete`     | `NormalizedEvent<MessageDeletePayload>`     | Message deletions           |
+| `credentials`        | `NormalizedEvent<void>`                     | Credentials updated         |
+| `error`              | `(Error, string)`                           | Error occurred              |
 
 ### NormalizedMessage
 
@@ -171,14 +171,14 @@ Interface for defining commands.
 
 ```typescript
 interface CommandDefinition {
-  pattern?: string;           // Command name
-  alias?: string[];           // Alternative names
-  category?: string;          // Category for organization
-  event?: boolean;            // Event-based handler
+  pattern?: string; // Command name
+  alias?: string[]; // Alternative names
+  category?: string; // Category for organization
+  event?: boolean; // Event-based handler
   dontAddToCommandList?: boolean;
-  isGroup?: boolean;          // Group-only command
-  isAdmin?: boolean;          // Requires group admin
-  isSudo?: boolean;           // Requires sudo privileges
+  isGroup?: boolean; // Group-only command
+  isAdmin?: boolean; // Requires group admin
+  isSudo?: boolean; // Requires sudo privileges
   exec: (msg, sock?, args?) => Promise<any>;
 }
 ```
@@ -206,15 +206,15 @@ sessionMiddleware.on("message", handleSessionMessage);
 
 Messages are automatically classified into types:
 
-| Classification | Description |
-|----------------|-------------|
-| `text` | Plain text message |
-| `command` | Text that matches a command pattern |
-| `media` | Image, video, audio, or document |
-| `sticker` | Sticker message |
-| `button_response` | Button interaction response |
-| `protocol` | System/protocol message |
-| `unknown` | Unclassified message |
+| Classification    | Description                         |
+| ----------------- | ----------------------------------- |
+| `text`            | Plain text message                  |
+| `command`         | Text that matches a command pattern |
+| `media`           | Image, video, audio, or document    |
+| `sticker`         | Sticker message                     |
+| `button_response` | Button interaction response         |
+| `protocol`        | System/protocol message             |
+| `unknown`         | Unclassified message                |
 
 ## Permission System
 
