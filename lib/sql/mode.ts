@@ -1,4 +1,4 @@
-import { bunql } from "./_sql";
+import { bunql, execWithParams } from "./_sql";
 import {
   createUserModeTable,
   getPhoneFromSessionId,
@@ -26,9 +26,11 @@ export const setMode = (sessionId: string, type: Mode): boolean | null => {
   if (row?.mode === type) return null;
 
   if (row) {
-    bunql.exec(`UPDATE "${tableName}" SET mode = '${type}' WHERE id = 1`);
+    execWithParams(`UPDATE "${tableName}" SET mode = ? WHERE id = 1`, [type]);
   } else {
-    bunql.exec(`INSERT INTO "${tableName}" (id, mode) VALUES (1, '${type}')`);
+    execWithParams(`INSERT INTO "${tableName}" (id, mode) VALUES (1, ?)`, [
+      type,
+    ]);
   }
 
   return true;

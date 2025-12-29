@@ -1,4 +1,4 @@
-import { bunql } from "./_sql";
+import { bunql, execWithParams } from "./_sql";
 import {
   createUserBanTable,
   getPhoneFromSessionId,
@@ -32,15 +32,17 @@ export const addBan = (sessionId: string, pn: string, lid: string) => {
   if (existing.length > 0) {
     return existing[0];
   }
-  bunql.exec(
-    `INSERT INTO "${tableName}" (pn, lid) VALUES ('${pn}', '${lid}')`,
-  );
+  execWithParams(`INSERT INTO "${tableName}" (pn, lid) VALUES (?, ?)`, [
+    pn,
+    lid,
+  ]);
   return { pn, lid };
 };
 
 export const removeBan = (sessionId: string, id: string) => {
   const tableName = getBanTable(sessionId);
-  bunql.exec(
-    `DELETE FROM "${tableName}" WHERE pn = '${id}' OR lid = '${id}'`,
-  );
+  execWithParams(`DELETE FROM "${tableName}" WHERE pn = ? OR lid = ?`, [
+    id,
+    id,
+  ]);
 };

@@ -1,4 +1,4 @@
-import { bunql } from "../sql/_sql";
+import { bunql, execWithParams } from "../sql/_sql";
 import {
   BufferJSON,
   initAuthCreds,
@@ -37,15 +37,16 @@ export const useSessionAuth = async (sessionId: string) => {
       );
       const row = rows[0];
       const payload = JSON.stringify(data, BufferJSON.replacer);
-      const escapedPayload = payload.replace(/'/g, "''");
 
       if (row) {
-        bunql.exec(
-          `UPDATE "${tableName}" SET data = '${escapedPayload}' WHERE name = '${name}'`,
-        );
+        execWithParams(`UPDATE "${tableName}" SET data = ? WHERE name = ?`, [
+          payload,
+          name,
+        ]);
       } else {
-        bunql.exec(
-          `INSERT INTO "${tableName}" (name, data) VALUES ('${name}', '${escapedPayload}')`,
+        execWithParams(
+          `INSERT INTO "${tableName}" (name, data) VALUES (?, ?)`,
+          [name, payload],
         );
       }
     });
@@ -62,7 +63,7 @@ export const useSessionAuth = async (sessionId: string) => {
 
   const removeData = async (name: string) =>
     mutex.runExclusive(() => {
-      bunql.exec(`DELETE FROM "${tableName}" WHERE name = '${name}'`);
+      execWithParams(`DELETE FROM "${tableName}" WHERE name = ?`, [name]);
     });
 
   const creds: AuthenticationCreds =

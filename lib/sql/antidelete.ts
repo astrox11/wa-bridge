@@ -1,4 +1,4 @@
-import { bunql } from "./_sql";
+import { bunql, execWithParams } from "./_sql";
 import {
   createUserAntideleteTable,
   getPhoneFromSessionId,
@@ -32,12 +32,14 @@ export const setAntidelete = (
     return null;
   }
   if (current) {
-    bunql.exec(
-      `UPDATE "${tableName}" SET active = ${activeValue}, mode = '${mode}' WHERE id = 1`,
+    execWithParams(
+      `UPDATE "${tableName}" SET active = ?, mode = ? WHERE id = 1`,
+      [activeValue, mode],
     );
   } else {
-    bunql.exec(
-      `INSERT INTO "${tableName}" (id, active, mode) VALUES (1, ${activeValue}, '${mode}')`,
+    execWithParams(
+      `INSERT INTO "${tableName}" (id, active, mode) VALUES (1, ?, ?)`,
+      [activeValue, mode],
     );
   }
 

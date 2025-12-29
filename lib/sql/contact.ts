@@ -1,5 +1,5 @@
 import type { GroupParticipant } from "baileys";
-import { bunql } from "./_sql";
+import { bunql, execWithParams } from "./_sql";
 import {
   createUserContactsTable,
   getPhoneFromSessionId,
@@ -27,13 +27,15 @@ export const addContact = (sessionId: string, pn: string, lid: string) => {
     );
 
     if (existing.length > 0) {
-      bunql.exec(
-        `UPDATE "${tableName}" SET lid = '${lid}' WHERE pn = '${pn}'`,
-      );
+      execWithParams(`UPDATE "${tableName}" SET lid = ? WHERE pn = ?`, [
+        lid,
+        pn,
+      ]);
     } else {
-      bunql.exec(
-        `INSERT INTO "${tableName}" (pn, lid) VALUES ('${pn}', '${lid}')`,
-      );
+      execWithParams(`INSERT INTO "${tableName}" (pn, lid) VALUES (?, ?)`, [
+        pn,
+        lid,
+      ]);
     }
   }
   return;
@@ -101,9 +103,10 @@ export const getAlternateId = (sessionId: string, id: string) => {
 
 export const removeContact = (sessionId: string, id: string) => {
   const tableName = getContactsTable(sessionId);
-  bunql.exec(
-    `DELETE FROM "${tableName}" WHERE pn = '${id}' OR lid = '${id}'`,
-  );
+  execWithParams(`DELETE FROM "${tableName}" WHERE pn = ? OR lid = ?`, [
+    id,
+    id,
+  ]);
 };
 
 export const syncGroupParticipantsToContactList = (

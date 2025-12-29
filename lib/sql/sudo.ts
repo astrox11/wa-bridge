@@ -1,5 +1,5 @@
 import { jidNormalizedUser } from "baileys";
-import { bunql } from "./_sql";
+import { bunql, execWithParams } from "./_sql";
 import {
   createUserSudoTable,
   getPhoneFromSessionId,
@@ -31,9 +31,10 @@ export const addSudo = (sessionId: string, id: string, lid: string) => {
   lid = jidNormalizedUser(lid);
   if (!isSudo(sessionId, id)) {
     const tableName = getSudoTable(sessionId);
-    bunql.exec(
-      `INSERT INTO "${tableName}" (pn, lid) VALUES ('${id}', '${lid}')`,
-    );
+    execWithParams(`INSERT INTO "${tableName}" (pn, lid) VALUES (?, ?)`, [
+      id,
+      lid,
+    ]);
     return true;
   }
   return false;
@@ -42,9 +43,10 @@ export const addSudo = (sessionId: string, id: string, lid: string) => {
 export const removeSudo = (sessionId: string, id: string) => {
   if (isSudo(sessionId, id)) {
     const tableName = getSudoTable(sessionId);
-    bunql.exec(
-      `DELETE FROM "${tableName}" WHERE pn = '${id}' OR lid = '${id}'`,
-    );
+    execWithParams(`DELETE FROM "${tableName}" WHERE pn = ? OR lid = ?`, [
+      id,
+      id,
+    ]);
     return true;
   }
   return false;

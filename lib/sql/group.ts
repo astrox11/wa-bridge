@@ -1,5 +1,5 @@
 import type { GroupMetadata, WASocket } from "baileys";
-import { bunql } from "./_sql";
+import { bunql, execWithParams } from "./_sql";
 import { log } from "../util";
 import { syncGroupParticipantsToContactList } from "./contact";
 import {
@@ -85,22 +85,22 @@ export const cacheGroupMetadata = async (
           : existingData.participants,
     };
     syncGroupParticipantsToContactList(sessionId, metadata.participants);
-    const dataStr = JSON.stringify(mergedData).replace(/'/g, "''");
-    bunql.exec(
-      `UPDATE "${tableName}" SET data = '${dataStr}' WHERE id = '${metadata.id}'`,
-    );
+    execWithParams(`UPDATE "${tableName}" SET data = ? WHERE id = ?`, [
+      JSON.stringify(mergedData),
+      metadata.id,
+    ]);
   } else {
     syncGroupParticipantsToContactList(sessionId, metadata.participants);
-    const dataStr = JSON.stringify(metadata).replace(/'/g, "''");
-    bunql.exec(
-      `INSERT INTO "${tableName}" (id, data) VALUES ('${metadata.id}', '${dataStr}')`,
-    );
+    execWithParams(`INSERT INTO "${tableName}" (id, data) VALUES (?, ?)`, [
+      metadata.id,
+      JSON.stringify(metadata),
+    ]);
   }
 };
 
 export const removeGroupMetadata = async (sessionId: string, id: string) => {
   const tableName = getGroupsTable(sessionId);
-  bunql.exec(`DELETE FROM "${tableName}" WHERE id = '${id}'`);
+  execWithParams(`DELETE FROM "${tableName}" WHERE id = ?`, [id]);
 };
 
 export const isAdmin = function (

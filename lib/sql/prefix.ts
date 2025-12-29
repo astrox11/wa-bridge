@@ -1,4 +1,4 @@
-import { bunql } from "./_sql";
+import { bunql, execWithParams } from "./_sql";
 import {
   createUserPrefixTable,
   getPhoneFromSessionId,
@@ -18,10 +18,9 @@ export const set_prefix = (session_id: string, prefix?: string) => {
   const tableName = getPrefixTable(session_id);
   bunql.exec(`DELETE FROM "${tableName}" WHERE id = 1`);
 
-  const prefixValue = prefix ? `'${prefix.replace(/'/g, "''")}'` : "NULL";
-  bunql.exec(
-    `INSERT INTO "${tableName}" (id, prefix) VALUES (1, ${prefixValue})`,
-  );
+  execWithParams(`INSERT INTO "${tableName}" (id, prefix) VALUES (1, ?)`, [
+    prefix || null,
+  ]);
 };
 
 export const get_prefix = (session_id: string) => {

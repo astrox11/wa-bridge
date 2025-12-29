@@ -1,5 +1,5 @@
 import { proto, type WAMessageKey } from "baileys";
-import { bunql } from "./_sql";
+import { bunql, execWithParams } from "./_sql";
 import type { WAMessage } from "baileys";
 import {
   createUserMessagesTable,
@@ -46,11 +46,15 @@ export const saveMessage = (
     );
 
     if (existing.length > 0) {
-      bunql.exec(`UPDATE "${tableName}" SET msg = '${msgData.replace(/'/g, "''")}' WHERE id = '${id}'`);
+      execWithParams(`UPDATE "${tableName}" SET msg = ? WHERE id = ?`, [
+        msgData,
+        id,
+      ]);
     } else {
-      bunql.exec(
-        `INSERT INTO "${tableName}" (id, msg) VALUES ('${id}', '${msgData.replace(/'/g, "''")}')`,
-      );
+      execWithParams(`INSERT INTO "${tableName}" (id, msg) VALUES (?, ?)`, [
+        id,
+        msgData,
+      ]);
     }
   }
 };
