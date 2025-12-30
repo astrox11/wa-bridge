@@ -225,7 +225,7 @@ export class Message {
     msg: WAMessage,
     opts?: { forceForward?: boolean; forwardScore?: number },
   ) {
-    return await this.client.sendMessage(
+    await this.client.sendMessage(
       jid,
       {
         forward: msg,

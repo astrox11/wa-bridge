@@ -5,6 +5,8 @@ import { type MessageUpsertType, type WASocket } from "baileys";
 import type { Message } from "./Message";
 import { isAdmin, log } from "../";
 
+const processedMessages = new Set<string>();
+
 export class Plugins {
   message: Message;
   client: WASocket;
@@ -55,14 +57,23 @@ export class Plugins {
   }
 
   async eventUser(type: MessageUpsertType) {
-    if (this.message && type === "notify") {
-      for (const cmd of Plugins.eventCommands) {
-        try {
-          if (cmd?.isSudo && !this.message.sudo) return;
-          await cmd.exec(this.message, this.client);
-        } catch (error) {
-          log.error("[event] CMD ERROR:", error);
-        }
+    if (!this.message || type !== "notify") return;
+
+    const msgId = this.message.key.id || this.message.key?.id;
+    if (!msgId || processedMessages.has(msgId)) return;
+
+    processedMessages.add(msgId);
+
+    setTimeout(() => {
+      processedMessages.delete(msgId);
+    }, 5000);
+
+    for (const cmd of Plugins.eventCommands) {
+      try {
+        if (cmd?.isSudo && !this.message.sudo) continue;
+        await cmd.exec(this.message, this.client);
+      } catch (error) {
+        log.error("[event] CMD ERROR:", error);
       }
     }
   }
