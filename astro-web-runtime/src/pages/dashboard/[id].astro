@@ -1,0 +1,641 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const { id } = Astro.params;
+---
+
+<Layout title="Dashboard">
+  <div class="dashboard">
+    <header class="dashboard-header">
+      <div class="header-left">
+        <a href="/" class="back-link">← Sessions</a>
+        <h1>wa-runtime Dashboard</h1>
+      </div>
+      <div class="header-right">
+        <span id="session-status" class="session-status">
+          <span class="status-dot"></span>
+          Loading...
+        </span>
+      </div>
+    </header>
+
+    <main class="dashboard-content">
+      <!-- Overview Cards -->
+      <section class="stats-overview">
+        <div class="stat-card">
+          <div class="stat-icon">📱</div>
+          <div class="stat-info">
+            <span class="stat-value" id="phone-number">---</span>
+            <span class="stat-label">Phone Number</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">💬</div>
+          <div class="stat-info">
+            <span class="stat-value" id="messages-count">0</span>
+            <span class="stat-label">Messages Processed</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⏱️</div>
+          <div class="stat-info">
+            <span class="stat-value" id="uptime">0m</span>
+            <span class="stat-label">Session Uptime</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📊</div>
+          <div class="stat-info">
+            <span class="stat-value" id="avg-messages">0</span>
+            <span class="stat-label">Avg Messages/Hour</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Activity Chart -->
+      <section class="main-chart">
+        <div class="chart-header">
+          <h2>Activity Overview</h2>
+          <span class="chart-subtitle">Messages per hour (today)</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="activity-chart"></canvas>
+        </div>
+      </section>
+
+      <!-- Secondary Charts -->
+      <section class="secondary-charts">
+        <div class="chart-card">
+          <h3>Runtime Statistics</h3>
+          <div class="runtime-stats">
+            <div class="runtime-stat">
+              <span class="stat-name">Total Sessions</span>
+              <span class="stat-value" id="total-sessions">0</span>
+            </div>
+            <div class="runtime-stat">
+              <span class="stat-name">Active Sessions</span>
+              <span class="stat-value" id="active-sessions">0</span>
+            </div>
+            <div class="runtime-stat">
+              <span class="stat-name">Total Messages</span>
+              <span class="stat-value" id="total-messages">0</span>
+            </div>
+            <div class="runtime-stat">
+              <span class="stat-name">Server Uptime</span>
+              <span class="stat-value" id="server-uptime">0m</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>Session Health</h3>
+          <div class="health-indicator">
+            <div id="health-ring" class="health-ring">
+              <svg viewBox="0 0 36 36">
+                <path
+                  d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none"
+                  stroke="var(--color-bg-tertiary)"
+                  stroke-width="3"
+                />
+                <path
+                  id="health-progress"
+                  d="M18 2.0845
+                    a 15.9155 15.9155 0 0 1 0 31.831
+                    a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none"
+                  stroke="var(--color-success)"
+                  stroke-width="3"
+                  stroke-dasharray="100, 100"
+                />
+              </svg>
+              <span id="health-value">100%</span>
+            </div>
+            <p id="health-status">Session is healthy</p>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>Version Info</h3>
+          <div class="version-info">
+            <div class="version-item">
+              <span class="version-label">wa-runtime</span>
+              <span class="version-value" id="runtime-version">---</span>
+            </div>
+            <div class="version-item">
+              <span class="version-label">Session ID</span>
+              <span class="version-value session-id">{id}</span>
+            </div>
+            <div class="version-item">
+              <span class="version-label">Created</span>
+              <span class="version-value" id="session-created">---</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Actions -->
+      <section class="actions">
+        <button id="refresh-btn" class="btn-secondary">
+          🔄 Refresh Data
+        </button>
+        <button id="disconnect-btn" class="btn-danger">
+          ⏏️ Disconnect Session
+        </button>
+      </section>
+    </main>
+  </div>
+</Layout>
+
+<style>
+  .dashboard {
+    min-height: 100vh;
+    background: var(--color-bg);
+  }
+
+  .dashboard-header {
+    background: var(--color-bg-secondary);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .back-link {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .session-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--color-bg-tertiary);
+    border-radius: 20px;
+    font-size: 0.9rem;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-text-secondary);
+  }
+
+  .status-dot.active {
+    background: var(--color-success);
+  }
+
+  .status-dot.pairing {
+    background: var(--color-warning);
+  }
+
+  .dashboard-content {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Stats Overview */
+  .stats-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: var(--color-bg-secondary);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: 1px solid var(--color-border);
+  }
+
+  .stat-icon {
+    font-size: 2rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-tertiary);
+    border-radius: 12px;
+  }
+
+  .stat-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+  }
+
+  /* Main Chart */
+  .main-chart {
+    background: var(--color-bg-secondary);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--color-border);
+  }
+
+  .chart-header {
+    margin-bottom: 1rem;
+  }
+
+  .chart-header h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .chart-subtitle {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+  }
+
+  .chart-container {
+    height: 300px;
+    position: relative;
+  }
+
+  #activity-chart {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Secondary Charts */
+  .secondary-charts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .chart-card {
+    background: var(--color-bg-secondary);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--color-border);
+  }
+
+  .chart-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--color-text);
+  }
+
+  /* Runtime Stats */
+  .runtime-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .runtime-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .runtime-stat:last-child {
+    border-bottom: none;
+  }
+
+  .stat-name {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .runtime-stat .stat-value {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  /* Health Indicator */
+  .health-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .health-ring {
+    width: 120px;
+    height: 120px;
+    position: relative;
+  }
+
+  .health-ring svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+
+  .health-ring span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-success);
+  }
+
+  #health-status {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+  }
+
+  /* Version Info */
+  .version-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .version-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .version-item:last-child {
+    border-bottom: none;
+  }
+
+  .version-label {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .version-value {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text);
+  }
+
+  .version-value.session-id {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.8rem;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Actions */
+  .actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+  }
+
+  .btn-secondary,
+  .btn-danger {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+  }
+
+  .btn-secondary:hover {
+    background: var(--color-border);
+  }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--color-danger);
+    border: 1px solid var(--color-danger);
+  }
+
+  .btn-danger:hover {
+    background: var(--color-danger);
+    color: #fff;
+  }
+
+  /* Bar Chart Styles */
+  .bar-chart {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    height: 100%;
+    padding: 1rem 0;
+    gap: 4px;
+  }
+
+  .bar-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+  }
+
+  .bar {
+    flex: 1;
+    width: 100%;
+    max-width: 30px;
+    background: var(--color-bg-tertiary);
+    border-radius: 4px 4px 0 0;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .bar-fill {
+    width: 100%;
+    background: var(--color-primary);
+    border-radius: 4px 4px 0 0;
+    min-height: 2px;
+    transition: height 0.3s ease;
+  }
+
+  .bar-label {
+    font-size: 0.65rem;
+    color: var(--color-text-secondary);
+    margin-top: 0.5rem;
+  }
+</style>
+
+<script define:vars={{ sessionId: id }}>
+  // Initialize dashboard
+  async function init() {
+    await Promise.all([
+      loadSessionStats(),
+      loadOverallStats(),
+      loadConfig(),
+    ]);
+
+    // Auto-refresh every 30 seconds
+    setInterval(() => {
+      loadSessionStats();
+      loadOverallStats();
+    }, 30000);
+  }
+
+  async function loadSessionStats() {
+    try {
+      const response = await fetch(`/api/stats/${sessionId}`);
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        const data = result.data;
+
+        // Update stat cards
+        document.getElementById('phone-number').textContent = `+${data.session.phone_number}`;
+        document.getElementById('messages-count').textContent = data.messages.toLocaleString();
+        document.getElementById('uptime').textContent = data.uptimeFormatted;
+        document.getElementById('avg-messages').textContent = data.avgMessagesPerHour.toFixed(1);
+
+        // Update status
+        const statusEl = document.getElementById('session-status');
+        const statusDot = statusEl.querySelector('.status-dot');
+        statusDot.className = `status-dot ${data.session.status}`;
+        statusEl.innerHTML = `<span class="status-dot ${data.session.status}"></span>${data.session.status}`;
+
+        // Update session created
+        const createdDate = new Date(data.session.createdAt);
+        document.getElementById('session-created').textContent = createdDate.toLocaleDateString();
+
+        // Update health indicator
+        const healthPercent = data.session.status === 'active' ? 100 : data.session.status === 'pairing' ? 50 : 0;
+        document.getElementById('health-progress').style.strokeDasharray = `${healthPercent}, 100`;
+        document.getElementById('health-value').textContent = `${healthPercent}%`;
+        document.getElementById('health-status').textContent = 
+          healthPercent === 100 ? 'Session is healthy' : 
+          healthPercent === 50 ? 'Pairing in progress' : 'Session disconnected';
+
+        // Update activity chart
+        renderBarChart(data.hourlyActivity);
+      }
+    } catch (error) {
+      console.error('Failed to load session stats:', error);
+    }
+  }
+
+  async function loadOverallStats() {
+    try {
+      const response = await fetch('/api/stats');
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        document.getElementById('total-sessions').textContent = result.data.totalSessions;
+        document.getElementById('active-sessions').textContent = result.data.activeSessions;
+        document.getElementById('total-messages').textContent = result.data.totalMessages.toLocaleString();
+        document.getElementById('server-uptime').textContent = result.data.serverUptimeFormatted;
+      }
+    } catch (error) {
+      console.error('Failed to load overall stats:', error);
+    }
+  }
+
+  async function loadConfig() {
+    try {
+      const response = await fetch('/api/config');
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        document.getElementById('runtime-version').textContent = `v${result.data.version}`;
+      }
+    } catch (error) {
+      console.error('Failed to load config:', error);
+    }
+  }
+
+  function renderBarChart(hourlyData) {
+    const container = document.getElementById('activity-chart');
+    const maxValue = Math.max(...hourlyData, 1);
+
+    let html = '<div class="bar-chart">';
+    for (let i = 0; i < 24; i++) {
+      const value = hourlyData[i] || 0;
+      const height = (value / maxValue) * 100;
+      const label = i % 3 === 0 ? `${i}:00` : '';
+      
+      html += `
+        <div class="bar-column">
+          <div class="bar">
+            <div class="bar-fill" style="height: ${height}%"></div>
+          </div>
+          <span class="bar-label">${label}</span>
+        </div>
+      `;
+    }
+    html += '</div>';
+    
+    container.innerHTML = html;
+  }
+
+  // Event listeners
+  document.getElementById('refresh-btn').addEventListener('click', async () => {
+    const btn = document.getElementById('refresh-btn');
+    btn.disabled = true;
+    btn.textContent = '🔄 Refreshing...';
+    
+    await Promise.all([loadSessionStats(), loadOverallStats()]);
+    
+    btn.disabled = false;
+    btn.textContent = '🔄 Refresh Data';
+  });
+
+  document.getElementById('disconnect-btn').addEventListener('click', async () => {
+    if (!confirm('Are you sure you want to disconnect this session? This will log you out of WhatsApp.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/sessions/${sessionId}`, {
+        method: 'DELETE',
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        window.location.href = '/';
+      } else {
+        alert(result.error || 'Failed to disconnect session');
+      }
+    } catch (error) {
+      alert('Failed to disconnect session');
+    }
+  });
+
+  init();
+</script>

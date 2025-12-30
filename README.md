@@ -1,119 +1,252 @@
-# AstroBridge
+# wa-runtime
 
-AstroBridge provides an abstraction layer for programmatic control of WhatsApp interactions via text commands. It manages messages, groups, communities, channels, and events while exposing extension points for middleware-driven logic.
+wa-runtime is a full WhatsApp runtime that provides a backend service for session management, authentication, messaging, and statistics. It includes a web dashboard built with Astro.js for managing WhatsApp sessions.
 
-It is designed to be simple to start, but flexible enough to grow into a backend service or a bridge for frontend applications.
+## Features
+
+- **Multi-session support**: Manage multiple isolated WhatsApp sessions
+- **REST API**: Backend service exposing APIs for external clients
+- **Web Dashboard**: Built with Astro.js for session management and monitoring
+- **WhatsApp Pairing**: Uses pairing code authentication (no QR code scanning)
+- **Real-time Statistics**: Track messages, uptime, and session health
+- **Extensible Middleware**: Add custom behavior and business logic
+
+## Architecture
+
+```
+wa-runtime/
+├── Backend Service (Bun.js)
+│   ├── Session Management API
+│   ├── Authentication API
+│   ├── Statistics API
+│   └── WhatsApp Core (Baileys)
+│
+└── Frontend (astro-web-runtime)
+    ├── Session Creation
+    ├── Pairing Flow
+    └── Dashboard
+```
+
+## Requirements
+
+- [Node.js](https://nodejs.org/) (v20+)
+- [Bun.js](https://bun.sh/)
+- [ffmpeg](https://www.ffmpeg.org/)
+- [libwebp](https://developers.google.com/speed/webp/download)
 
 ## Installation
 
-Before running AstroBridge, make sure the following tools are installed on your system.
+### 1. Clone the repository
 
-Required dependencies:
-
-- [**Node.js**](https://nodejs.org/)
-- [**Bun.js**](https://bun.com/)
-- [**ffmpeg**](https://www.ffmpeg.org/)
-- [**libwebp**](https://developers.google.com/speed/webp/download)
-
-These are required for media handling and WhatsApp message processing. If any of these are missing, things will break quietly and then loudly.
-
-## Supported Platforms
-
-AstroBridge currently supports:
-
-- [Windows](https://www.microsoft.com/en-us/windows?r=1)
-- [Linux](https://www.fedoraproject.org/)
-- [macOS](https://www.apple.com/os/macos/)
-- [Docker](https://www.docker.com/)
-
-Not supported:
-
-- [Android](https://www.android.com/)
-  Bun does not support Android for now.
-
-## How to Use
-
-### Using AstroBridge as a CLI Tool
-
-1. Clone the repository.
-
-```
-git clone https://github.com/astrox11/wa-bridge
+```bash
+git clone https://github.com/astrox11/wa-runtime
+cd wa-runtime
 ```
 
-2. From the root of the project, install dependencies:
+### 2. Install backend dependencies
 
-```
+```bash
 bun install
 ```
 
-3. Start the application:
+### 3. Install frontend dependencies
 
-```
-bun start
-```
-
-This will kick-start the WhatsApp session setup and begin the interaction flow.
-
-#### Configuration
-
-You **must** provide a phone number before starting.
-
-You have two options:
-
-**Option 1: config.ts**
-
-Set the `PHONE_NUMBER` constant in `config.ts`.
-
-**Option 2: .env file**
-
-Create a `.env` file in the project root and add:
-
-```
-PHONE_NUMBER=2348012345678
+```bash
+cd astro-web-runtime
+npm install
+cd ..
 ```
 
-Important rules for the phone number:
+## Running the Application
 
-- Do **not** include the `+` symbol
-- Include your country code
-- No spaces or separators
+### Option 1: Run backend and frontend separately (Development)
 
-Correct example:
-
-```
-PHONE_NUMBER=2348012345678
+**Terminal 1 - Backend:**
+```bash
+bun run server
 ```
 
-Incorrect examples:
+**Terminal 2 - Frontend:**
+```bash
+cd astro-web-runtime
+npm run dev
+```
+
+The backend will be available at `http://localhost:3000` and the frontend at `http://localhost:4321`.
+
+### Option 2: Run using CLI (Session management only)
+
+```bash
+# Create a session
+bun start session create 14155551234
+
+# List all sessions
+bun start session list
+
+# Delete a session
+bun start session delete <session_id>
+```
+
+### Option 3: Docker
+
+```bash
+docker build -t wa-runtime .
+docker run -p 3000:3000 -p 4321:4321 wa-runtime
+```
+
+## Configuration
+
+Configuration can be set via environment variables or the `config.ts` file:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PHONE_NUMBER` | Phone number for auto-session creation | - |
+| `BOT_NAME` | Display name for the bot | `wa-runtime` |
+| `API_PORT` | Backend API port | `3000` |
+| `API_HOST` | Backend API host | `0.0.0.0` |
+
+### Using .env file
+
+```bash
+PHONE_NUMBER=14155551234
+BOT_NAME=MyBot
+API_PORT=3000
+```
+
+## API Reference
+
+### Sessions
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/sessions` | List all sessions |
+| POST | `/api/sessions` | Create a new session |
+| GET | `/api/sessions/:id` | Get session details |
+| DELETE | `/api/sessions/:id` | Delete a session |
+
+### Authentication
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/auth/status/:sessionId` | Get authentication status |
+
+### Statistics
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/stats` | Get overall runtime statistics |
+| GET | `/api/stats/:sessionId` | Get session-specific statistics |
+
+### Configuration
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/config` | Get runtime configuration |
+
+### Example: Create a Session
+
+```bash
+curl -X POST http://localhost:3000/api/sessions \
+  -H "Content-Type: application/json" \
+  -d '{"phoneNumber": "14155551234"}'
+```
+
+Response:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "session_14155551234",
+    "pairingCode": "12345678",
+    "pairingCodeFormatted": "1234-5678"
+  }
+}
+```
+
+## Web Dashboard
+
+The web dashboard provides a visual interface for managing sessions:
+
+### Home Page
+- Create new sessions by entering phone number and bot name
+- View existing sessions with status indicators
+- Quick access to dashboard or pairing flow
+
+### Pairing Page
+- Displays the 8-digit pairing code
+- Instructions for linking via WhatsApp
+- Automatic redirect to dashboard on success
+
+### Dashboard
+- Session statistics (messages, uptime, health)
+- Activity graphs showing messages per hour
+- Runtime statistics (total sessions, server uptime)
+- Session management actions (refresh, disconnect)
+
+## Supported Platforms
+
+- Windows
+- Linux
+- macOS
+- Docker
+
+**Not supported:**
+- Android (Bun.js limitation)
+
+## Middleware Extension
+
+wa-runtime can be extended using the middleware layer:
+
+```typescript
+import { MiddlewareService, createRegistry } from './middleware';
+
+const middleware = new MiddlewareService({
+  sessionId: 'my-session',
+  debug: true,
+});
+
+middleware.on('message', (message, client) => {
+  console.log('Received:', message.text);
+});
+
+middleware.on('command', (message, client) => {
+  console.log('Command:', message.command?.name);
+});
+```
+
+## Project Structure
 
 ```
-+2348012345678
-234 801 234 5678
+wa-runtime/
+├── index.ts          # CLI entry point
+├── server.ts         # Backend HTTP server
+├── api.ts            # API route handlers
+├── config.ts         # Configuration
+├── lib/              # Core library
+│   ├── core/         # Message, Group, Community handlers
+│   ├── session/      # Session management
+│   ├── sql/          # Database operations
+│   └── util/         # Utilities
+├── middleware/       # Middleware layer
+└── astro-web-runtime/  # Frontend dashboard
+    ├── src/
+    │   ├── layouts/  # Astro layouts
+    │   ├── pages/    # Page components
+    │   ├── lib/      # API client
+    │   └── components/
+    └── public/       # Static assets
 ```
-
-If the number is invalid, the startup process will stop early. This is intentional.
-
-### Using AstroBridge as Middleware
-
-AstroBridge can be extended using middleware to add custom behavior, business logic, or frontend integrations.
-
-To see a real-world example of this, check out the merged middleware pull request:
-
-[https://github.com/astrox11/wa-bridge/pull/4](https://github.com/astrox11/wa-bridge/pull/4)
-
-That PR includes inline comments demonstrating:
-
-- How to register middleware
-- How to intercept and extend message handling
-- How to expose AstroBridge logic to frontend services
-
-This approach allows AstroBridge to act as a backend bridge rather than just a CLI-driven bot.
-
-If you are building dashboards, admin panels, or automation services, this is the intended path.
 
 ## Contributing
 
-Contributions are welcome.
+Contributions are welcome! wa-runtime is evolving and community input directly influences its direction.
 
-AstroBridge is evolving fast, and community input directly influences its direction. Bug fixes, middleware ideas, documentation improvements, and architectural discussions are all fair game.
+Areas for contribution:
+- Bug fixes
+- Documentation improvements
+- New features
+- Middleware extensions
+
+## License
+
+This project is licensed under the terms specified in the LICENSE file.

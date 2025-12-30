@@ -1,0 +1,384 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Session Setup">
+  <div class="setup-container">
+    <div class="setup-card">
+      <div class="logo">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.48 2 2 6.48 2 12C2 13.85 2.5 15.55 3.36 17L2 22L7.13 20.68C8.53 21.51 10.2 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM16.46 15.46C16.23 16.08 15.17 16.64 14.45 16.77C13.86 16.87 13.11 16.94 10.43 15.83C7.07 14.42 4.93 11.01 4.78 10.81C4.63 10.61 3.53 9.15 3.53 7.64C3.53 6.13 4.28 5.4 4.58 5.08C4.88 4.76 5.23 4.68 5.45 4.68C5.67 4.68 5.88 4.68 6.08 4.69C6.3 4.7 6.58 4.6 6.85 5.18C7.13 5.78 7.8 7.29 7.87 7.44C7.94 7.59 8 7.78 7.9 7.98C7.8 8.18 7.73 8.3 7.58 8.48C7.43 8.66 7.26 8.88 7.13 9.01C6.98 9.16 6.82 9.32 7 9.62C7.18 9.92 7.79 10.9 8.7 11.71C9.87 12.76 10.83 13.09 11.13 13.24C11.43 13.39 11.62 13.36 11.8 13.15C11.98 12.94 12.56 12.27 12.77 11.97C12.98 11.67 13.19 11.72 13.47 11.82C13.75 11.92 15.25 12.66 15.55 12.81C15.85 12.96 16.05 13.03 16.12 13.16C16.19 13.29 16.19 13.84 15.96 14.46L16.46 15.46Z" fill="#25D366"/>
+        </svg>
+        <h1>wa-runtime</h1>
+      </div>
+      
+      <p class="subtitle">Create a new WhatsApp session</p>
+
+      <form id="session-form" class="form">
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input 
+            type="tel" 
+            id="phone" 
+            name="phoneNumber" 
+            placeholder="e.g., 14155551234" 
+            required
+            pattern="[0-9]+"
+          />
+          <small>Include country code without + symbol</small>
+        </div>
+
+        <div class="form-group">
+          <label for="botName">Bot Name</label>
+          <input 
+            type="text" 
+            id="botName" 
+            name="botName" 
+            placeholder="My Bot"
+          />
+          <small>Optional display name for your bot</small>
+        </div>
+
+        <div class="form-group">
+          <label for="version">Version</label>
+          <input 
+            type="text" 
+            id="version" 
+            name="version" 
+            readonly
+            disabled
+          />
+          <small>Runtime version (read-only)</small>
+        </div>
+
+        <button type="submit" class="btn-primary">
+          Create Session
+        </button>
+      </form>
+
+      <div id="error-message" class="error-message" style="display: none;"></div>
+
+      <div class="existing-sessions">
+        <h3>Existing Sessions</h3>
+        <div id="sessions-list">Loading...</div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .setup-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .setup-card {
+    background: var(--color-bg-secondary);
+    border-radius: 12px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .logo h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--color-text-secondary);
+    margin-bottom: 2rem;
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .form-group label {
+    font-weight: 500;
+    color: var(--color-text);
+  }
+
+  .form-group input {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-bg-tertiary);
+    color: var(--color-text);
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+  }
+
+  .form-group input:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  .form-group small {
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+  }
+
+  .btn-primary {
+    padding: 0.875rem 1.5rem;
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    margin-top: 0.5rem;
+  }
+
+  .btn-primary:hover {
+    background: var(--color-primary-dark);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  .error-message {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: rgba(234, 67, 53, 0.1);
+    border: 1px solid var(--color-danger);
+    border-radius: 8px;
+    color: var(--color-danger);
+  }
+
+  .existing-sessions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .existing-sessions h3 {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: var(--color-text-secondary);
+  }
+
+  #sessions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .session-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: var(--color-bg-tertiary);
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+  }
+
+  .session-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .session-phone {
+    font-weight: 500;
+  }
+
+  .session-status {
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .status-active {
+    background: var(--color-success);
+  }
+
+  .status-pairing {
+    background: var(--color-warning);
+  }
+
+  .status-inactive {
+    background: var(--color-text-secondary);
+  }
+
+  .session-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .btn-small {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    border: none;
+    font-weight: 500;
+  }
+
+  .btn-dashboard {
+    background: var(--color-primary);
+    color: #fff;
+  }
+
+  .btn-dashboard:hover {
+    background: var(--color-primary-dark);
+  }
+
+  .btn-delete {
+    background: transparent;
+    color: var(--color-danger);
+    border: 1px solid var(--color-danger);
+  }
+
+  .btn-delete:hover {
+    background: var(--color-danger);
+    color: #fff;
+  }
+
+  .no-sessions {
+    color: var(--color-text-secondary);
+    text-align: center;
+    padding: 1rem;
+  }
+</style>
+
+<script>
+  import { api } from '../lib/api';
+
+  const form = document.getElementById('session-form') as HTMLFormElement;
+  const errorDiv = document.getElementById('error-message') as HTMLDivElement;
+  const sessionsList = document.getElementById('sessions-list') as HTMLDivElement;
+  const versionInput = document.getElementById('version') as HTMLInputElement;
+
+  // Load config and sessions on page load
+  async function init() {
+    // Load version
+    const configResult = await api.getConfig();
+    if (configResult.success && configResult.data) {
+      versionInput.value = configResult.data.version;
+    }
+
+    // Load existing sessions
+    await loadSessions();
+  }
+
+  async function loadSessions() {
+    const result = await api.getSessions();
+    
+    if (result.success && result.data) {
+      if (result.data.length === 0) {
+        sessionsList.innerHTML = '<p class="no-sessions">No sessions yet</p>';
+        return;
+      }
+
+      sessionsList.innerHTML = result.data.map(session => `
+        <div class="session-item" data-id="${session.id}">
+          <div class="session-info">
+            <span class="session-phone">+${session.phone_number}</span>
+            <span class="session-status">
+              <span class="status-dot status-${session.status}"></span>
+              ${session.status}
+            </span>
+          </div>
+          <div class="session-actions">
+            ${session.status === 'active' ? `
+              <a href="/dashboard/${session.id}" class="btn-small btn-dashboard">Dashboard</a>
+            ` : session.status === 'pairing' ? `
+              <a href="/pairing/${session.id}" class="btn-small btn-dashboard">Continue Pairing</a>
+            ` : ''}
+            <button class="btn-small btn-delete" onclick="deleteSession('${session.id}')">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    } else {
+      sessionsList.innerHTML = '<p class="no-sessions">Failed to load sessions</p>';
+    }
+  }
+
+  // @ts-ignore - expose to global scope for onclick
+  window.deleteSession = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this session?')) return;
+    
+    const result = await api.deleteSession(id);
+    if (result.success) {
+      await loadSessions();
+    } else {
+      alert(result.error || 'Failed to delete session');
+    }
+  };
+
+  // Form submission
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const phoneInput = document.getElementById('phone') as HTMLInputElement;
+    const phoneNumber = phoneInput.value.replace(/\D/g, '');
+    
+    if (!phoneNumber) {
+      showError('Please enter a valid phone number');
+      return;
+    }
+
+    const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creating...';
+    hideError();
+
+    const result = await api.createSession(phoneNumber);
+
+    if (result.success && result.data) {
+      // Redirect to pairing page
+      window.location.href = `/pairing/${result.data.id}?code=${result.data.pairingCode}`;
+    } else {
+      showError(result.error || 'Failed to create session');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Create Session';
+    }
+  });
+
+  function showError(message: string) {
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+  }
+
+  function hideError() {
+    errorDiv.style.display = 'none';
+  }
+
+  init();
+</script>

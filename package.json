@@ -1,5 +1,7 @@
 {
-  "name": "bridge",
+  "name": "wa-runtime",
+  "version": "1.0.0",
+  "description": "A full WhatsApp runtime with backend service and web dashboard",
   "type": "module",
   "devDependencies": {
     "@eslint/js": "^9.39.2",
@@ -16,6 +18,7 @@
   },
   "scripts": {
     "start": "bun run ./index.ts",
+    "server": "bun run ./server.ts",
     "postinstall": "bun run hook.ts",
     "lint": "eslint . --ext .ts --fix",
     "format": "prettier --write ."

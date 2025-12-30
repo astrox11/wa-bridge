@@ -1,0 +1,328 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const { id } = Astro.params;
+---
+
+<Layout title="Pair Device">
+  <div class="pairing-container">
+    <div class="pairing-card">
+      <div class="header">
+        <a href="/" class="back-link">← Back</a>
+        <h1>Link with WhatsApp</h1>
+      </div>
+
+      <div id="pairing-content" class="pairing-content">
+        <div class="spinner-container">
+          <div class="spinner"></div>
+          <p>Loading pairing code...</p>
+        </div>
+      </div>
+
+      <div id="success-content" class="success-content" style="display: none;">
+        <div class="success-icon">✓</div>
+        <h2>Successfully Paired!</h2>
+        <p>Your WhatsApp session is now active.</p>
+        <a href={`/dashboard/${id}`} class="btn-primary">Go to Dashboard</a>
+      </div>
+
+      <div id="error-content" class="error-content" style="display: none;">
+        <div class="error-icon">✗</div>
+        <h2>Pairing Failed</h2>
+        <p id="error-message"></p>
+        <a href="/" class="btn-secondary">Try Again</a>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .pairing-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .pairing-card {
+    background: var(--color-bg-secondary);
+    border-radius: 12px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-bottom: 1rem;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .header h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  .pairing-content,
+  .success-content,
+  .error-content {
+    text-align: center;
+  }
+
+  .spinner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .pairing-code-container {
+    margin: 2rem 0;
+  }
+
+  .pairing-code {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--color-primary);
+    background: var(--color-bg-tertiary);
+    padding: 1.5rem 2rem;
+    border-radius: 12px;
+    display: inline-block;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+
+  .instructions {
+    margin: 1.5rem 0;
+    text-align: left;
+    padding: 1rem;
+    background: var(--color-bg-tertiary);
+    border-radius: 8px;
+  }
+
+  .instructions h3 {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    color: var(--color-text);
+  }
+
+  .instructions ol {
+    padding-left: 1.25rem;
+    color: var(--color-text-secondary);
+  }
+
+  .instructions li {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--color-text-secondary);
+    margin-top: 1rem;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-warning);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .success-content,
+  .error-content {
+    padding: 2rem 0;
+  }
+
+  .success-icon {
+    width: 64px;
+    height: 64px;
+    background: var(--color-success);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #fff;
+    margin: 0 auto 1rem;
+  }
+
+  .error-icon {
+    width: 64px;
+    height: 64px;
+    background: var(--color-danger);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #fff;
+    margin: 0 auto 1rem;
+  }
+
+  .success-content h2,
+  .error-content h2 {
+    margin-bottom: 0.5rem;
+  }
+
+  .success-content p,
+  .error-content p {
+    color: var(--color-text-secondary);
+    margin-bottom: 1.5rem;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    display: inline-block;
+    padding: 0.875rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background: var(--color-primary);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: var(--color-primary-dark);
+    text-decoration: none;
+  }
+
+  .btn-secondary {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+  }
+
+  .btn-secondary:hover {
+    background: var(--color-border);
+    text-decoration: none;
+  }
+</style>
+
+<script define:vars={{ sessionId: id }}>
+  const pairingContent = document.getElementById('pairing-content');
+  const successContent = document.getElementById('success-content');
+  const errorContent = document.getElementById('error-content');
+  const errorMessage = document.getElementById('error-message');
+
+  // Get pairing code from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const pairingCode = urlParams.get('code');
+
+  if (pairingCode) {
+    showPairingCode(pairingCode);
+  }
+
+  function showPairingCode(code) {
+    const formattedCode = `${code.slice(0, 4)}-${code.slice(4)}`;
+    
+    pairingContent.innerHTML = `
+      <div class="pairing-code-container">
+        <div class="pairing-code">${formattedCode}</div>
+      </div>
+      
+      <div class="instructions">
+        <h3>How to link:</h3>
+        <ol>
+          <li>Open WhatsApp on your phone</li>
+          <li>Go to <strong>Settings</strong> → <strong>Linked Devices</strong></li>
+          <li>Tap <strong>Link a Device</strong></li>
+          <li>Enter the code shown above</li>
+        </ol>
+      </div>
+
+      <div class="status">
+        <span class="status-dot"></span>
+        Waiting for pairing...
+      </div>
+    `;
+
+    // Start polling for auth status
+    pollAuthStatus();
+  }
+
+  async function pollAuthStatus() {
+    const maxAttempts = 60;
+    let attempts = 0;
+
+    const poll = async () => {
+      try {
+        const response = await fetch(`/api/auth/status/${sessionId}`);
+        const result = await response.json();
+
+        if (result.success && result.data) {
+          if (result.data.isAuthenticated) {
+            showSuccess();
+            return;
+          }
+
+          if (result.data.status === 'inactive') {
+            showError('Session was disconnected or timed out');
+            return;
+          }
+        }
+
+        attempts++;
+        if (attempts < maxAttempts) {
+          setTimeout(poll, 3000);
+        } else {
+          showError('Pairing timed out. Please try again.');
+        }
+      } catch (error) {
+        attempts++;
+        if (attempts < maxAttempts) {
+          setTimeout(poll, 3000);
+        } else {
+          showError('Connection error. Please try again.');
+        }
+      }
+    };
+
+    poll();
+  }
+
+  function showSuccess() {
+    pairingContent.style.display = 'none';
+    successContent.style.display = 'block';
+  }
+
+  function showError(message) {
+    pairingContent.style.display = 'none';
+    errorMessage.textContent = message;
+    errorContent.style.display = 'block';
+  }
+</script>

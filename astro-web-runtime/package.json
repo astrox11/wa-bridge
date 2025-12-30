@@ -1,0 +1,19 @@
+{
+  "name": "astro-web-runtime",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Web dashboard for wa-runtime",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "node ./dist/server/entry.mjs",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/node": "^9.5.1",
+    "astro": "^5.2.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}

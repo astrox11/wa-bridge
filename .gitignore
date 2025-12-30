@@ -52,6 +52,11 @@ out/
 .public/
 .vuepress/dist
 
+# Astro
+astro-web-runtime/dist/
+astro-web-runtime/.astro/
+astro-web-runtime/node_modules/
+
 # Compiled binary addons
 build/Release/
 
