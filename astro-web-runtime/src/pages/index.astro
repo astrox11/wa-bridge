@@ -147,15 +147,32 @@ import Layout from '../layouts/Layout.astro';
           <h2 class="text-sm font-semibold text-gh-text">Network Status</h2>
         </div>
         <div class="p-4">
-          <div id="network-status" class="flex items-center justify-center gap-3 py-4">
-            <svg id="network-icon" class="w-8 h-8 text-gh-success" viewBox="0 0 16 16" fill="currentColor">
+          <div id="network-status" class="flex items-center gap-3 mb-4">
+            <svg id="network-icon" class="w-6 h-6 text-gh-success" viewBox="0 0 16 16" fill="currentColor">
               <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>
             </svg>
             <div>
-              <p id="network-text" class="text-lg font-semibold text-gh-success">Connected</p>
+              <p id="network-text" class="text-sm font-semibold text-gh-success">Connected</p>
               <p id="network-detail" class="text-xs text-gh-text-muted">All systems operational</p>
             </div>
           </div>
+          <!-- Network Activity Graph -->
+          <div class="h-16 flex items-end gap-0.5" id="network-graph">
+            <!-- Skeleton bars for graph -->
+            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 40%"></div>
+            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 60%"></div>
+            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 30%"></div>
+            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 80%"></div>
+            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 50%"></div>
+            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 70%"></div>
+            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 45%"></div>
+            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 65%"></div>
+            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 55%"></div>
+            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 35%"></div>
+            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 75%"></div>
+            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 40%"></div>
+          </div>
+          <p class="text-xs text-gh-text-muted mt-2 text-center">Network activity (last 12 checks)</p>
         </div>
       </div>
     </div>
@@ -169,11 +186,29 @@ import Layout from '../layouts/Layout.astro';
           </svg>
           <h2 class="text-sm font-semibold text-gh-text">Sessions</h2>
         </div>
-        <span id="session-count" class="text-xs text-gh-text-muted">0 sessions</span>
+        <span id="session-count" class="text-xs text-gh-text-muted">Loading...</span>
       </div>
       <div id="sessions-list" class="divide-y divide-gh-border">
-        <div class="p-8 flex justify-center">
-          <div class="w-5 h-5 border-2 border-gh-accent border-t-transparent rounded-full animate-spin"></div>
+        <!-- Skeleton loaders -->
+        <div class="flex items-center justify-between p-3">
+          <div class="flex items-center gap-3">
+            <div class="w-4 h-4 bg-gh-bg-tertiary rounded animate-pulse"></div>
+            <div class="w-32 h-4 bg-gh-bg-tertiary rounded animate-pulse"></div>
+          </div>
+          <div class="flex items-center gap-1">
+            <div class="w-8 h-8 bg-gh-bg-tertiary rounded animate-pulse"></div>
+            <div class="w-8 h-8 bg-gh-bg-tertiary rounded animate-pulse"></div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between p-3">
+          <div class="flex items-center gap-3">
+            <div class="w-4 h-4 bg-gh-bg-tertiary rounded animate-pulse"></div>
+            <div class="w-24 h-4 bg-gh-bg-tertiary rounded animate-pulse"></div>
+          </div>
+          <div class="flex items-center gap-1">
+            <div class="w-8 h-8 bg-gh-bg-tertiary rounded animate-pulse"></div>
+            <div class="w-8 h-8 bg-gh-bg-tertiary rounded animate-pulse"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -193,8 +228,14 @@ import Layout from '../layouts/Layout.astro';
   const cancelFormBtn = document.getElementById('cancel-form-btn') as HTMLButtonElement;
   const botNameInput = document.getElementById('botName') as HTMLInputElement;
   const clearBotnameBtn = document.getElementById('clear-botname') as HTMLButtonElement;
+  const networkGraph = document.getElementById('network-graph') as HTMLDivElement;
 
   let formExpanded = false;
+  let sessionsLoaded = false;
+  
+  // Network activity history for graph (12 data points)
+  const networkHistory: boolean[] = [];
+  const GRAPH_POINTS = 12;
 
   function showForm() {
     formExpanded = true;
@@ -239,33 +280,63 @@ import Layout from '../layouts/Layout.astro';
     }
   }
 
+  function updateNetworkGraph(isHealthy: boolean) {
+    // Add new data point
+    networkHistory.push(isHealthy);
+    // Keep only last GRAPH_POINTS
+    while (networkHistory.length > GRAPH_POINTS) {
+      networkHistory.shift();
+    }
+    
+    // Render graph bars
+    const bars = networkHistory.map((healthy, idx) => {
+      // Create a varying height based on position for visual interest
+      const baseHeight = healthy ? 80 : 20;
+      const variance = Math.sin((idx + Date.now() / 1000) * 0.5) * 20;
+      const height = Math.max(10, Math.min(100, baseHeight + variance));
+      const color = healthy ? 'bg-gh-success' : 'bg-gh-danger';
+      return `<div class="flex-1 ${color} rounded-t transition-all duration-300" style="height: ${height}%"></div>`;
+    }).join('');
+    
+    // Pad with empty bars if less than GRAPH_POINTS
+    const emptyBars = Array(GRAPH_POINTS - networkHistory.length)
+      .fill('<div class="flex-1 bg-gh-bg-tertiary rounded-t" style="height: 40%"></div>')
+      .join('');
+    
+    networkGraph.innerHTML = emptyBars + bars;
+  }
+
   function updateNetworkStatus(network: { isHealthy: boolean; isPaused: boolean; consecutiveFailures: number }) {
     const icon = document.getElementById('network-icon') as SVGElement;
     const text = document.getElementById('network-text') as HTMLParagraphElement;
     const detail = document.getElementById('network-detail') as HTMLParagraphElement;
 
+    // Update graph with current status
+    updateNetworkGraph(network.isHealthy && !network.isPaused);
+
     if (network.isPaused) {
-      icon.className = 'w-8 h-8 text-gh-warning';
+      icon.className = 'w-6 h-6 text-gh-warning';
       icon.innerHTML = '<path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Z"/>';
       text.textContent = 'Paused';
-      text.className = 'text-lg font-semibold text-gh-warning';
+      text.className = 'text-sm font-semibold text-gh-warning';
       detail.textContent = 'Sessions paused due to network issues';
     } else if (network.isHealthy) {
-      icon.className = 'w-8 h-8 text-gh-success';
+      icon.className = 'w-6 h-6 text-gh-success';
       icon.innerHTML = '<path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>';
       text.textContent = 'Connected';
-      text.className = 'text-lg font-semibold text-gh-success';
+      text.className = 'text-sm font-semibold text-gh-success';
       detail.textContent = 'All systems operational';
     } else {
-      icon.className = 'w-8 h-8 text-gh-danger';
+      icon.className = 'w-6 h-6 text-gh-danger';
       icon.innerHTML = '<path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"/>';
       text.textContent = 'Issues Detected';
-      text.className = 'text-lg font-semibold text-gh-danger';
+      text.className = 'text-sm font-semibold text-gh-danger';
       detail.textContent = `${network.consecutiveFailures} consecutive failures`;
     }
   }
 
   function renderSessions(sessions: Array<{id: string; phone_number: string; created_at: number; status: string; pushName?: string; push_name?: string}>) {
+    sessionsLoaded = true;
     sessionCount.textContent = `${sessions.length} session${sessions.length !== 1 ? 's' : ''}`;
     
     if (sessions.length === 0) {
@@ -343,15 +414,16 @@ import Layout from '../layouts/Layout.astro';
     document.getElementById('stat-messages')!.textContent = overall.totalMessages.toLocaleString();
   }
 
-  // Subscribe to real-time updates
+  // Subscribe to real-time updates via WebSocket
   api.onStats((data) => {
+    console.log('[wa-runtime] Received stats update:', data);
     if (data.type === 'stats') {
       updateStats(data.data.overall);
       if (data.data.network) {
         updateNetworkStatus(data.data.network);
       }
       if (data.data.sessions) {
-        renderSessions(data.data.sessions.map(s => ({
+        renderSessions(data.data.sessions.map((s: any) => ({
           id: s.id,
           phone_number: s.phone_number,
           created_at: s.created_at,
