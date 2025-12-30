@@ -419,30 +419,36 @@ import Layout from '../layouts/Layout.astro';
   }
 
   function updateNetworkStatus(network: { isHealthy: boolean; isPaused: boolean; consecutiveFailures: number }) {
-    const icon = document.getElementById('network-icon') as SVGElement;
-    const text = document.getElementById('network-text') as HTMLParagraphElement;
-    const detail = document.getElementById('network-detail') as HTMLParagraphElement;
+    const icon = document.getElementById('network-icon');
+    const text = document.getElementById('network-text');
+    const detail = document.getElementById('network-detail');
 
     // Update graph with current status
     updateNetworkGraph(network.isHealthy && !network.isPaused);
 
+    // Check if elements exist
+    if (!icon || !text || !detail) {
+      console.warn('[wa-runtime] Network status elements not found');
+      return;
+    }
+
     if (network.isPaused) {
-      icon.className = 'w-6 h-6 text-gh-warning';
+      icon.setAttribute('class', 'w-6 h-6 text-gh-warning');
       icon.innerHTML = '<path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Z"/>';
       text.textContent = 'Paused';
-      text.className = 'text-sm font-semibold text-gh-warning';
+      text.setAttribute('class', 'text-sm font-semibold text-gh-warning');
       detail.textContent = 'Sessions paused due to network issues';
     } else if (network.isHealthy) {
-      icon.className = 'w-6 h-6 text-gh-success';
+      icon.setAttribute('class', 'w-6 h-6 text-gh-success');
       icon.innerHTML = '<path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>';
       text.textContent = 'Connected';
-      text.className = 'text-sm font-semibold text-gh-success';
+      text.setAttribute('class', 'text-sm font-semibold text-gh-success');
       detail.textContent = 'All systems operational';
     } else {
-      icon.className = 'w-6 h-6 text-gh-danger';
+      icon.setAttribute('class', 'w-6 h-6 text-gh-danger');
       icon.innerHTML = '<path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"/>';
       text.textContent = 'Issues Detected';
-      text.className = 'text-sm font-semibold text-gh-danger';
+      text.setAttribute('class', 'text-sm font-semibold text-gh-danger');
       detail.textContent = `${network.consecutiveFailures} consecutive failures`;
     }
   }
@@ -535,9 +541,13 @@ import Layout from '../layouts/Layout.astro';
   }
 
   function updateStats(overall: { totalSessions: number; activeSessions: number; totalMessages: number }) {
-    document.getElementById('stat-sessions')!.textContent = overall.totalSessions.toString();
-    document.getElementById('stat-active')!.textContent = overall.activeSessions.toString();
-    document.getElementById('stat-messages')!.textContent = overall.totalMessages.toLocaleString();
+    const statSessions = document.getElementById('stat-sessions');
+    const statActive = document.getElementById('stat-active');
+    const statMessages = document.getElementById('stat-messages');
+    
+    if (statSessions) statSessions.textContent = overall.totalSessions.toString();
+    if (statActive) statActive.textContent = overall.activeSessions.toString();
+    if (statMessages) statMessages.textContent = overall.totalMessages.toLocaleString();
   }
 
   // Subscribe to real-time updates via WebSocket
