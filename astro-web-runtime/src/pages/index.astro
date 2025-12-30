@@ -20,7 +20,54 @@ import Layout from '../layouts/Layout.astro';
         <path d="M0 2.75C0 1.784.784 1 1.75 1h12.5c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 14.25 15H1.75A1.75 1.75 0 0 1 0 13.25Zm1.75-.25a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25Zm7.25 2a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5ZM4.78 6.72a.75.75 0 0 0-1.06 1.06l1.22 1.22-1.22 1.22a.75.75 0 1 0 1.06 1.06l1.75-1.75a.75.75 0 0 0 0-1.06Z"/>
       </svg>
     </button>
+    <div class="h-px bg-gh-border my-1"></div>
+    <a href="mailto:support@wa-runtime.app" class="p-2 text-gh-text-secondary hover:text-gh-accent hover:bg-gh-bg-tertiary rounded-gh transition-colors" title="Email Support">
+      <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M1.75 2h12.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0 1 14.25 14H1.75A1.75 1.75 0 0 1 0 12.25v-8.5C0 2.784.784 2 1.75 2ZM1.5 12.251c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V5.809L8.38 9.397a.75.75 0 0 1-.76 0L1.5 5.809v6.442Zm13-8.181v-.32a.25.25 0 0 0-.25-.25H1.75a.25.25 0 0 0-.25.25v.32L8 7.88Z"/>
+      </svg>
+    </a>
+    <a href="https://github.com/astrox11/wa-runtime/pulls" target="_blank" rel="noopener noreferrer" class="p-2 text-gh-text-secondary hover:text-gh-success hover:bg-gh-bg-tertiary rounded-gh transition-colors" title="Contribute">
+      <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z"/>
+      </svg>
+    </a>
   </aside>
+
+  <!-- Mobile Sidebar (fixed bottom bar) -->
+  <nav id="mobile-sidebar" class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-gh-bg border-t border-gh-border shadow-lg">
+    <div class="flex items-center justify-around py-2 px-4">
+      <a href="https://github.com/astrox11/wa-runtime" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center p-2 text-gh-text-secondary hover:text-gh-text transition-colors" title="GitHub">
+        <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/>
+        </svg>
+        <span class="text-[10px] mt-0.5">GitHub</span>
+      </a>
+      <button id="mobile-create-session" class="flex flex-col items-center p-2 text-gh-text-secondary hover:text-gh-success transition-colors" title="Create Session">
+        <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"/>
+        </svg>
+        <span class="text-[10px] mt-0.5">Create</span>
+      </button>
+      <button id="mobile-console" class="flex flex-col items-center p-2 text-gh-text-secondary hover:text-gh-text transition-colors" title="Logs">
+        <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M0 2.75C0 1.784.784 1 1.75 1h12.5c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 14.25 15H1.75A1.75 1.75 0 0 1 0 13.25Zm1.75-.25a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25Zm7.25 2a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5ZM4.78 6.72a.75.75 0 0 0-1.06 1.06l1.22 1.22-1.22 1.22a.75.75 0 1 0 1.06 1.06l1.75-1.75a.75.75 0 0 0 0-1.06Z"/>
+        </svg>
+        <span class="text-[10px] mt-0.5">Logs</span>
+      </button>
+      <a href="mailto:support@wa-runtime.app" class="flex flex-col items-center p-2 text-gh-text-secondary hover:text-gh-accent transition-colors" title="Support">
+        <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M1.75 2h12.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0 1 14.25 14H1.75A1.75 1.75 0 0 1 0 12.25v-8.5C0 2.784.784 2 1.75 2ZM1.5 12.251c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V5.809L8.38 9.397a.75.75 0 0 1-.76 0L1.5 5.809v6.442Zm13-8.181v-.32a.25.25 0 0 0-.25-.25H1.75a.25.25 0 0 0-.25.25v.32L8 7.88Z"/>
+        </svg>
+        <span class="text-[10px] mt-0.5">Support</span>
+      </a>
+      <a href="https://github.com/astrox11/wa-runtime/pulls" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center p-2 text-gh-text-secondary hover:text-gh-success transition-colors" title="Contribute">
+        <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z"/>
+        </svg>
+        <span class="text-[10px] mt-0.5">Contribute</span>
+      </a>
+    </div>
+  </nav>
 
   <!-- Logs Modal -->
   <div id="logs-modal" class="fixed inset-0 z-50 hidden">
@@ -80,7 +127,7 @@ import Layout from '../layouts/Layout.astro';
     </div>
   </div>
 
-  <main class="max-w-4xl mx-auto px-4 py-8 lg:ml-20">
+  <main class="max-w-4xl mx-auto px-4 py-8 lg:ml-20 pb-24 lg:pb-8">
     <!-- Hero Section -->
     <div class="text-center mb-8">
       <div class="flex justify-center mb-4">
@@ -127,20 +174,21 @@ import Layout from '../layouts/Layout.astro';
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Create Session Card -->
       <div class="bg-gh-bg border border-gh-border rounded-gh">
-        <div class="p-4 border-b border-gh-border flex items-center justify-between">
+        <div class="p-4 border-b border-gh-border flex items-center justify-between cursor-pointer hover:bg-gh-bg-secondary transition-colors" id="new-session-header">
           <div class="flex items-center gap-2">
             <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
               <path d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"/>
             </svg>
             <h2 class="text-sm font-semibold text-gh-text">New Session</h2>
           </div>
-          <button id="toggle-form-btn" class="text-xs text-gh-link hover:underline">
-            Show Form
-          </button>
+          <svg id="new-session-chevron" class="w-4 h-4 text-gh-text-secondary transition-transform" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M12.78 5.22a.749.749 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.06 0L3.22 6.28a.749.749 0 1 1 1.06-1.06L8 8.939l3.72-3.719a.749.749 0 0 1 1.06 0Z"/>
+          </svg>
         </div>
 
-        <!-- Collapsed State -->
-        <div id="form-collapsed" class="p-6 text-center">
+        <div id="new-session-content">
+          <!-- Collapsed State -->
+          <div id="form-collapsed" class="p-6 text-center">
           <p class="text-sm text-gh-text-secondary mb-4">Create a new WhatsApp session to get started</p>
           <button id="show-form-btn" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-gh bg-gh-success text-white hover:bg-green-700 transition-colors">
             <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
@@ -237,17 +285,23 @@ import Layout from '../layouts/Layout.astro';
         </form>
 
         <div id="error-message" class="mx-4 mb-4 p-3 rounded-gh bg-gh-danger-subtle border border-gh-danger text-gh-danger text-sm hidden"></div>
+        </div> <!-- End new-session-content -->
       </div>
 
       <!-- Network Status Card -->
       <div class="bg-gh-bg border border-gh-border rounded-gh">
-        <div class="p-4 border-b border-gh-border flex items-center gap-2">
-          <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2l-2.218-.887zm3.564 1.426L5.596 5 8 5.961 14.154 3.5l-2.404-.961zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464L7.443.184z"/>
+        <div class="p-4 border-b border-gh-border flex items-center justify-between cursor-pointer hover:bg-gh-bg-secondary transition-colors" id="network-status-header">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2l-2.218-.887zm3.564 1.426L5.596 5 8 5.961 14.154 3.5l-2.404-.961zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464L7.443.184z"/>
+            </svg>
+            <h2 class="text-sm font-semibold text-gh-text">Network Status</h2>
+          </div>
+          <svg id="network-status-chevron" class="w-4 h-4 text-gh-text-secondary transition-transform" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M12.78 5.22a.749.749 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.06 0L3.22 6.28a.749.749 0 1 1 1.06-1.06L8 8.939l3.72-3.719a.749.749 0 0 1 1.06 0Z"/>
           </svg>
-          <h2 class="text-sm font-semibold text-gh-text">Network Status</h2>
         </div>
-        <div class="p-4">
+        <div id="network-status-content" class="p-4">
           <div id="network-status" class="flex items-center gap-3 mb-4">
             <svg id="network-icon" class="w-6 h-6 text-gh-success" viewBox="0 0 16 16" fill="currentColor">
               <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>
@@ -331,7 +385,6 @@ import Layout from '../layouts/Layout.astro';
   const sessionsList = document.getElementById('sessions-list') as HTMLDivElement;
   const sessionCount = document.getElementById('session-count') as HTMLSpanElement;
   const showFormBtn = document.getElementById('show-form-btn') as HTMLButtonElement;
-  const toggleFormBtn = document.getElementById('toggle-form-btn') as HTMLButtonElement;
   const cancelFormBtn = document.getElementById('cancel-form-btn') as HTMLButtonElement;
   const botNameInput = document.getElementById('botName') as HTMLInputElement;
   const clearBotnameBtn = document.getElementById('clear-botname') as HTMLButtonElement;
@@ -407,24 +460,15 @@ import Layout from '../layouts/Layout.astro';
     formExpanded = true;
     form.classList.remove('hidden');
     formCollapsed.classList.add('hidden');
-    toggleFormBtn.textContent = 'Hide Form';
   }
 
   function hideForm() {
     formExpanded = false;
     form.classList.add('hidden');
     formCollapsed.classList.remove('hidden');
-    toggleFormBtn.textContent = 'Show Form';
   }
 
   showFormBtn.addEventListener('click', showForm);
-  toggleFormBtn.addEventListener('click', () => {
-    if (formExpanded) {
-      hideForm();
-    } else {
-      showForm();
-    }
-  });
   cancelFormBtn.addEventListener('click', hideForm);
 
   // Clear button visibility
@@ -716,6 +760,53 @@ import Layout from '../layouts/Layout.astro';
       sessionsList?.classList.remove('hidden');
       sessionsChevron?.classList.remove('-rotate-90');
     }
+  });
+
+  // New Session section collapse functionality
+  const newSessionHeader = document.getElementById('new-session-header');
+  const newSessionContent = document.getElementById('new-session-content');
+  const newSessionChevron = document.getElementById('new-session-chevron');
+  let newSessionCollapsed = false;
+
+  newSessionHeader?.addEventListener('click', () => {
+    newSessionCollapsed = !newSessionCollapsed;
+    if (newSessionCollapsed) {
+      newSessionContent?.classList.add('hidden');
+      newSessionChevron?.classList.add('-rotate-90');
+    } else {
+      newSessionContent?.classList.remove('hidden');
+      newSessionChevron?.classList.remove('-rotate-90');
+    }
+  });
+
+  // Network Status section collapse functionality
+  const networkStatusHeader = document.getElementById('network-status-header');
+  const networkStatusContent = document.getElementById('network-status-content');
+  const networkStatusChevron = document.getElementById('network-status-chevron');
+  let networkStatusCollapsed = false;
+
+  networkStatusHeader?.addEventListener('click', () => {
+    networkStatusCollapsed = !networkStatusCollapsed;
+    if (networkStatusCollapsed) {
+      networkStatusContent?.classList.add('hidden');
+      networkStatusChevron?.classList.add('-rotate-90');
+    } else {
+      networkStatusContent?.classList.remove('hidden');
+      networkStatusChevron?.classList.remove('-rotate-90');
+    }
+  });
+
+  // Mobile sidebar functionality
+  const mobileCreateSession = document.getElementById('mobile-create-session');
+  const mobileConsole = document.getElementById('mobile-console');
+
+  mobileCreateSession?.addEventListener('click', () => {
+    createModal?.classList.remove('hidden');
+  });
+
+  mobileConsole?.addEventListener('click', () => {
+    logsModal?.classList.remove('hidden');
+    updateLogsDisplay();
   });
 
   // Logs modal functionality
