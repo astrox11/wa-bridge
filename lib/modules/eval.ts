@@ -4,11 +4,13 @@ import { inspect } from "util";
 export default {
   pattern: "eval",
   category: "util",
-  isSudo: true,
+  isSudo: true, // Security: Only sudo users can execute arbitrary code
   async exec(msg, sock, args) {
     if (!args) return await msg.reply("No code provided");
 
     try {
+      // SECURITY WARNING: eval() allows arbitrary code execution
+      // This is intentional and restricted to sudo users only
       const asyncEval = async () => {
         return eval(`(async () => { ${args} })()`);
       };

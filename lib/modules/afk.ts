@@ -23,7 +23,7 @@ export default [
         const command = args.toLowerCase().split(" ")[0];
         
         if (command === "on") {
-          const customMessage = args.slice(2).trim();
+          const customMessage = args.substring(3).trim();
           setAfk(msg.sessionId, true, customMessage || "I'm currently AFK");
           return await msg.reply("```AFK mode enabled```");
         } else if (command === "off") {
@@ -46,7 +46,8 @@ export default [
       
       if (afkStatus && afkStatus.status === 1) {
         // Check if someone mentioned or replied to the AFK user
-        if (msg.contextInfo?.mentionedJid?.includes(sock.user.id)) {
+        const botJid = sock.user.id;
+        if (msg.contextInfo?.mentionedJid?.includes(botJid)) {
           const afkMessage = afkStatus.message || "I'm currently AFK";
           await msg.reply(`\`\`\`${afkMessage}\`\`\``);
         }

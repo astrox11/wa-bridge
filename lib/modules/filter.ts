@@ -32,14 +32,13 @@ export default [
         return await msg.reply("```Usage: filter <trigger>```");
       }
 
-      const filters = getAllFilters(msg.sessionId);
       const filterId = parseInt(args);
 
       if (isNaN(filterId)) {
         return await msg.reply("```Invalid filter ID```");
       }
 
-      const filter = filters.find((f) => f.id === filterId);
+      const filter = getFilterById(msg.sessionId, filterId);
 
       if (!filter) {
         return await msg.reply("```Filter not found```");
