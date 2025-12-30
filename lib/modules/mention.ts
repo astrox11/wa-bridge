@@ -64,11 +64,7 @@ export default [
         !msg.isGroup ||
         !(
           msg.mentions?.includes(jidNormalizedUser(sock.user.id)) ||
-          msg.mentions?.includes(jidNormalizedUser(sock.user.lid)) ||
-          [
-            jidNormalizedUser(sock.user.id),
-            jidNormalizedUser(sock.user.lid),
-          ].includes(msg?.quoted?.sender)
+          msg.mentions?.includes(jidNormalizedUser(sock.user.lid))
         )
       )
         return;
