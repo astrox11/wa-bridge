@@ -24,8 +24,19 @@ import { log, sessionManager } from "./lib";
 import config from "./config";
 import { handleApiRequest, type ApiResponse, type CorsOptions } from "./api";
 
+/**
+ * Parse CORS origins from environment variable or use defaults
+ */
+function getCorsOrigins(): string[] {
+  const envOrigins = process.env.CORS_ORIGINS;
+  if (envOrigins) {
+    return envOrigins.split(",").map(o => o.trim());
+  }
+  return ["http://localhost:4321", "http://127.0.0.1:4321"];
+}
+
 const corsOptions: CorsOptions = {
-  allowedOrigins: ["http://localhost:4321", "http://127.0.0.1:4321"],
+  allowedOrigins: getCorsOrigins(),
   allowedMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   allowCredentials: true,
@@ -58,6 +69,19 @@ function createCorsHeaders(
 }
 
 /**
+ * Determine HTTP status code from API response
+ */
+function getHttpStatusCode(data: ApiResponse): number {
+  if (data.success) {
+    return 200;
+  }
+  if (data.error?.includes("not found")) {
+    return 404;
+  }
+  return 400;
+}
+
+/**
  * Create HTTP response with proper headers
  */
 function createResponse(
@@ -67,7 +91,7 @@ function createResponse(
   const corsHeaders = createCorsHeaders(origin, corsOptions);
 
   return new Response(JSON.stringify(data), {
-    status: data.success ? 200 : data.error?.includes("not found") ? 404 : 400,
+    status: getHttpStatusCode(data),
     headers: {
       "Content-Type": "application/json",
       ...corsHeaders,

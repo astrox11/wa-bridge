@@ -297,6 +297,17 @@ import Layout from '../layouts/Layout.astro';
     await loadSessions();
   }
 
+  async function deleteSession(id: string) {
+    if (!confirm('Are you sure you want to delete this session?')) return;
+    
+    const result = await api.deleteSession(id);
+    if (result.success) {
+      await loadSessions();
+    } else {
+      alert(result.error || 'Failed to delete session');
+    }
+  }
+
   async function loadSessions() {
     const result = await api.getSessions();
     
@@ -321,26 +332,25 @@ import Layout from '../layouts/Layout.astro';
             ` : session.status === 'pairing' ? `
               <a href="/pairing/${session.id}" class="btn-small btn-dashboard">Continue Pairing</a>
             ` : ''}
-            <button class="btn-small btn-delete" onclick="deleteSession('${session.id}')">Delete</button>
+            <button class="btn-small btn-delete" data-delete-session="${session.id}">Delete</button>
           </div>
         </div>
       `).join('');
+
+      // Add event listeners for delete buttons using event delegation
+      sessionsList.querySelectorAll('[data-delete-session]').forEach(button => {
+        button.addEventListener('click', (e) => {
+          const target = e.target as HTMLElement;
+          const sessionId = target.getAttribute('data-delete-session');
+          if (sessionId) {
+            deleteSession(sessionId);
+          }
+        });
+      });
     } else {
       sessionsList.innerHTML = '<p class="no-sessions">Failed to load sessions</p>';
     }
   }
-
-  // @ts-ignore - expose to global scope for onclick
-  window.deleteSession = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this session?')) return;
-    
-    const result = await api.deleteSession(id);
-    if (result.success) {
-      await loadSessions();
-    } else {
-      alert(result.error || 'Failed to delete session');
-    }
-  };
 
   // Form submission
   form.addEventListener('submit', async (e) => {

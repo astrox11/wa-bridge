@@ -282,6 +282,11 @@ const { id } = Astro.params;
     const poll = async () => {
       try {
         const response = await fetch(`/api/auth/status/${sessionId}`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error: ${response.status}`);
+        }
+        
         const result = await response.json();
 
         if (result.success && result.data) {
@@ -294,6 +299,12 @@ const { id } = Astro.params;
             showError('Session was disconnected or timed out');
             return;
           }
+        } else if (!result.success) {
+          // API returned an error
+          if (result.error?.includes('not found')) {
+            showError('Session not found. It may have been deleted.');
+            return;
+          }
         }
 
         attempts++;
@@ -303,11 +314,12 @@ const { id } = Astro.params;
           showError('Pairing timed out. Please try again.');
         }
       } catch (error) {
+        console.error('Poll error:', error);
         attempts++;
         if (attempts < maxAttempts) {
           setTimeout(poll, 3000);
         } else {
-          showError('Connection error. Please try again.');
+          showError('Connection error. Please check your network and try again.');
         }
       }
     };

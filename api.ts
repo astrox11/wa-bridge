@@ -86,20 +86,26 @@ class RuntimeStats {
   }
 }
 
+// Time constants for uptime formatting
+const MS_PER_SECOND = 1000;
+const SECONDS_PER_MINUTE = 60;
+const MINUTES_PER_HOUR = 60;
+const HOURS_PER_DAY = 24;
+
 function formatUptime(ms: number): string {
-  const seconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
+  const seconds = Math.floor(ms / MS_PER_SECOND);
+  const minutes = Math.floor(seconds / SECONDS_PER_MINUTE);
+  const hours = Math.floor(minutes / MINUTES_PER_HOUR);
+  const days = Math.floor(hours / HOURS_PER_DAY);
 
   if (days > 0) {
-    return `${days}d ${hours % 24}h ${minutes % 60}m`;
+    return `${days}d ${hours % HOURS_PER_DAY}h ${minutes % MINUTES_PER_HOUR}m`;
   }
   if (hours > 0) {
-    return `${hours}h ${minutes % 60}m`;
+    return `${hours}h ${minutes % MINUTES_PER_HOUR}m`;
   }
   if (minutes > 0) {
-    return `${minutes}m ${seconds % 60}s`;
+    return `${minutes}m ${seconds % SECONDS_PER_MINUTE}s`;
   }
   return `${seconds}s`;
 }
