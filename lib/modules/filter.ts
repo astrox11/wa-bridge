@@ -7,6 +7,8 @@ import {
 } from "../sql";
 import config from "../../config";
 
+const STATUS_FILTER = "_status";
+
 async function fetchFact(): Promise<string> {
   try {
     const res = await fetch("https://uselessfacts.jsph.pl/random.json?language=en");
@@ -21,7 +23,10 @@ async function fetchQuote(): Promise<string> {
   try {
     const res = await fetch("https://api.quotable.io/random");
     const data = await res.json();
-    return `${data.content} - ${data.author}` || "Stay positive!";
+    if (data.content && data.author) {
+      return `${data.content} - ${data.author}`;
+    }
+    return "Stay positive!";
   } catch {
     return "Stay positive!";
   }
@@ -31,7 +36,10 @@ async function fetchJoke(): Promise<string> {
   try {
     const res = await fetch("https://official-joke-api.appspot.com/random_joke");
     const data = await res.json();
-    return `${data.setup} ${data.punchline}` || "Why don't scientists trust atoms? Because they make up everything!";
+    if (data.setup && data.punchline) {
+      return `${data.setup} ${data.punchline}`;
+    }
+    return "Why don't scientists trust atoms? Because they make up everything!";
   } catch {
     return "Why don't scientists trust atoms? Because they make up everything!";
   }
@@ -78,10 +86,10 @@ export default [
       const command = args.toLowerCase().trim();
       
       if (command === "on") {
-        setFilter(msg.sessionId, "_status", "", 1);
+        setFilter(msg.sessionId, STATUS_FILTER, "", 1);
         return await msg.reply("```Filter enabled```");
       } else if (command === "off") {
-        setFilter(msg.sessionId, "_status", "", 0);
+        setFilter(msg.sessionId, STATUS_FILTER, "", 0);
         return await msg.reply("```Filter disabled```");
       } else {
         return await msg.reply("```Usage: filter on|off```");
@@ -116,7 +124,7 @@ export default [
     pattern: "getfilter",
     category: "util",
     async exec(msg) {
-      const filters = getAllFilters(msg.sessionId).filter(f => f.trigger !== "_status");
+      const filters = getAllFilters(msg.sessionId).filter(f => f.trigger !== STATUS_FILTER);
 
       if (filters.length === 0) {
         return await msg.reply("```No filters found```");
@@ -152,7 +160,7 @@ export default [
     async exec(msg, sock) {
       if (!msg.text) return;
 
-      const statusFilter = getFilterByTrigger(msg.sessionId, "_status");
+      const statusFilter = getFilterByTrigger(msg.sessionId, STATUS_FILTER);
       if (!statusFilter || statusFilter.status === 0) return;
 
       const filter = getFilterByTrigger(msg.sessionId, msg.text.trim());

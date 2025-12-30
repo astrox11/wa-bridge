@@ -16,7 +16,10 @@ async function fetchQuote(): Promise<string> {
   try {
     const res = await fetch("https://api.quotable.io/random");
     const data = await res.json();
-    return `${data.content} - ${data.author}` || "Stay positive!";
+    if (data.content && data.author) {
+      return `${data.content} - ${data.author}`;
+    }
+    return "Stay positive!";
   } catch {
     return "Stay positive!";
   }
@@ -26,7 +29,10 @@ async function fetchJoke(): Promise<string> {
   try {
     const res = await fetch("https://official-joke-api.appspot.com/random_joke");
     const data = await res.json();
-    return `${data.setup} ${data.punchline}` || "Why don't scientists trust atoms? Because they make up everything!";
+    if (data.setup && data.punchline) {
+      return `${data.setup} ${data.punchline}`;
+    }
+    return "Why don't scientists trust atoms? Because they make up everything!";
   } catch {
     return "Why don't scientists trust atoms? Because they make up everything!";
   }
