@@ -19,6 +19,9 @@
   "scripts": {
     "start": "bun run ./index.ts",
     "server": "bun run ./server.ts",
+    "web": "cd astro-web-runtime && bun run start",
+    "web:dev": "cd astro-web-runtime && bun run dev",
+    "start:all": "bun run server & cd astro-web-runtime && bun run start",
     "postinstall": "bun run hook.ts",
     "lint": "eslint . --ext .ts --fix",
     "format": "prettier --write ."

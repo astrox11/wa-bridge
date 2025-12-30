@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { execSync } from "child_process";
 
+// Build baileys
 try {
   execSync("npm run build", {
     cwd: path.join("node_modules", "baileys"),
@@ -10,6 +11,8 @@ try {
 } catch {
   /* */
 }
+
+// Patch libsignal
 try {
   const target = path.join(
     "node_modules",
@@ -30,4 +33,24 @@ try {
   );
 } catch {
   /** */
+}
+
+// Build astro-web-runtime frontend
+try {
+  const astroPath = path.join(process.cwd(), "astro-web-runtime");
+  if (fs.existsSync(astroPath)) {
+    console.log("Installing astro-web-runtime dependencies...");
+    execSync("bun install", {
+      cwd: astroPath,
+      stdio: "inherit",
+    });
+    console.log("Building astro-web-runtime...");
+    execSync("bun run build", {
+      cwd: astroPath,
+      stdio: "inherit",
+    });
+    console.log("astro-web-runtime build complete.");
+  }
+} catch (error) {
+  console.error("Failed to build astro-web-runtime:", error);
 }

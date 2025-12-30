@@ -1,237 +1,65 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import AppBar from '../../components/AppBar.astro';
+import Card from '../../components/Card.astro';
 
 const { id } = Astro.params;
 ---
 
 <Layout title="Pair Device">
-  <div class="pairing-container">
-    <div class="pairing-card">
-      <div class="header">
-        <a href="/" class="back-link">← Back</a>
-        <h1>Link with WhatsApp</h1>
+  <AppBar title="wa-runtime" />
+  
+  <main class="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 md:p-8">
+    <Card variant="elevated" class="w-full max-w-md">
+      <div class="text-center mb-6">
+        <a href="/" class="inline-flex items-center gap-2 text-primary dark:text-primary-dark body-medium mb-4 hover:underline">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+          </svg>
+          Back to Sessions
+        </a>
+        <h1 class="headline-medium text-surface-on-surface dark:text-surface-dark-on-surface">Link with WhatsApp</h1>
       </div>
 
-      <div id="pairing-content" class="pairing-content">
-        <div class="spinner-container">
-          <div class="spinner"></div>
-          <p>Loading pairing code...</p>
+      <div id="pairing-content">
+        <div class="flex flex-col items-center py-8">
+          <div class="w-12 h-12 border-3 border-primary dark:border-primary-dark border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p class="body-large text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant">Loading pairing code...</p>
         </div>
       </div>
 
-      <div id="success-content" class="success-content" style="display: none;">
-        <div class="success-icon">✓</div>
-        <h2>Successfully Paired!</h2>
-        <p>Your WhatsApp session is now active.</p>
-        <a href={`/dashboard/${id}`} class="btn-primary">Go to Dashboard</a>
+      <div id="success-content" class="hidden">
+        <div class="flex flex-col items-center py-8">
+          <div class="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-4">
+            <svg class="w-8 h-8 text-green-600 dark:text-green-400" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+          </div>
+          <h2 class="headline-small text-surface-on-surface dark:text-surface-dark-on-surface mb-2">Successfully Paired</h2>
+          <p class="body-medium text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant mb-6">Your WhatsApp session is now active.</p>
+          <a href={`/dashboard/${id}`} class="px-8 py-4 rounded-3xl bg-primary dark:bg-primary-dark text-white label-large font-medium shadow-elevation-1 hover:shadow-elevation-2 transition-all ripple">
+            Go to Dashboard
+          </a>
+        </div>
       </div>
 
-      <div id="error-content" class="error-content" style="display: none;">
-        <div class="error-icon">✗</div>
-        <h2>Pairing Failed</h2>
-        <p id="error-message"></p>
-        <a href="/" class="btn-secondary">Try Again</a>
+      <div id="error-content" class="hidden">
+        <div class="flex flex-col items-center py-8">
+          <div class="w-16 h-16 rounded-full bg-error-container flex items-center justify-center mb-4">
+            <svg class="w-8 h-8 text-error" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
+          </div>
+          <h2 class="headline-small text-surface-on-surface dark:text-surface-dark-on-surface mb-2">Pairing Failed</h2>
+          <p id="error-message" class="body-medium text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant mb-6 text-center"></p>
+          <a href="/" class="px-8 py-4 rounded-3xl bg-surface-container-highest dark:bg-surface-dark-container-highest text-surface-on-surface dark:text-surface-dark-on-surface label-large font-medium border border-outline-variant dark:border-outline-dark-variant hover:bg-surface-container-high dark:hover:bg-surface-dark-container-high transition-all ripple">
+            Try Again
+          </a>
+        </div>
       </div>
-    </div>
-  </div>
+    </Card>
+  </main>
 </Layout>
-
-<style>
-  .pairing-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-  }
-
-  .pairing-card {
-    background: var(--color-bg-secondary);
-    border-radius: 12px;
-    padding: 2rem;
-    width: 100%;
-    max-width: 480px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-  }
-
-  .header {
-    text-align: center;
-    margin-bottom: 2rem;
-  }
-
-  .back-link {
-    display: inline-block;
-    margin-bottom: 1rem;
-    color: var(--color-text-secondary);
-    font-size: 0.9rem;
-  }
-
-  .header h1 {
-    font-size: 1.5rem;
-    font-weight: 600;
-  }
-
-  .pairing-content,
-  .success-content,
-  .error-content {
-    text-align: center;
-  }
-
-  .spinner-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    padding: 2rem;
-  }
-
-  .spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid var(--color-border);
-    border-top-color: var(--color-primary);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  .pairing-code-container {
-    margin: 2rem 0;
-  }
-
-  .pairing-code {
-    font-size: 2.5rem;
-    font-weight: 700;
-    letter-spacing: 0.2em;
-    color: var(--color-primary);
-    background: var(--color-bg-tertiary);
-    padding: 1.5rem 2rem;
-    border-radius: 12px;
-    display: inline-block;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-  }
-
-  .instructions {
-    margin: 1.5rem 0;
-    text-align: left;
-    padding: 1rem;
-    background: var(--color-bg-tertiary);
-    border-radius: 8px;
-  }
-
-  .instructions h3 {
-    font-size: 1rem;
-    margin-bottom: 0.75rem;
-    color: var(--color-text);
-  }
-
-  .instructions ol {
-    padding-left: 1.25rem;
-    color: var(--color-text-secondary);
-  }
-
-  .instructions li {
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-  }
-
-  .status {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    color: var(--color-text-secondary);
-    margin-top: 1rem;
-  }
-
-  .status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--color-warning);
-    animation: pulse 1.5s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
-  .success-content,
-  .error-content {
-    padding: 2rem 0;
-  }
-
-  .success-icon {
-    width: 64px;
-    height: 64px;
-    background: var(--color-success);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    color: #fff;
-    margin: 0 auto 1rem;
-  }
-
-  .error-icon {
-    width: 64px;
-    height: 64px;
-    background: var(--color-danger);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    color: #fff;
-    margin: 0 auto 1rem;
-  }
-
-  .success-content h2,
-  .error-content h2 {
-    margin-bottom: 0.5rem;
-  }
-
-  .success-content p,
-  .error-content p {
-    color: var(--color-text-secondary);
-    margin-bottom: 1.5rem;
-  }
-
-  .btn-primary,
-  .btn-secondary {
-    display: inline-block;
-    padding: 0.875rem 2rem;
-    border-radius: 8px;
-    font-weight: 600;
-    text-decoration: none;
-  }
-
-  .btn-primary {
-    background: var(--color-primary);
-    color: #fff;
-  }
-
-  .btn-primary:hover {
-    background: var(--color-primary-dark);
-    text-decoration: none;
-  }
-
-  .btn-secondary {
-    background: var(--color-bg-tertiary);
-    color: var(--color-text);
-    border: 1px solid var(--color-border);
-  }
-
-  .btn-secondary:hover {
-    background: var(--color-border);
-    text-decoration: none;
-  }
-</style>
 
 <script define:vars={{ sessionId: id }}>
   const pairingContent = document.getElementById('pairing-content');
@@ -239,7 +67,6 @@ const { id } = Astro.params;
   const errorContent = document.getElementById('error-content');
   const errorMessage = document.getElementById('error-message');
 
-  // Get pairing code from URL
   const urlParams = new URLSearchParams(window.location.search);
   const pairingCode = urlParams.get('code');
 
@@ -251,27 +78,30 @@ const { id } = Astro.params;
     const formattedCode = `${code.slice(0, 4)}-${code.slice(4)}`;
     
     pairingContent.innerHTML = `
-      <div class="pairing-code-container">
-        <div class="pairing-code">${formattedCode}</div>
-      </div>
-      
-      <div class="instructions">
-        <h3>How to link:</h3>
-        <ol>
-          <li>Open WhatsApp on your phone</li>
-          <li>Go to <strong>Settings</strong> → <strong>Linked Devices</strong></li>
-          <li>Tap <strong>Link a Device</strong></li>
-          <li>Enter the code shown above</li>
-        </ol>
-      </div>
+      <div class="flex flex-col items-center">
+        <div class="mb-6">
+          <div class="px-8 py-6 rounded-3xl bg-primary-container dark:bg-primary-dark-container">
+            <span class="display-small font-mono tracking-[0.3em] text-primary-on-container dark:text-primary-dark-on-container">${formattedCode}</span>
+          </div>
+        </div>
+        
+        <div class="w-full p-4 rounded-xl bg-surface-container dark:bg-surface-dark-container mb-6">
+          <h3 class="title-medium text-surface-on-surface dark:text-surface-dark-on-surface mb-3">How to link:</h3>
+          <ol class="space-y-2 pl-5 list-decimal">
+            <li class="body-medium text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant">Open WhatsApp on your phone</li>
+            <li class="body-medium text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant">Go to <strong class="text-surface-on-surface dark:text-surface-dark-on-surface">Settings</strong> then <strong class="text-surface-on-surface dark:text-surface-dark-on-surface">Linked Devices</strong></li>
+            <li class="body-medium text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant">Tap <strong class="text-surface-on-surface dark:text-surface-dark-on-surface">Link a Device</strong></li>
+            <li class="body-medium text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant">Enter the code shown above</li>
+          </ol>
+        </div>
 
-      <div class="status">
-        <span class="status-dot"></span>
-        Waiting for pairing...
+        <div class="flex items-center gap-3">
+          <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+          <span class="body-medium text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant">Waiting for pairing...</span>
+        </div>
       </div>
     `;
 
-    // Start polling for auth status
     pollAuthStatus();
   }
 
@@ -300,7 +130,6 @@ const { id } = Astro.params;
             return;
           }
         } else if (!result.success) {
-          // API returned an error
           if (result.error?.includes('not found')) {
             showError('Session not found. It may have been deleted.');
             return;
@@ -328,13 +157,13 @@ const { id } = Astro.params;
   }
 
   function showSuccess() {
-    pairingContent.style.display = 'none';
-    successContent.style.display = 'block';
+    pairingContent.classList.add('hidden');
+    successContent.classList.remove('hidden');
   }
 
   function showError(message) {
-    pairingContent.style.display = 'none';
+    pairingContent.classList.add('hidden');
     errorMessage.textContent = message;
-    errorContent.style.display = 'block';
+    errorContent.classList.remove('hidden');
   }
 </script>
