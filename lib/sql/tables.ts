@@ -99,7 +99,7 @@ export function createUserAuthTable(phoneNumber: string): string {
  */
 export function createUserMessagesTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "messages");
-  
+
   if (!createdTables.has(tableName)) {
     try {
       bunql.exec(`
@@ -113,7 +113,7 @@ export function createUserMessagesTable(phoneNumber: string): string {
       log.error(`Failed to create table ${tableName}:`, error);
     }
   }
-  
+
   return tableName;
 }
 
@@ -122,7 +122,7 @@ export function createUserMessagesTable(phoneNumber: string): string {
  */
 export function createUserContactsTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "contacts");
-  
+
   if (!createdTables.has(tableName)) {
     try {
       bunql.exec(`
@@ -136,7 +136,7 @@ export function createUserContactsTable(phoneNumber: string): string {
       log.error(`Failed to create table ${tableName}:`, error);
     }
   }
-  
+
   return tableName;
 }
 
@@ -145,7 +145,7 @@ export function createUserContactsTable(phoneNumber: string): string {
  */
 export function createUserGroupsTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "groups");
-  
+
   if (!createdTables.has(tableName)) {
     try {
       bunql.exec(`
@@ -159,7 +159,7 @@ export function createUserGroupsTable(phoneNumber: string): string {
       log.error(`Failed to create table ${tableName}:`, error);
     }
   }
-  
+
   return tableName;
 }
 
@@ -168,7 +168,7 @@ export function createUserGroupsTable(phoneNumber: string): string {
  */
 export function createUserSudoTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "sudo");
-  
+
   if (!createdTables.has(tableName)) {
     try {
       bunql.exec(`
@@ -182,7 +182,7 @@ export function createUserSudoTable(phoneNumber: string): string {
       log.error(`Failed to create table ${tableName}:`, error);
     }
   }
-  
+
   return tableName;
 }
 
@@ -191,7 +191,7 @@ export function createUserSudoTable(phoneNumber: string): string {
  */
 export function createUserBanTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "ban");
-  
+
   if (!createdTables.has(tableName)) {
     try {
       bunql.exec(`
@@ -205,7 +205,7 @@ export function createUserBanTable(phoneNumber: string): string {
       log.error(`Failed to create table ${tableName}:`, error);
     }
   }
-  
+
   return tableName;
 }
 
@@ -214,7 +214,7 @@ export function createUserBanTable(phoneNumber: string): string {
  */
 export function createUserModeTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "mode");
-  
+
   if (!createdTables.has(tableName)) {
     try {
       bunql.exec(`
@@ -228,7 +228,7 @@ export function createUserModeTable(phoneNumber: string): string {
       log.error(`Failed to create table ${tableName}:`, error);
     }
   }
-  
+
   return tableName;
 }
 
@@ -237,7 +237,7 @@ export function createUserModeTable(phoneNumber: string): string {
  */
 export function createUserPrefixTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "prefix");
-  
+
   if (!createdTables.has(tableName)) {
     try {
       bunql.exec(`
@@ -251,7 +251,7 @@ export function createUserPrefixTable(phoneNumber: string): string {
       log.error(`Failed to create table ${tableName}:`, error);
     }
   }
-  
+
   return tableName;
 }
 
@@ -260,7 +260,7 @@ export function createUserPrefixTable(phoneNumber: string): string {
  */
 export function createUserAntideleteTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "antidelete");
-  
+
   if (!createdTables.has(tableName)) {
     try {
       bunql.exec(`
@@ -275,7 +275,7 @@ export function createUserAntideleteTable(phoneNumber: string): string {
       log.error(`Failed to create table ${tableName}:`, error);
     }
   }
-  
+
   return tableName;
 }
 
@@ -284,7 +284,7 @@ export function createUserAntideleteTable(phoneNumber: string): string {
  */
 export function createUserAliveTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "alive");
-  
+
   if (!createdTables.has(tableName)) {
     try {
       bunql.exec(`
@@ -298,7 +298,7 @@ export function createUserAliveTable(phoneNumber: string): string {
       log.error(`Failed to create table ${tableName}:`, error);
     }
   }
-  
+
   return tableName;
 }
 
@@ -307,7 +307,7 @@ export function createUserAliveTable(phoneNumber: string): string {
  */
 export function createUserMentionTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "mention");
-  
+
   if (!createdTables.has(tableName)) {
     try {
       bunql.exec(`
@@ -321,7 +321,7 @@ export function createUserMentionTable(phoneNumber: string): string {
       log.error(`Failed to create table ${tableName}:`, error);
     }
   }
-  
+
   return tableName;
 }
 
@@ -330,7 +330,7 @@ export function createUserMentionTable(phoneNumber: string): string {
  */
 export function createUserFilterTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "filter");
-  
+
   if (!createdTables.has(tableName)) {
     try {
       bunql.exec(`
@@ -345,7 +345,7 @@ export function createUserFilterTable(phoneNumber: string): string {
       log.error(`Failed to create table ${tableName}:`, error);
     }
   }
-  
+
   return tableName;
 }
 
@@ -354,22 +354,30 @@ export function createUserFilterTable(phoneNumber: string): string {
  */
 export function createUserAfkTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "afk");
-  
+
   if (!createdTables.has(tableName)) {
     try {
       bunql.exec(`
-        CREATE TABLE IF NOT EXISTS "${tableName}" (
-          id INTEGER PRIMARY KEY CHECK (id = 1),
-          status INTEGER,
-          message TEXT
-        )
-      `);
+         CREATE TABLE IF NOT EXISTS "${tableName}" (
+           id INTEGER PRIMARY KEY CHECK (id = 1),
+           status INTEGER,
+           message TEXT,
+           time BIGINT
+         )
+       `);
+
+      const columns = bunql.query(`PRAGMA table_info("${tableName}")`);
+      const hasTime = columns.some((c: any) => c.name === "time");
+      if (!hasTime) {
+        bunql.exec(`ALTER TABLE "${tableName}" ADD COLUMN time BIGINT`);
+      }
+
       createdTables.add(tableName);
     } catch (error) {
       log.error(`Failed to create table ${tableName}:`, error);
     }
   }
-  
+
   return tableName;
 }
 
@@ -378,7 +386,7 @@ export function createUserAfkTable(phoneNumber: string): string {
  */
 export function createUserGroupEventTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "group_event");
-  
+
   if (!createdTables.has(tableName)) {
     try {
       bunql.exec(`
@@ -392,7 +400,7 @@ export function createUserGroupEventTable(phoneNumber: string): string {
       log.error(`Failed to create table ${tableName}:`, error);
     }
   }
-  
+
   return tableName;
 }
 
@@ -401,7 +409,7 @@ export function createUserGroupEventTable(phoneNumber: string): string {
  */
 export function createUserStickerTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "sticker");
-  
+
   if (!createdTables.has(tableName)) {
     try {
       bunql.exec(`
@@ -415,7 +423,7 @@ export function createUserStickerTable(phoneNumber: string): string {
       log.error(`Failed to create table ${tableName}:`, error);
     }
   }
-  
+
   return tableName;
 }
 
@@ -424,7 +432,7 @@ export function createUserStickerTable(phoneNumber: string): string {
  */
 export function createUserBgmTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "bgm");
-  
+
   if (!createdTables.has(tableName)) {
     try {
       bunql.exec(`
@@ -438,7 +446,7 @@ export function createUserBgmTable(phoneNumber: string): string {
       log.error(`Failed to create table ${tableName}:`, error);
     }
   }
-  
+
   return tableName;
 }
 

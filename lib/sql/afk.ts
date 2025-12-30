@@ -17,27 +17,39 @@ function getAfkTable(sessionId: string) {
 /**
  * Set AFK status
  */
-export const setAfk = (sessionId: string, status: boolean, message?: string) => {
+export const setAfk = (
+  sessionId: string,
+  status: boolean,
+  message?: string,
+  time?: number,
+) => {
   const tableName = getAfkTable(sessionId);
   const statusValue = status ? 1 : 0;
-  const rows = bunql.query<{ status: number; message: string }>(
-    `SELECT status, message FROM "${tableName}" WHERE id = 1`,
+  const timeValue = status ? time || Date.now() : null;
+
+  const rows = bunql.query<{ status: number; message: string; time: number }>(
+    `SELECT status, message, time FROM "${tableName}" WHERE id = 1`,
   );
   const current = rows[0];
 
   if (current) {
     execWithParams(
-      `UPDATE "${tableName}" SET status = ?, message = ? WHERE id = 1`,
-      [statusValue, message || null],
+      `UPDATE "${tableName}" SET status = ?, message = ?, time = ? WHERE id = 1`,
+      [statusValue, message || null, timeValue],
     );
   } else {
     execWithParams(
-      `INSERT INTO "${tableName}" (id, status, message) VALUES (1, ?, ?)`,
-      [statusValue, message || null],
+      `INSERT INTO "${tableName}" (id, status, message, time) VALUES (1, ?, ?, ?)`,
+      [statusValue, message || null, timeValue],
     );
   }
 
-  return { session_id: sessionId, status: statusValue, message };
+  return {
+    session_id: sessionId,
+    status: statusValue,
+    message,
+    time: timeValue,
+  };
 };
 
 /**
@@ -45,8 +57,8 @@ export const setAfk = (sessionId: string, status: boolean, message?: string) => 
  */
 export const getAfk = (sessionId: string) => {
   const tableName = getAfkTable(sessionId);
-  const rows = bunql.query<{ status: number; message: string }>(
-    `SELECT status, message FROM "${tableName}" WHERE id = 1`,
+  const rows = bunql.query<{ status: number; message: string; time: number }>(
+    `SELECT status, message, time FROM "${tableName}" WHERE id = 1`,
   );
   return rows[0] || null;
 };

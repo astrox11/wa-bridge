@@ -48,6 +48,7 @@ export class Message {
   text: string | undefined;
   type: string | undefined;
   sender_alt: string | undefined;
+  mentions: string[];
   contextInfo: proto.IContextInfo | undefined;
 
   constructor(
@@ -84,6 +85,10 @@ export class Message {
       typeof content === "object" && content !== null
         ? (content as any).contextInfo
         : undefined;
+
+    this.mentions = this?.contextInfo?.mentionedJid
+      ? this.contextInfo.mentionedJid
+      : [];
 
     this.quoted =
       this.contextInfo?.stanzaId && this.contextInfo?.quotedMessage
