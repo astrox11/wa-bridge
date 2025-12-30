@@ -421,6 +421,28 @@ class SessionManager {
     return [...this.sessions.values()].filter((s) => s.status === "connected")
       .length;
   }
+
+  /**
+   * Get pushName for a session from the active socket
+   */
+  getPushName(sessionId: string): string | undefined {
+    const activeSession = this.sessions.get(sessionId);
+    if (activeSession?.socket?.user?.name) {
+      return activeSession.socket.user.name;
+    }
+    return undefined;
+  }
+
+  /**
+   * List all sessions with extended info (including pushName)
+   */
+  listExtended(): Array<SessionRecord & { pushName?: string }> {
+    const sessions = getAllSessions();
+    return sessions.map((session) => ({
+      ...session,
+      pushName: this.getPushName(session.id),
+    }));
+  }
 }
 
 export const sessionManager = SessionManager.getInstance();

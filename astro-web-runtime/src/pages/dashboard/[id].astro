@@ -8,13 +8,12 @@ const { id } = Astro.params;
   <main class="max-w-5xl mx-auto px-4 py-6">
     <div class="flex items-center justify-between mb-4">
       <a href="/" class="inline-flex items-center gap-1 text-sm text-gh-link hover:underline">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+        <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M7.78 12.53a.75.75 0 0 1-1.06 0L2.47 8.28a.75.75 0 0 1 0-1.06l4.25-4.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L4.81 7h7.44a.75.75 0 0 1 0 1.5H4.81l2.97 2.97a.75.75 0 0 1 0 1.06Z"/>
         </svg>
-        Back to Sessions
+        Sessions
       </a>
       <span id="session-status" class="flex items-center gap-2 px-3 py-1 rounded-gh bg-gh-bg-secondary border border-gh-border text-xs">
-        <span class="w-2 h-2 rounded-full bg-gh-text-muted"></span>
         <span class="text-gh-text-secondary">Loading...</span>
       </span>
     </div>
@@ -22,28 +21,51 @@ const { id } = Astro.params;
     <!-- Stats Overview -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       <div class="bg-gh-bg border border-gh-border rounded-gh p-4">
-        <p class="text-xs text-gh-text-secondary mb-1">Phone Number</p>
-        <p id="phone-number" class="text-lg font-semibold text-gh-text">---</p>
+        <div class="flex items-center gap-2 mb-1">
+          <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M10.561 8.073a6.005 6.005 0 0 1 3.432 5.142.75.75 0 1 1-1.498.07 4.5 4.5 0 0 0-8.99 0 .75.75 0 0 1-1.498-.07 6.004 6.004 0 0 1 3.431-5.142 3.999 3.999 0 1 1 5.123 0ZM10.5 5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Z"/>
+          </svg>
+          <p class="text-xs text-gh-text-secondary">User</p>
+        </div>
+        <p id="user-name" class="text-base font-semibold text-gh-text truncate">---</p>
       </div>
       <div class="bg-gh-bg border border-gh-border rounded-gh p-4">
-        <p class="text-xs text-gh-text-secondary mb-1">Messages</p>
-        <p id="messages-count" class="text-lg font-semibold text-gh-text">0</p>
+        <div class="flex items-center gap-2 mb-1">
+          <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M1.75 1h8.5c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 10.25 10H7.061l-2.574 2.573A1.458 1.458 0 0 1 2 11.543V10h-.25A1.75 1.75 0 0 1 0 8.25v-5.5C0 1.784.784 1 1.75 1ZM1.5 2.75v5.5c0 .138.112.25.25.25h1a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h3.5a.25.25 0 0 0 .25-.25v-5.5a.25.25 0 0 0-.25-.25h-8.5a.25.25 0 0 0-.25.25Zm13 2a.25.25 0 0 0-.25-.25h-.5a.75.75 0 0 1 0-1.5h.5c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 14.25 12H14v1.543a1.458 1.458 0 0 1-2.487 1.03L9.22 12.28a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l2.22 2.22v-2.19a.75.75 0 0 1 .75-.75h1a.25.25 0 0 0 .25-.25Z"/>
+          </svg>
+          <p class="text-xs text-gh-text-secondary">Messages</p>
+        </div>
+        <p id="messages-count" class="text-base font-semibold text-gh-text">0</p>
       </div>
       <div class="bg-gh-bg border border-gh-border rounded-gh p-4">
-        <p class="text-xs text-gh-text-secondary mb-1">Uptime</p>
-        <p id="uptime" class="text-lg font-semibold text-gh-text">0m</p>
+        <div class="flex items-center gap-2 mb-1">
+          <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm7-3.25v2.992l2.028.812a.75.75 0 0 1-.557 1.392l-2.5-1A.751.751 0 0 1 7 8.25v-3.5a.75.75 0 0 1 1.5 0Z"/>
+          </svg>
+          <p class="text-xs text-gh-text-secondary">Uptime</p>
+        </div>
+        <p id="uptime" class="text-base font-semibold text-gh-text">0m</p>
       </div>
       <div class="bg-gh-bg border border-gh-border rounded-gh p-4">
-        <p class="text-xs text-gh-text-secondary mb-1">Avg/Hour</p>
-        <p id="avg-messages" class="text-lg font-semibold text-gh-text">0</p>
+        <div class="flex items-center gap-2 mb-1">
+          <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M1.5 1.75V13.5h13.75a.75.75 0 0 1 0 1.5H.75a.75.75 0 0 1-.75-.75V1.75a.75.75 0 0 1 1.5 0Zm14.28 2.53-5.25 5.25a.75.75 0 0 1-1.06 0L7 7.06 4.28 9.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.25-3.25a.75.75 0 0 1 1.06 0L10 7.94l4.72-4.72a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042Z"/>
+          </svg>
+          <p class="text-xs text-gh-text-secondary">Avg/Hour</p>
+        </div>
+        <p id="avg-messages" class="text-base font-semibold text-gh-text">0</p>
       </div>
     </div>
 
     <!-- Activity Chart -->
     <div class="bg-gh-bg border border-gh-border rounded-gh mb-6">
-      <div class="p-4 border-b border-gh-border">
+      <div class="p-4 border-b border-gh-border flex items-center gap-2">
+        <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M1.5 1.75V13.5h13.75a.75.75 0 0 1 0 1.5H.75a.75.75 0 0 1-.75-.75V1.75a.75.75 0 0 1 1.5 0Zm14.28 2.53-5.25 5.25a.75.75 0 0 1-1.06 0L7 7.06 4.28 9.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.25-3.25a.75.75 0 0 1 1.06 0L10 7.94l4.72-4.72a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042Z"/>
+        </svg>
         <h2 class="text-sm font-semibold text-gh-text">Activity</h2>
-        <p class="text-xs text-gh-text-secondary">Messages per hour (today)</p>
+        <span class="text-xs text-gh-text-muted">Messages per hour (today)</span>
       </div>
       <div id="activity-chart" class="p-4 h-40 flex items-end justify-between gap-0.5">
         <div class="flex-1 flex items-center justify-center">
@@ -55,23 +77,26 @@ const { id } = Astro.params;
     <!-- Info Grid -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       <div class="bg-gh-bg border border-gh-border rounded-gh">
-        <div class="p-4 border-b border-gh-border">
-          <h3 class="text-sm font-semibold text-gh-text">Runtime Stats</h3>
+        <div class="p-4 border-b border-gh-border flex items-center gap-2">
+          <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M2 5.5a3.5 3.5 0 1 1 5.898 2.549 5.508 5.508 0 0 1 3.034 4.084.75.75 0 1 1-1.482.235 4 4 0 0 0-7.9 0 .75.75 0 0 1-1.482-.236A5.507 5.507 0 0 1 3.102 8.05 3.493 3.493 0 0 1 2 5.5ZM11 4a3.001 3.001 0 0 1 2.22 5.018 5.01 5.01 0 0 1 2.56 3.012.749.749 0 0 1-.885.954.752.752 0 0 1-.549-.514 3.507 3.507 0 0 0-2.522-2.372.75.75 0 0 1-.574-.73v-.352a.75.75 0 0 1 .416-.672A1.5 1.5 0 0 0 11 5.5.75.75 0 0 1 11 4Zm-5.5-.5a2 2 0 1 0-.001 3.999A2 2 0 0 0 5.5 3.5Z"/>
+          </svg>
+          <h3 class="text-sm font-semibold text-gh-text">Runtime</h3>
         </div>
         <div class="p-4 space-y-2 text-sm">
-          <div class="flex justify-between">
+          <div class="flex justify-between items-center">
             <span class="text-gh-text-secondary">Total Sessions</span>
             <span id="total-sessions" class="text-gh-text font-medium">0</span>
           </div>
-          <div class="flex justify-between">
-            <span class="text-gh-text-secondary">Active Sessions</span>
+          <div class="flex justify-between items-center">
+            <span class="text-gh-text-secondary">Active</span>
             <span id="active-sessions" class="text-gh-text font-medium">0</span>
           </div>
-          <div class="flex justify-between">
+          <div class="flex justify-between items-center">
             <span class="text-gh-text-secondary">Total Messages</span>
             <span id="total-messages" class="text-gh-text font-medium">0</span>
           </div>
-          <div class="flex justify-between">
+          <div class="flex justify-between items-center">
             <span class="text-gh-text-secondary">Server Uptime</span>
             <span id="server-uptime" class="text-gh-text font-medium">0m</span>
           </div>
@@ -79,47 +104,40 @@ const { id } = Astro.params;
       </div>
 
       <div class="bg-gh-bg border border-gh-border rounded-gh">
-        <div class="p-4 border-b border-gh-border">
+        <div class="p-4 border-b border-gh-border flex items-center gap-2">
+          <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm5 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"/>
+          </svg>
           <h3 class="text-sm font-semibold text-gh-text">Health</h3>
         </div>
         <div class="p-4 flex flex-col items-center">
-          <div id="health-ring" class="relative w-20 h-20 mb-2">
-            <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
-              <path
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                fill="none"
-                stroke-width="3"
-                class="stroke-gh-bg-tertiary"
-              />
-              <path
-                id="health-progress"
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                fill="none"
-                stroke-width="3"
-                stroke-dasharray="100, 100"
-                class="stroke-gh-success"
-              />
+          <div id="health-indicator" class="flex items-center gap-2 mb-2">
+            <svg id="health-icon" class="w-8 h-8 text-gh-success" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>
             </svg>
-            <span id="health-value" class="absolute inset-0 flex items-center justify-center text-lg font-semibold text-gh-success">100%</span>
+            <span id="health-text" class="text-lg font-semibold text-gh-success">Healthy</span>
           </div>
-          <p id="health-status" class="text-xs text-gh-text-secondary">Session is healthy</p>
+          <p id="health-status" class="text-xs text-gh-text-secondary text-center">Session is active and connected</p>
         </div>
       </div>
 
       <div class="bg-gh-bg border border-gh-border rounded-gh">
-        <div class="p-4 border-b border-gh-border">
+        <div class="p-4 border-b border-gh-border flex items-center gap-2">
+          <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M0 1.75A.75.75 0 0 1 .75 1h4.253c1.227 0 2.317.59 3 1.501A3.743 3.743 0 0 1 11.006 1h4.245a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75h-4.507a2.25 2.25 0 0 0-1.591.659l-.622.621a.75.75 0 0 1-1.06 0l-.622-.621A2.25 2.25 0 0 0 5.258 13H.75a.75.75 0 0 1-.75-.75Zm7.251 10.324.004-5.073-.002-2.253A2.25 2.25 0 0 0 5.003 2.5H1.5v9h3.757a3.75 3.75 0 0 1 1.994.574ZM8.755 4.75l-.004 7.322a3.752 3.752 0 0 1 1.992-.572H14.5v-9h-3.495a2.25 2.25 0 0 0-2.25 2.25Z"/>
+          </svg>
           <h3 class="text-sm font-semibold text-gh-text">Info</h3>
         </div>
         <div class="p-4 space-y-2 text-sm">
-          <div class="flex justify-between">
+          <div class="flex justify-between items-center">
             <span class="text-gh-text-secondary">Version</span>
             <span id="runtime-version" class="text-gh-text font-medium">---</span>
           </div>
-          <div class="flex justify-between">
+          <div class="flex justify-between items-center">
             <span class="text-gh-text-secondary">Session ID</span>
             <span class="text-gh-text font-mono text-xs truncate max-w-[120px]">{id}</span>
           </div>
-          <div class="flex justify-between">
+          <div class="flex justify-between items-center">
             <span class="text-gh-text-secondary">Created</span>
             <span id="session-created" class="text-gh-text font-medium">---</span>
           </div>
@@ -128,24 +146,24 @@ const { id } = Astro.params;
     </div>
 
     <!-- Actions -->
-    <div class="flex justify-end gap-3">
-      <button id="refresh-btn" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-gh bg-gh-bg-secondary border border-gh-border text-gh-text hover:bg-gh-bg-tertiary transition-colors">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+    <div class="flex justify-end gap-2">
+      <button id="refresh-btn" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-gh bg-gh-bg-secondary border border-gh-border text-gh-text hover:bg-gh-bg-tertiary transition-colors" title="Refresh">
+        <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z"/>
         </svg>
-        Refresh
       </button>
-      <button id="disconnect-btn" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-gh border border-gh-danger text-gh-danger hover:bg-gh-danger-subtle transition-colors">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+      <button id="disconnect-btn" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-gh border border-gh-danger text-gh-danger hover:bg-gh-danger-subtle transition-colors" title="Disconnect">
+        <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75ZM4.496 6.675l.66 6.6a.25.25 0 0 0 .249.225h5.19a.25.25 0 0 0 .249-.225l.66-6.6a.75.75 0 0 1 1.492.149l-.66 6.6A1.748 1.748 0 0 1 10.595 15h-5.19a1.75 1.75 0 0 1-1.741-1.575l-.66-6.6a.75.75 0 1 1 1.492-.15ZM6.5 1.75V3h3V1.75a.25.25 0 0 0-.25-.25h-2.5a.25.25 0 0 0-.25.25Z"/>
         </svg>
-        Disconnect
       </button>
     </div>
   </main>
 </Layout>
 
 <script define:vars={{ sessionId: id }}>
+  let ws = null;
+
   async function init() {
     await Promise.all([
       loadSessionStats(),
@@ -153,10 +171,114 @@ const { id } = Astro.params;
       loadConfig(),
     ]);
 
-    setInterval(() => {
-      loadSessionStats();
-      loadOverallStats();
-    }, 30000);
+    // Connect to WebSocket for real-time updates (1s interval)
+    connectWebSocket();
+  }
+
+  function connectWebSocket() {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    ws = new WebSocket(`${protocol}//${window.location.host}/ws/stats`);
+    
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'stats') {
+          // Update overall stats
+          if (data.data.overall) {
+            document.getElementById('total-sessions').textContent = data.data.overall.totalSessions;
+            document.getElementById('active-sessions').textContent = data.data.overall.activeSessions;
+            document.getElementById('total-messages').textContent = data.data.overall.totalMessages.toLocaleString();
+            document.getElementById('server-uptime').textContent = data.data.overall.serverUptimeFormatted;
+          }
+          
+          // Find current session stats
+          if (data.data.sessions) {
+            const sessionData = data.data.sessions.find(s => s.id === sessionId);
+            if (sessionData) {
+              updateSessionDisplay(sessionData);
+            }
+          }
+        }
+      } catch (e) {
+        console.error('WebSocket message parse error:', e);
+      }
+    };
+    
+    ws.onclose = () => {
+      // Reconnect after 3 seconds
+      setTimeout(connectWebSocket, 3000);
+    };
+    
+    ws.onerror = () => {
+      console.error('WebSocket error');
+    };
+  }
+
+  function updateSessionDisplay(sessionData) {
+    // User name (pushName or phone number)
+    const displayName = sessionData.pushName || `+${sessionData.phone_number}`;
+    document.getElementById('user-name').textContent = displayName;
+    
+    // Stats from the stats object
+    if (sessionData.stats) {
+      document.getElementById('messages-count').textContent = sessionData.stats.messages.toLocaleString();
+      document.getElementById('uptime').textContent = sessionData.stats.uptimeFormatted;
+      document.getElementById('avg-messages').textContent = sessionData.stats.avgMessagesPerHour.toFixed(1);
+      
+      if (sessionData.stats.hourlyActivity) {
+        renderBarChart(sessionData.stats.hourlyActivity);
+      }
+    }
+    
+    // Status indicator
+    const statusEl = document.getElementById('session-status');
+    const healthIcon = document.getElementById('health-icon');
+    const healthText = document.getElementById('health-text');
+    const healthStatus = document.getElementById('health-status');
+    
+    if (sessionData.status === 'active') {
+      statusEl.innerHTML = `
+        <svg class="w-4 h-4 text-gh-success" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>
+        </svg>
+        <span class="text-gh-success">Active</span>
+      `;
+      healthIcon.className = 'w-8 h-8 text-gh-success';
+      healthIcon.innerHTML = '<path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>';
+      healthText.textContent = 'Healthy';
+      healthText.className = 'text-lg font-semibold text-gh-success';
+      healthStatus.textContent = 'Session is active and connected';
+    } else if (sessionData.status === 'pairing') {
+      statusEl.innerHTML = `
+        <svg class="w-4 h-4 text-gh-warning" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Z"/>
+        </svg>
+        <span class="text-gh-warning">Pairing</span>
+      `;
+      healthIcon.className = 'w-8 h-8 text-gh-warning';
+      healthIcon.innerHTML = '<path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Z"/>';
+      healthText.textContent = 'Pairing';
+      healthText.className = 'text-lg font-semibold text-gh-warning';
+      healthStatus.textContent = 'Waiting for device pairing';
+    } else {
+      statusEl.innerHTML = `
+        <svg class="w-4 h-4 text-gh-text-muted" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0Z"/>
+        </svg>
+        <span class="text-gh-text-muted">Inactive</span>
+      `;
+      healthIcon.className = 'w-8 h-8 text-gh-text-muted';
+      healthIcon.innerHTML = '<path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0Z"/>';
+      healthText.textContent = 'Offline';
+      healthText.className = 'text-lg font-semibold text-gh-text-muted';
+      healthStatus.textContent = 'Session is disconnected';
+    }
+    
+    // Created date
+    if (sessionData.created_at) {
+      const createdDate = new Date(sessionData.created_at);
+      document.getElementById('session-created').textContent = createdDate.toLocaleDateString();
+    }
   }
 
   async function loadSessionStats() {
@@ -167,31 +289,13 @@ const { id } = Astro.params;
       if (result.success && result.data) {
         const data = result.data;
 
-        document.getElementById('phone-number').textContent = `+${data.session.phone_number}`;
+        document.getElementById('user-name').textContent = data.session.pushName || `+${data.session.phoneNumber}`;
         document.getElementById('messages-count').textContent = data.messages.toLocaleString();
         document.getElementById('uptime').textContent = data.uptimeFormatted;
         document.getElementById('avg-messages').textContent = data.avgMessagesPerHour.toFixed(1);
 
-        const statusEl = document.getElementById('session-status');
-        const statusColors = {
-          active: 'bg-gh-success',
-          pairing: 'bg-gh-warning',
-          inactive: 'bg-gh-text-muted'
-        };
-        statusEl.innerHTML = `
-          <span class="w-2 h-2 rounded-full ${statusColors[data.session.status] || 'bg-gh-text-muted'}"></span>
-          <span class="text-gh-text-secondary capitalize">${data.session.status}</span>
-        `;
-
         const createdDate = new Date(data.session.createdAt);
         document.getElementById('session-created').textContent = createdDate.toLocaleDateString();
-
-        const healthPercent = data.session.status === 'active' ? 100 : data.session.status === 'pairing' ? 50 : 0;
-        document.getElementById('health-progress').style.strokeDasharray = `${healthPercent}, 100`;
-        document.getElementById('health-value').textContent = `${healthPercent}%`;
-        document.getElementById('health-status').textContent = 
-          healthPercent === 100 ? 'Session is healthy' : 
-          healthPercent === 50 ? 'Pairing in progress' : 'Session disconnected';
 
         renderBarChart(data.hourlyActivity);
       }
@@ -251,24 +355,14 @@ const { id } = Astro.params;
   document.getElementById('refresh-btn').addEventListener('click', async () => {
     const btn = document.getElementById('refresh-btn');
     btn.disabled = true;
-    btn.innerHTML = `
-      <div class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-      Refreshing...
-    `;
     
     await Promise.all([loadSessionStats(), loadOverallStats()]);
     
     btn.disabled = false;
-    btn.innerHTML = `
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
-      </svg>
-      Refresh
-    `;
   });
 
   document.getElementById('disconnect-btn').addEventListener('click', async () => {
-    if (!confirm('Are you sure you want to disconnect this session?')) {
+    if (!confirm('Disconnect this session?')) {
       return;
     }
 

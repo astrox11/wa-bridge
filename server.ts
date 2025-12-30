@@ -4,6 +4,7 @@
  * Exposes HTTP APIs for session management, authentication, messaging, and statistics.
  * Supports multiple isolated sessions consumable by external clients.
  * Serves static frontend files from the same host.
+ * Includes WebSocket support for real-time stats streaming.
  */
 
 import { WebSocket } from "ws";
@@ -25,7 +26,44 @@ if (wsListener) {
 
 import { log, sessionManager } from "./lib";
 import config from "./config";
-import { handleApiRequest, type ApiResponse } from "./api";
+import { handleApiRequest, runtimeStats, type ApiResponse } from "./api";
+
+/**
+ * WebSocket clients for stats streaming
+ */
+const wsClients: Set<any> = new Set();
+
+/**
+ * Broadcast stats to all connected WebSocket clients
+ */
+function broadcastStats() {
+  if (wsClients.size === 0) return;
+  
+  const overallStats = runtimeStats.getOverallStats();
+  const sessions = sessionManager.listExtended();
+  
+  const message = JSON.stringify({
+    type: "stats",
+    data: {
+      overall: overallStats,
+      sessions: sessions.map(s => ({
+        ...s,
+        stats: runtimeStats.getStats(s.id),
+      })),
+    },
+  });
+  
+  for (const client of wsClients) {
+    try {
+      client.send(message);
+    } catch {
+      wsClients.delete(client);
+    }
+  }
+}
+
+// Broadcast stats every 1 second
+setInterval(broadcastStats, 1000);
 
 const STATIC_DIR = join(import.meta.dir, "astro-web-runtime", "dist");
 
@@ -111,9 +149,16 @@ async function serveStaticFile(filePath: string): Promise<Response | null> {
 const server = Bun.serve({
   port: config.API_PORT,
   hostname: config.API_HOST,
-  async fetch(req) {
+  async fetch(req, server) {
     const url = new URL(req.url);
     let path = url.pathname;
+
+    // WebSocket upgrade for stats streaming
+    if (path === "/ws/stats" && req.headers.get("upgrade") === "websocket") {
+      const success = server.upgrade(req);
+      if (success) return undefined as any;
+      return new Response("WebSocket upgrade failed", { status: 500 });
+    }
 
     // Health check endpoint
     if (path === "/health" && req.method === "GET") {
@@ -157,6 +202,19 @@ const server = Bun.serve({
 
     // 404 for unknown routes
     return new Response("Not Found", { status: 404 });
+  },
+  websocket: {
+    open(ws) {
+      wsClients.add(ws);
+      log.info("WebSocket client connected for stats");
+    },
+    message() {
+      // Client messages not needed for stats streaming
+    },
+    close(ws) {
+      wsClients.delete(ws);
+      log.info("WebSocket client disconnected");
+    },
   },
 });
 

@@ -86,16 +86,42 @@ import Layout from '../layouts/Layout.astro';
   const sessionsList = document.getElementById('sessions-list') as HTMLDivElement;
   const versionInput = document.getElementById('version') as HTMLInputElement;
 
+  let ws: WebSocket | null = null;
+
   async function init() {
     const configResult = await api.getConfig();
     if (configResult.success && configResult.data) {
       versionInput.value = configResult.data.version;
     }
     await loadSessions();
+    
+    // Connect to WebSocket for real-time updates
+    connectWebSocket();
+  }
+
+  function connectWebSocket() {
+    ws = api.connectStats((data) => {
+      if (data.type === 'stats' && data.data.sessions) {
+        renderSessions(data.data.sessions.map(s => ({
+          id: s.id,
+          phone_number: s.phone_number,
+          created_at: s.created_at,
+          status: s.status,
+          pushName: s.pushName,
+        })));
+      }
+    });
+    
+    if (ws) {
+      ws.onclose = () => {
+        // Reconnect after 3 seconds
+        setTimeout(connectWebSocket, 3000);
+      };
+    }
   }
 
   async function deleteSession(id: string) {
-    if (!confirm('Are you sure you want to delete this session?')) return;
+    if (!confirm('Delete this session?')) return;
     
     const result = await api.deleteSession(id);
     if (result.success) {
@@ -105,60 +131,79 @@ import Layout from '../layouts/Layout.astro';
     }
   }
 
+  function renderSessions(sessions: Array<{id: string; phone_number: string; created_at: number; status: string; pushName?: string}>) {
+    if (sessions.length === 0) {
+      sessionsList.innerHTML = `
+        <div class="p-6 text-center">
+          <p class="text-sm text-gh-text-muted">No sessions yet</p>
+        </div>
+      `;
+      return;
+    }
+
+    sessionsList.innerHTML = sessions.map(session => {
+      // Use pushName if available, otherwise show phone number
+      const displayName = session.pushName || `+${session.phone_number}`;
+      
+      // Status icon - green checkmark for active (GitHub style)
+      const statusIcon = session.status === 'active' 
+        ? `<svg class="w-4 h-4 text-gh-success" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>
+          </svg>`
+        : session.status === 'pairing'
+        ? `<svg class="w-4 h-4 text-gh-warning" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"/>
+          </svg>`
+        : `<svg class="w-4 h-4 text-gh-text-muted" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm9.78-2.22-5.5 5.5a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734l5.5-5.5a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042Z"/>
+          </svg>`;
+      
+      return `
+        <div class="flex items-center justify-between p-3 hover:bg-gh-bg-secondary transition-colors" data-id="${session.id}">
+          <div class="flex items-center gap-3">
+            ${statusIcon}
+            <span class="text-sm font-medium text-gh-text">${displayName}</span>
+          </div>
+          <div class="flex items-center gap-1">
+            ${session.status === 'active' ? `
+              <a href="/dashboard/${session.id}" class="p-1.5 text-gh-text-secondary hover:text-gh-accent hover:bg-gh-bg-tertiary rounded-gh transition-colors" title="Dashboard">
+                <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M0 1.75A.75.75 0 0 1 .75 1h4.253c1.227 0 2.317.59 3 1.501A3.743 3.743 0 0 1 11.006 1h4.245a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75h-4.507a2.25 2.25 0 0 0-1.591.659l-.622.621a.75.75 0 0 1-1.06 0l-.622-.621A2.25 2.25 0 0 0 5.258 13H.75a.75.75 0 0 1-.75-.75Zm7.251 10.324.004-5.073-.002-2.253A2.25 2.25 0 0 0 5.003 2.5H1.5v9h3.757a3.75 3.75 0 0 1 1.994.574ZM8.755 4.75l-.004 7.322a3.752 3.752 0 0 1 1.992-.572H14.5v-9h-3.495a2.25 2.25 0 0 0-2.25 2.25Z"/>
+                </svg>
+              </a>
+            ` : session.status === 'pairing' ? `
+              <a href="/pairing/${session.id}" class="p-1.5 text-gh-text-secondary hover:text-gh-success hover:bg-gh-bg-tertiary rounded-gh transition-colors" title="Continue Pairing">
+                <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm4.879-2.773 4.264 2.559a.25.25 0 0 1 0 .428l-4.264 2.559A.25.25 0 0 1 6 10.559V5.442a.25.25 0 0 1 .379-.215Z"/>
+                </svg>
+              </a>
+            ` : ''}
+            <button class="p-1.5 text-gh-text-secondary hover:text-gh-danger hover:bg-gh-danger-subtle rounded-gh transition-colors" data-delete-session="${session.id}" title="Delete">
+              <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75ZM4.496 6.675l.66 6.6a.25.25 0 0 0 .249.225h5.19a.25.25 0 0 0 .249-.225l.66-6.6a.75.75 0 0 1 1.492.149l-.66 6.6A1.748 1.748 0 0 1 10.595 15h-5.19a1.75 1.75 0 0 1-1.741-1.575l-.66-6.6a.75.75 0 1 1 1.492-.15ZM6.5 1.75V3h3V1.75a.25.25 0 0 0-.25-.25h-2.5a.25.25 0 0 0-.25.25Z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    sessionsList.querySelectorAll('[data-delete-session]').forEach(button => {
+      button.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const sessionId = target.getAttribute('data-delete-session');
+        if (sessionId) {
+          deleteSession(sessionId);
+        }
+      });
+    });
+  }
+
   async function loadSessions() {
     const result = await api.getSessions();
     
     if (result.success && result.data) {
-      if (result.data.length === 0) {
-        sessionsList.innerHTML = `
-          <div class="p-6 text-center">
-            <p class="text-sm text-gh-text-muted">No sessions yet</p>
-          </div>
-        `;
-        return;
-      }
-
-      sessionsList.innerHTML = result.data.map(session => {
-        const statusColors: Record<string, string> = {
-          active: 'bg-gh-success',
-          pairing: 'bg-gh-warning',
-          inactive: 'bg-gh-text-muted'
-        };
-        
-        return `
-          <div class="flex items-center justify-between p-4" data-id="${session.id}">
-            <div class="flex items-center gap-3">
-              <div class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full ${statusColors[session.status] || 'bg-gh-text-muted'}"></span>
-                <span class="text-sm font-medium text-gh-text">+${session.phone_number}</span>
-              </div>
-              <span class="text-xs text-gh-text-muted capitalize">${session.status}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              ${session.status === 'active' ? `
-                <a href="/dashboard/${session.id}" class="px-3 py-1 text-xs font-medium rounded-gh bg-gh-accent text-white hover:bg-gh-accent-emphasis">Dashboard</a>
-              ` : session.status === 'pairing' ? `
-                <a href="/pairing/${session.id}" class="px-3 py-1 text-xs font-medium rounded-gh bg-gh-accent text-white hover:bg-gh-accent-emphasis">Continue</a>
-              ` : ''}
-              <button class="p-1.5 text-gh-text-secondary hover:text-gh-danger hover:bg-gh-bg-secondary rounded-gh transition-colors" data-delete-session="${session.id}" aria-label="Delete session">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      sessionsList.querySelectorAll('[data-delete-session]').forEach(button => {
-        button.addEventListener('click', (e) => {
-          const target = e.currentTarget as HTMLElement;
-          const sessionId = target.getAttribute('data-delete-session');
-          if (sessionId) {
-            deleteSession(sessionId);
-          }
-        });
-      });
+      renderSessions(result.data);
     } else {
       sessionsList.innerHTML = `
         <div class="p-6 text-center">

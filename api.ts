@@ -122,7 +122,7 @@ async function parseBody<T>(req: Request): Promise<T | null> {
 const routes: Record<string, Record<string, (req: Request, params?: Record<string, string>) => Promise<ApiResponse>>> = {
   // Session management
   "GET /api/sessions": async () => {
-    const sessions = sessionManager.list();
+    const sessions = sessionManager.listExtended();
     return { success: true, data: sessions };
   },
 

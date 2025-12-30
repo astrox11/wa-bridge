@@ -15,6 +15,7 @@ interface Session {
   phone_number: string;
   created_at: number;
   status: 'active' | 'inactive' | 'pairing';
+  pushName?: string;
 }
 
 interface SessionCreateResponse {
@@ -54,6 +55,14 @@ interface Config {
   defaultBotName: string;
 }
 
+interface StatsUpdate {
+  type: 'stats';
+  data: {
+    overall: RuntimeStats;
+    sessions: Array<Session & { stats: SessionStats }>;
+  };
+}
+
 async function request<T>(
   endpoint: string,
   options: RequestInit = {}
@@ -73,6 +82,31 @@ async function request<T>(
       error: error instanceof Error ? error.message : 'Network error',
     };
   }
+}
+
+/**
+ * Create WebSocket connection for real-time stats
+ */
+function createStatsWebSocket(onMessage: (data: StatsUpdate) => void): WebSocket | null {
+  if (typeof window === 'undefined') return null;
+  
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const ws = new WebSocket(`${protocol}//${window.location.host}/ws/stats`);
+  
+  ws.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data) as StatsUpdate;
+      onMessage(data);
+    } catch {
+      // Ignore parse errors
+    }
+  };
+  
+  ws.onerror = () => {
+    console.error('WebSocket error');
+  };
+  
+  return ws;
 }
 
 export const api = {
@@ -116,6 +150,9 @@ export const api = {
   async getConfig(): Promise<ApiResponse<Config>> {
     return request<Config>('/config');
   },
+
+  // WebSocket for real-time stats
+  connectStats: createStatsWebSocket,
 };
 
 export type {
@@ -126,4 +163,5 @@ export type {
   SessionStats,
   Config,
   ApiResponse,
+  StatsUpdate,
 };
