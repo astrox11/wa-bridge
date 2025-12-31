@@ -402,6 +402,14 @@ class SessionManager {
             statusCode,
           );
           if (statusCode !== DisconnectReason.loggedOut) {
+            // Don't reconnect if session is paused by user
+            if (session.status === "paused") {
+              log.info(
+                `Session ${session.id} reconnection skipped - session is paused`,
+              );
+              return;
+            }
+
             // Reconnect only if network is not paused
             session.status = "connecting";
             log.info(`Session ${session.id} reconnecting...`);
