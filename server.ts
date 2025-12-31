@@ -249,10 +249,6 @@ const server = Bun.serve({
   },
 });
 
-log.info(
-  `Whatsaly server running on http://${config.API_HOST}:${config.API_PORT}`,
-);
-
 log.debug("Debug mode:", config.DEBUG ? "enabled" : "disabled");
 
 sessionManager

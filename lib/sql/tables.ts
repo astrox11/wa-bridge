@@ -65,6 +65,7 @@ export function getUserTableName(
  * Extract phone number from a session ID (format: session_<phoneNumber>)
  */
 export function getPhoneFromSessionId(sessionId: string): string {
+  if (!sessionId) return "";
   return sessionId.replace(/^session_/, "");
 }
 
