@@ -41,6 +41,12 @@ import type { ActiveSession, NetworkState } from "./types";
 
 const logger = MAIN_LOGGER({ level: "silent" });
 
+/**
+ * Helper to check if a status represents a paused state
+ */
+const isPausedStatus = (status: string | undefined): boolean =>
+  status === "paused_user" || status === "paused_network";
+
 class SessionManager {
   private sessions: Map<string, ActiveSession> = new Map();
   private static instance: SessionManager | null = null;
@@ -369,9 +375,9 @@ class SessionManager {
           );
           if (statusCode !== DisconnectReason.loggedOut) {
             const session_status = getSession(session.id).status;
-            if (session_status === "paused") {
+            if (session_status === "paused_user") {
               log.info(
-                `Session ${session.id} reconnection skipped - session is paused`,
+                `Session ${session.id} reconnection skipped - session is paused by user`,
               );
               return;
             }
@@ -585,7 +591,7 @@ class SessionManager {
 
     log.debug("Session To Be Paused:", activeSession);
 
-    if (activeSession.status === "paused") {
+    if (isPausedStatus(activeSession.status)) {
       return { success: false, error: "Session already paused" };
     }
 
@@ -605,11 +611,11 @@ class SessionManager {
       activeSession.pushNameInterval = undefined;
     }
 
-    activeSession.status = "paused";
+    activeSession.status = "paused_user";
 
     log.debug("Session Status:", activeSession);
 
-    updateSessionStatus(sessionId, "paused");
+    updateSessionStatus(sessionId, "paused_user");
 
     log.info(`Session ${sessionId} paused`);
     return { success: true };
@@ -661,7 +667,7 @@ class SessionManager {
       return { success: true };
     } catch (error) {
       log.error(`Failed to resume session ${sessionId}:`, error);
-      activeSession.status = "paused";
+      activeSession.status = "paused_network";
       return {
         success: false,
         error:
@@ -685,10 +691,11 @@ class SessionManager {
   async restoreAllSessions(): Promise<void> {
     const sessions = getAllSessions();
 
-    // Filter out inactive and paused sessions - only restore sessions that should be active
+    // Filter out inactive and user-paused sessions - only restore sessions that should be active
+    // Note: paused_network sessions are restored since network may have recovered
     const sessionsToRestore = sessions.filter(
       (sessionRecord) =>
-        sessionRecord.status !== "inactive" && sessionRecord.status !== "paused",
+        sessionRecord.status !== "inactive" && sessionRecord.status !== "paused_user",
     );
 
     if (sessionsToRestore.length === 0) {
@@ -753,10 +760,10 @@ class SessionManager {
     const sessions = getAllSessions();
     return sessions.map((session) => {
       const activeSession = this.sessions.get(session.id);
+      const isPaused = isPausedStatus(activeSession?.status) || isPausedStatus(session.status);
       return {
         ...session,
-        status:
-          activeSession?.status === "paused" ? "inactive" : session.status,
+        status: isPaused ? "inactive" : session.status,
         pushName: this.getPushName(session.id) || session.push_name,
       };
     });

@@ -5,7 +5,7 @@ export interface SessionRecord {
   id: string;
   phone_number: string;
   created_at: number;
-  status: "active" | "inactive" | "pairing" | "paused";
+  status: "active" | "inactive" | "pairing" | "paused_user" | "paused_network";
   push_name?: string;
 }
 
@@ -79,7 +79,8 @@ const VALID_STATUSES: SessionRecord["status"][] = [
   "active",
   "inactive",
   "pairing",
-  "paused",
+  "paused_user",
+  "paused_network",
 ];
 
 export const updateSessionStatus = (
