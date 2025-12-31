@@ -5,7 +5,7 @@ export interface SessionRecord {
   id: string;
   phone_number: string;
   created_at: number;
-  status: "active" | "inactive" | "pairing";
+  status: "active" | "inactive" | "pairing" | paused;
   push_name?: string;
 }
 
@@ -17,7 +17,6 @@ const Session = bunql.define("sessions", {
   push_name: { type: "TEXT" },
 });
 
-// Ensure push_name column exists (migration for existing databases)
 try {
   const columns = bunql.query<{ name: string }>(
     `PRAGMA table_info("sessions")`,
@@ -28,7 +27,6 @@ try {
     log.info("Added push_name column to sessions table");
   }
 } catch (error) {
-  // Log the error but continue - table might not exist yet on first run
   log.debug("Session table migration check:", error);
 }
 

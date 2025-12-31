@@ -37,27 +37,9 @@ import {
 } from "../";
 import { useSessionAuth } from "./auth";
 import { isNetworkStable } from "../util/networkProbe";
+import type { ActiveSession, NetworkState } from "./types";
 
 const logger = MAIN_LOGGER({ level: "silent" });
-
-interface ActiveSession {
-  id: string;
-  phoneNumber: string;
-  socket: WASocket | null;
-  msgRetryCounterCache: CacheStore;
-  status: "connecting" | "connected" | "disconnected" | "pairing" | "paused";
-  pushNameInterval?: ReturnType<typeof setInterval>;
-}
-
-/**
- * Network monitoring state
- */
-interface NetworkState {
-  isHealthy: boolean;
-  consecutiveFailures: number;
-  lastCheck: number;
-  isPaused: boolean;
-}
 
 class SessionManager {
   private sessions: Map<string, ActiveSession> = new Map();
@@ -70,7 +52,6 @@ class SessionManager {
   };
   private networkCheckInterval?: ReturnType<typeof setInterval>;
 
-  // Configurable thresholds
   private static readonly NETWORK_FAILURE_THRESHOLD = 3;
   private static readonly NETWORK_CHECK_INTERVAL_MS = 5000;
   private static readonly PUSHNAME_CHECK_INTERVAL_MS = 10000;
@@ -184,14 +165,10 @@ class SessionManager {
       clearInterval(session.pushNameInterval);
     }
 
-    // Check immediately
     this.fetchAndSavePushName(session);
-
-    // Then check periodically until we have it
     session.pushNameInterval = setInterval(() => {
       const dbSession = getSession(session.id);
 
-      // Stop checking once we have a pushName saved
       if (dbSession?.push_name) {
         if (session.pushNameInterval) {
           clearInterval(session.pushNameInterval);
@@ -211,9 +188,6 @@ class SessionManager {
     if (session.socket?.user?.name) {
       const pushName = session.socket.user.name;
       updateSessionPushName(session.id, pushName);
-      log.debug(`Saved pushName "${pushName}" for session ${session.id}`);
-
-      // Clear interval once saved
       if (session.pushNameInterval) {
         clearInterval(session.pushNameInterval);
         session.pushNameInterval = undefined;
@@ -265,7 +239,6 @@ class SessionManager {
 
     log.debug("Creating new session:", sessionId);
 
-    // Check if session already exists
     if (sessionExists(sessionId) || this.sessions.has(sessionId)) {
       log.debug("Session already exists:", sessionId);
       return {
@@ -274,7 +247,6 @@ class SessionManager {
       };
     }
 
-    // Initialize user-specific database tables
     initializeUserTables(sanitized);
     log.debug("Initialized user tables for:", sanitized);
 
@@ -293,7 +265,7 @@ class SessionManager {
       const code = await this.initializeSession(activeSession, true);
       // Create database record only after successful initialization
       createSession(sessionId, sanitized);
-      log.debug("Session created successfully:", sessionId);
+      log.debug("Session created:", sessionId);
       return { success: true, code, id: sessionId };
     } catch (error) {
       // Cleanup on failure - only need to remove from memory since DB record wasn't created
@@ -313,7 +285,6 @@ class SessionManager {
     session: ActiveSession,
     requestPairingCode: boolean,
   ): Promise<string | undefined> {
-    // Check if network is paused
     if (this.networkState.isPaused) {
       log.info(
         `Session ${session.id} initialization deferred due to network pause`,
@@ -327,14 +298,13 @@ class SessionManager {
     const { state, saveCreds } = await useSessionAuth(session.id);
     const { version } = await fetchLatestBaileysVersion();
 
-    log.debug("Fetched Baileys version:", version.join("."));
+    log.debug("Baileys version:", version.join("."));
 
-    // Create a session-scoped getMessage function
-    const sessionGetMessage = async (key: any) => getMessage(session.id, key);
+    const sessionGetMessage = async (key: any) =>
+      await getMessage(session.id, key);
 
-    // Create a session-scoped cachedGroupMetadata function
     const sessionCachedGroupMetadata = async (id: string) =>
-      cachedGroupMetadata(session.id, id);
+      await cachedGroupMetadata(session.id, id);
 
     const sock = makeWASocket({
       auth: {
@@ -363,7 +333,6 @@ class SessionManager {
       );
     }
 
-    // Set up event handlers
     this.setupEventHandlers(session, sock, saveCreds);
 
     return pairingCode;
@@ -397,8 +366,8 @@ class SessionManager {
             statusCode,
           );
           if (statusCode !== DisconnectReason.loggedOut) {
-            // Don't reconnect if session is paused by user
-            if (session.status === "paused") {
+            const session_status = getSession(session.id).status;
+            if (session_status === "paused") {
               log.info(
                 `Session ${session.id} reconnection skipped - session is paused`,
               );
@@ -418,7 +387,6 @@ class SessionManager {
               );
             }
           } else {
-            // Logged out - cleanup
             session.status = "disconnected";
             updateSessionStatus(session.id, "inactive");
             log.error(`Session ${session.id} logged out`);
@@ -430,7 +398,6 @@ class SessionManager {
           updateSessionStatus(session.id, "active");
           log.info(`Session ${session.id} connected to WhatsApp`);
 
-          // Start pushName fetching
           this.startPushNameFetching(session);
 
           if (!hasSynced) {
@@ -622,7 +589,7 @@ class SessionManager {
 
     if (activeSession.socket) {
       try {
-        await activeSession.socket.end(undefined);
+        activeSession.socket.end(undefined);
       } catch (error) {
         log.debug(`Error ending socket for session ${sessionId}:`, error);
       }
@@ -635,7 +602,7 @@ class SessionManager {
     }
 
     activeSession.status = "paused";
-    updateSessionStatus(sessionId, "inactive");
+    updateSessionStatus(sessionId, "paused");
 
     log.info(`Session ${sessionId} paused`);
     return { success: true };
