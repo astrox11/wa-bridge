@@ -18,15 +18,8 @@ import {
 } from "./middleware";
 import type { ApiResponse, SessionCreateRequest } from "./types";
 import { ApiResponseErrors } from "./errors";
-import {
-  validatePhoneNumber,
-  validatePagination,
-} from "./predicates";
-import {
-  parseBody,
-  matchRoute,
-  createApiError,
-} from "./handler";
+import { validatePhoneNumber, validatePagination } from "./predicates";
+import { parseBody, matchRoute, createApiError } from "./handler";
 
 // Re-export handleWsAction from handler
 export { handleWsAction } from "./handler";
