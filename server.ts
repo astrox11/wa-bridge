@@ -23,7 +23,7 @@ import {
   runtimeStats,
   type ApiResponse,
   type WsRequest,
-} from "./api";
+} from "./service/api";
 
 const wsClients: Set<any> = new Set();
 

@@ -25,6 +25,7 @@ import {
 } from "./commandDispatcher";
 
 export * from "./types";
+export * from "./api";
 export {
   normalizeMessage,
   validateMessage,
