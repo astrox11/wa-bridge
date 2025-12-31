@@ -1,5 +1,6 @@
 import { getAllGroups } from "../../../core";
 import type { ApiResponse } from "../../types";
+import { ApiResponseErrors } from "../../errors";
 import { validateSessionId } from "./vaildators";
 
 export function getGroups(sessionId: string): ApiResponse {

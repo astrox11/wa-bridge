@@ -26,6 +26,7 @@ import {
 
 export * from "./types";
 export * from "./api";
+export * from "./errors";
 export {
   normalizeMessage,
   validateMessage,

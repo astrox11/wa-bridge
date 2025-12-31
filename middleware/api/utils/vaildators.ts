@@ -1,11 +1,12 @@
 import { sessionManager } from "../../../core";
 import type { ApiResponse } from "../../types";
+import { ApiResponseErrors } from "../../errors";
 
 export function validateSessionId(
   sessionId: string | undefined,
 ): ApiResponse | null {
   if (!sessionId) {
-    return { success: false, error: ApiResponseErrors.INVAILD_SESSION };
+    return { success: false, error: ApiResponseErrors.INVALID_SESSION };
   }
   return null;
 }
@@ -14,7 +15,7 @@ export function validatePhoneNumber(
   phoneNumber: string | undefined,
 ): ApiResponse | null {
   if (!phoneNumber) {
-    return { success: false, error: ApiResponseErrors.INVAILD_PHONE_NUMBER };
+    return { success: false, error: ApiResponseErrors.INVALID_PHONE_NUMBER };
   }
   return null;
 }

@@ -1,120 +1,39 @@
+/**
+ * Service layer API routing
+ * HTTP and WebSocket request handling
+ */
+
 import { log } from "../core";
 import {
   getSessions,
   getSession,
   createSession,
   deleteSession,
-  pauseSession,
-  resumeSession,
   getAuthStatus,
   getOverallStats,
   getSessionStats,
   getMessages,
   getConfig,
   getNetworkState,
-  getGroups,
 } from "./middleware";
-import type {
-  ApiResponse,
-  SessionCreateRequest,
-  WsRequest,
-  WsResponse,
-} from "./types";
+import type { ApiResponse, SessionCreateRequest } from "./types";
+import { ApiResponseErrors } from "./errors";
+import {
+  validatePhoneNumber,
+  validatePagination,
+} from "./predicates";
+import {
+  parseBody,
+  matchRoute,
+  createApiError,
+} from "./handler";
 
-async function parseBody<T>(req: Request): Promise<T | null> {
-  try {
-    return (await req.json()) as T;
-  } catch {
-    return null;
-  }
-}
+// Re-export handleWsAction from handler
+export { handleWsAction } from "./handler";
 
-export async function handleWsAction(request: WsRequest): Promise<WsResponse> {
-  const { action, requestId, params = {} } = request;
-
-  log.debug("WebSocket action received:", action, params);
-
-  try {
-    let result: ApiResponse;
-    switch (action) {
-      case "getSessions":
-        result = getSessions();
-        break;
-
-      case "getSession":
-        result = getSession(params.id as string);
-        break;
-
-      case "createSession":
-        result = await createSession(params.phoneNumber as string);
-        break;
-
-      case "deleteSession":
-        result = await deleteSession(params.id as string);
-        break;
-
-      case "getAuthStatus":
-        result = getAuthStatus(params.sessionId as string);
-        break;
-
-      case "getStats":
-        result = getOverallStats();
-        break;
-
-      case "getSessionStats":
-        result = getSessionStats(params.sessionId as string);
-        break;
-
-      case "getMessages":
-        result = getMessages(
-          params.sessionId as string,
-          (params.limit as number) || 100,
-          (params.offset as number) || 0,
-        );
-        break;
-
-      case "getConfig":
-        result = getConfig();
-        break;
-
-      case "getNetworkState":
-        result = getNetworkState();
-        break;
-
-      case "getGroups":
-        result = getGroups(params.sessionId as string);
-        break;
-
-      case "pauseSession":
-        result = await pauseSession(params.id as string);
-        break;
-
-      case "resumeSession":
-        result = await resumeSession(params.id as string);
-        break;
-
-      default:
-        result = { success: false, error: `Unknown action: ${action}` };
-    }
-
-    return {
-      action,
-      requestId,
-      success: result.success,
-      data: result.data,
-      error: result.error,
-    };
-  } catch (error) {
-    log.error(`WebSocket action error on ${action}:`, error);
-    return {
-      action,
-      requestId,
-      success: false,
-      error: error instanceof Error ? error.message : "Internal server error",
-    };
-  }
-}
-
+/**
+ * API route definitions
+ */
 const routes: Record<
   string,
   (req: Request, params?: Record<string, string>) => Promise<ApiResponse>
@@ -125,9 +44,13 @@ const routes: Record<
 
   "POST /api/sessions": async (req) => {
     const body = await parseBody<SessionCreateRequest>(req);
-    if (!body || !body?.phoneNumber) {
-      return { success: false, error: "invaild_parameters" };
+    if (!body) {
+      return createApiError(ApiResponseErrors.INVALID_PARAMETERS);
     }
+
+    const validationError = validatePhoneNumber(body.phoneNumber);
+    if (validationError) return validationError;
+
     return createSession(body.phoneNumber);
   },
 
@@ -145,8 +68,10 @@ const routes: Record<
 
   "GET /api/messages/:sessionId": async (_req, params) => {
     const url = new URL(_req.url);
-    const limit = parseInt(url.searchParams.get("limit") || "100", 10);
-    const offset = parseInt(url.searchParams.get("offset") || "0", 10);
+    const { limit, offset } = validatePagination(
+      url.searchParams.get("limit"),
+      url.searchParams.get("offset"),
+    );
     return getMessages(params?.sessionId as string, limit, offset);
   },
 
@@ -167,68 +92,27 @@ const routes: Record<
   },
 };
 
-function matchRoute(
-  method: string,
-  path: string,
-): {
-  handler: (
-    req: Request,
-    params?: Record<string, string>,
-  ) => Promise<ApiResponse>;
-  params: Record<string, string>;
-} | null {
-  const routeKey = `${method} ${path}`;
-
-  if (routes[routeKey]) {
-    return { handler: routes[routeKey], params: {} };
-  }
-
-  for (const [pattern, handler] of Object.entries(routes)) {
-    const [routeMethod, routePath] = pattern.split(" ");
-    if (routeMethod !== method) continue;
-
-    const routeParts = routePath.split("/");
-    const pathParts = path.split("/");
-
-    if (routeParts.length !== pathParts.length) continue;
-
-    const params: Record<string, string> = {};
-    let match = true;
-
-    for (let i = 0; i < routeParts.length; i++) {
-      if (routeParts[i].startsWith(":")) {
-        params[routeParts[i].slice(1)] = pathParts[i];
-      } else if (routeParts[i] !== pathParts[i]) {
-        match = false;
-        break;
-      }
-    }
-
-    if (match) {
-      return { handler, params };
-    }
-  }
-
-  return null;
-}
-
+/**
+ * Handle HTTP API requests
+ */
 export async function handleApiRequest(req: Request): Promise<ApiResponse> {
   const url = new URL(req.url);
   const path = url.pathname;
   const method = req.method;
 
-  const route = matchRoute(method, path);
+  const route = matchRoute(method, path, routes);
   if (!route) {
-    return { success: false, error: `Route not found: ${method} ${path}` };
+    return createApiError(
+      `${ApiResponseErrors.ROUTE_NOT_FOUND}: ${method} ${path}`,
+    );
   }
 
   try {
     return await route.handler(req, route.params);
   } catch (error) {
     log.error(`API error on ${method} ${path}:`, error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Internal server error",
-    };
+    return createApiError(
+      error instanceof Error ? error.message : ApiResponseErrors.INTERNAL_ERROR,
+    );
   }
 }
