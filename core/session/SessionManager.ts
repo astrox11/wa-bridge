@@ -685,9 +685,10 @@ class SessionManager {
   async restoreAllSessions(): Promise<void> {
     const sessions = getAllSessions();
 
-    // Filter out inactive sessions and prepare active sessions for concurrent restoration
+    // Filter out inactive and paused sessions - only restore sessions that should be active
     const sessionsToRestore = sessions.filter(
-      (sessionRecord) => sessionRecord.status !== "inactive",
+      (sessionRecord) =>
+        sessionRecord.status !== "inactive" && sessionRecord.status !== "paused",
     );
 
     if (sessionsToRestore.length === 0) {

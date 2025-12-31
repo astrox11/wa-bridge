@@ -79,6 +79,7 @@ const VALID_STATUSES: SessionRecord["status"][] = [
   "active",
   "inactive",
   "pairing",
+  "paused",
 ];
 
 export const updateSessionStatus = (
