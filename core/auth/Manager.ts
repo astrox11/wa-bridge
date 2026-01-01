@@ -412,7 +412,7 @@ class SessionManager {
       this.runtimeData.set(sessionId, runtime);
     }
 
-    updateSessionStatus(sessionId, StatusType.Connecting);
+    updateSessionStatus(sessionId, StatusType.Active);
 
     try {
       await this.initializeSession(
