@@ -200,8 +200,8 @@ const server = Bun.serve({
       if (response) return response;
     }
 
-    if (path === "/favicon.svg") {
-      const response = await serveStaticFile(join(STATIC_DIR, "favicon.svg"));
+    if (path === "/favicon.png") {
+      const response = await serveStaticFile(join(STATIC_DIR, "favicon.png"));
       if (response) return response;
     }
 
