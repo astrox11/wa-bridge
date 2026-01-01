@@ -5,7 +5,13 @@ export interface ActiveSession {
   phoneNumber: string;
   socket: WASocket | null;
   msgRetryCounterCache: CacheStore;
-  status: "connecting" | "connected" | "disconnected" | "pairing" | "paused_user" | "paused_network";
+  status:
+    | "connecting"
+    | "connected"
+    | "disconnected"
+    | "pairing"
+    | "paused_user"
+    | "paused_network";
   pushNameInterval?: ReturnType<typeof setInterval>;
 }
 

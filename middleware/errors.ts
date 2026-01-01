@@ -11,4 +11,3 @@ export enum ApiResponseErrors {
   ROUTE_NOT_FOUND = "route_not_found",
   INTERNAL_ERROR = "internal_server_error",
 }
-

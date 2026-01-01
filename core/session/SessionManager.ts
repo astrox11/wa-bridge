@@ -292,7 +292,7 @@ class SessionManager {
     requestPairingCode: boolean,
   ): Promise<string | undefined> {
     log.debug("Session State:", session);
-    
+
     // Check if session was paused by user - don't initialize
     if (isPausedStatus(session.status)) {
       log.info(
@@ -300,7 +300,7 @@ class SessionManager {
       );
       return undefined;
     }
-    
+
     // Also check database status in case it was just updated by a concurrent pause action
     const dbSession = getSession(session.id);
     if (dbSession && isPausedStatus(dbSession.status)) {
@@ -315,7 +315,7 @@ class SessionManager {
       }
       return undefined;
     }
-    
+
     if (this.networkState.isPaused) {
       log.info(
         `Session ${session.id} initialization deferred due to network pause`,
@@ -719,7 +719,8 @@ class SessionManager {
     // Note: paused_network sessions are restored since network may have recovered
     const sessionsToRestore = sessions.filter(
       (sessionRecord) =>
-        sessionRecord.status !== "inactive" && sessionRecord.status !== "paused_user",
+        sessionRecord.status !== "inactive" &&
+        sessionRecord.status !== "paused_user",
     );
 
     if (sessionsToRestore.length === 0) {
@@ -784,7 +785,8 @@ class SessionManager {
     const sessions = getAllSessions();
     return sessions.map((session) => {
       const activeSession = this.sessions.get(session.id);
-      const isPaused = isPausedStatus(activeSession?.status) || isPausedStatus(session.status);
+      const isPaused =
+        isPausedStatus(activeSession?.status) || isPausedStatus(session.status);
       return {
         ...session,
         status: isPaused ? "inactive" : session.status,
