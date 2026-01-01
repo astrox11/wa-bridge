@@ -1,6 +1,8 @@
-export interface ApiResponse<T = unknown> {
+import type { WAMessage } from "baileys";
+
+export interface ApiResponse {
   success: boolean;
-  data?: T;
+  data?: WAMessage;
   error?: string;
 }
 

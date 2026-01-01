@@ -153,11 +153,6 @@ class WsApiClient {
 
         if (data?.type === "stats") {
           this.lastStatsData = data;
-          console.log(
-            "[Whatsaly] Stats",
-            this.statsCallbacks.size,
-            "callbacks",
-          );
           this.statsCallbacks.forEach((cb) => cb(data));
         }
       };

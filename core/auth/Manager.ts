@@ -219,6 +219,9 @@ class SessionManager {
 
             session.status = StatusType.Connecting;
             log.info(`Session ${session.id} reconnecting...`);
+            this.initializeSession(session, false).catch((error) => {
+              log.error(`Session ${session.id} reconnection failed:`, error);
+            });
           } else {
             session.status = StatusType.Disconnected;
             updateSessionStatus(session.id, StatusType.Inactive);
@@ -259,7 +262,7 @@ class SessionManager {
               }
 
               const cmd = new Plugins(msg, sock);
-              await cmd.load("./core/modules");
+              await cmd.load("./core/plugins");
               await Promise.allSettled([cmd.text(), cmd.eventUser(type)]);
             } catch (error) {
               log.error(
