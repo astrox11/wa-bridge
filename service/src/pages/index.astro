@@ -288,49 +288,6 @@ import Layout from '../layouts/Layout.astro';
         </div> <!-- End new-session-content -->
       </div>
 
-      <!-- Network Status Card -->
-      <div class="bg-gh-bg border border-gh-border rounded-gh">
-        <div class="p-4 border-b border-gh-border flex items-center justify-between cursor-pointer hover:bg-gh-bg-secondary transition-colors" id="network-status-header">
-          <div class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
-              <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2l-2.218-.887zm3.564 1.426L5.596 5 8 5.961 14.154 3.5l-2.404-.961zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464L7.443.184z"/>
-            </svg>
-            <h2 class="text-sm font-semibold text-gh-text">Network Status</h2>
-          </div>
-          <svg id="network-status-chevron" class="w-4 h-4 text-gh-text-secondary transition-transform" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M12.78 5.22a.749.749 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.06 0L3.22 6.28a.749.749 0 1 1 1.06-1.06L8 8.939l3.72-3.719a.749.749 0 0 1 1.06 0Z"/>
-          </svg>
-        </div>
-        <div id="network-status-content" class="p-4">
-          <div id="network-status" class="flex items-center gap-3 mb-4">
-            <svg id="network-icon" class="w-6 h-6 text-gh-success" viewBox="0 0 16 16" fill="currentColor">
-              <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>
-            </svg>
-            <div>
-              <p id="network-text" class="text-sm font-semibold text-gh-success">Connected</p>
-              <p id="network-detail" class="text-xs text-gh-text-muted">All systems operational</p>
-            </div>
-          </div>
-          <!-- Network Activity Line Graph -->
-          <div class="h-20 relative" id="network-graph-container">
-            <!-- Skeleton placeholder -->
-            <div class="absolute inset-0 flex items-center justify-center" id="network-graph-skeleton">
-              <div class="w-full h-0.5 bg-gh-bg-tertiary rounded animate-pulse"></div>
-            </div>
-            <svg id="network-graph" class="w-full h-full" viewBox="0 0 120 40" preserveAspectRatio="none">
-              <!-- Grid lines -->
-              <line x1="0" y1="10" x2="120" y2="10" stroke="currentColor" class="text-gh-border" stroke-width="0.5" stroke-dasharray="2"/>
-              <line x1="0" y1="20" x2="120" y2="20" stroke="currentColor" class="text-gh-border" stroke-width="0.5" stroke-dasharray="2"/>
-              <line x1="0" y1="30" x2="120" y2="30" stroke="currentColor" class="text-gh-border" stroke-width="0.5" stroke-dasharray="2"/>
-              <!-- Line path will be rendered dynamically -->
-              <polyline id="network-line" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="" class="text-gh-success"/>
-              <!-- Area fill below line -->
-              <polygon id="network-area" class="text-gh-success opacity-10" fill="currentColor" points=""/>
-            </svg>
-          </div>
-          <p class="text-xs text-gh-text-muted mt-2 text-center">Network activity (last 12 checks)</p>
-        </div>
-      </div>
     </div>
 
     <!-- Existing Sessions -->
@@ -377,7 +334,7 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <script>
-  import { api } from '../core/api';
+  import { api } from '../lib/api';
 
   const form = document.getElementById('session-form') as HTMLFormElement;
   const formCollapsed = document.getElementById('form-collapsed') as HTMLDivElement;
@@ -388,21 +345,13 @@ import Layout from '../layouts/Layout.astro';
   const cancelFormBtn = document.getElementById('cancel-form-btn') as HTMLButtonElement;
   const botNameInput = document.getElementById('botName') as HTMLInputElement;
   const clearBotnameBtn = document.getElementById('clear-botname') as HTMLButtonElement;
-  const networkLine = document.getElementById('network-line') as unknown as SVGPolylineElement;
-  const networkArea = document.getElementById('network-area') as unknown as SVGPolygonElement;
-  const networkGraphSkeleton = document.getElementById('network-graph-skeleton') as HTMLDivElement;
   const customVarsContainer = document.getElementById('custom-vars') as HTMLDivElement;
   const addVarBtn = document.getElementById('add-var-btn') as HTMLButtonElement;
 
   let formExpanded = false;
   let sessionsLoaded = false;
   let varCounter = 0;
-  
-  // Network activity history for graph (12 data points: 0 = unhealthy, 1 = healthy)
-  const networkHistory: number[] = [];
-  const GRAPH_POINTS = 12;
 
-  // Custom variables management
   function addCustomVar(name = '', value = '') {
     const varId = ++varCounter;
     const varHtml = `
@@ -487,95 +436,6 @@ import Layout from '../layouts/Layout.astro';
     const result = await api.deleteSession(id);
     if (!result.success) {
       alert(result.error || 'Failed to delete session');
-    }
-  }
-
-  function updateNetworkGraph(isHealthy: boolean) {
-    // Hide skeleton
-    if (networkGraphSkeleton) {
-      networkGraphSkeleton.classList.add('hidden');
-    }
-    
-    // Add new data point (0 = bottom, 1 = top)
-    networkHistory.push(isHealthy ? 1 : 0);
-    // Keep only last GRAPH_POINTS
-    while (networkHistory.length > GRAPH_POINTS) {
-      networkHistory.shift();
-    }
-    
-    // Calculate line graph points
-    const width = 120;
-    const height = 40;
-    const padding = 2;
-    const effectiveHeight = height - (padding * 2);
-    
-    const points: string[] = [];
-    const areaPoints: string[] = [];
-    
-    networkHistory.forEach((value, idx) => {
-      const x = (idx / (GRAPH_POINTS - 1)) * width;
-      const y = padding + (1 - value) * effectiveHeight; // Invert Y
-      points.push(`${x},${y}`);
-      areaPoints.push(`${x},${y}`);
-    });
-    
-    // Add bottom corners for area fill
-    if (areaPoints.length > 0) {
-      const lastX = ((networkHistory.length - 1) / (GRAPH_POINTS - 1)) * width;
-      const firstX = 0;
-      areaPoints.push(`${lastX},${height}`);
-      areaPoints.push(`${firstX},${height}`);
-    }
-    
-    // Determine color based on overall health (mostly healthy = green, otherwise red)
-    const healthyCount = networkHistory.filter(v => v === 1).length;
-    const isOverallHealthy = healthyCount >= networkHistory.length / 2;
-    const color = isOverallHealthy ? 'rgb(52, 211, 153)' : 'rgb(248, 113, 113)';
-    
-    // Update SVG elements
-    if (networkLine) {
-      networkLine.setAttribute('points', points.join(' '));
-      networkLine.setAttribute('stroke', color);
-    }
-    
-    if (networkArea) {
-      networkArea.setAttribute('points', areaPoints.join(' '));
-      networkArea.setAttribute('fill', color);
-    }
-  }
-
-  function updateNetworkStatus(network: { isHealthy: boolean; isPaused: boolean; consecutiveFailures: number }) {
-    const icon = document.getElementById('network-icon');
-    const text = document.getElementById('network-text');
-    const detail = document.getElementById('network-detail');
-
-    // Update graph with current status
-    updateNetworkGraph(network.isHealthy && !network.isPaused);
-
-    // Check if elements exist
-    if (!icon || !text || !detail) {
-      console.warn('[Whatsaly] Network status elements not found');
-      return;
-    }
-
-    if (network.isPaused) {
-      icon.setAttribute('class', 'w-6 h-6 text-gh-warning');
-      icon.innerHTML = '<path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Z"/>';
-      text.textContent = 'Paused';
-      text.setAttribute('class', 'text-sm font-semibold text-gh-warning');
-      detail.textContent = 'Sessions paused due to network issues';
-    } else if (network.isHealthy) {
-      icon.setAttribute('class', 'w-6 h-6 text-gh-success');
-      icon.innerHTML = '<path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>';
-      text.textContent = 'Connected';
-      text.setAttribute('class', 'text-sm font-semibold text-gh-success');
-      detail.textContent = 'All systems operational';
-    } else {
-      icon.setAttribute('class', 'w-6 h-6 text-gh-danger');
-      icon.innerHTML = '<path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"/>';
-      text.textContent = 'Issues Detected';
-      text.setAttribute('class', 'text-sm font-semibold text-gh-danger');
-      detail.textContent = `${network.consecutiveFailures} consecutive failures`;
     }
   }
 
@@ -750,17 +610,11 @@ import Layout from '../layouts/Layout.astro';
   // Subscribe to real-time updates via WebSocket
   api.onStats((data) => {
     console.log('[Whatsaly] Received stats update:', data);
-    console.log('[Whatsaly] Data type:', data?.type);
-    console.log('[Whatsaly] Sessions array:', data?.data?.sessions);
     
     if (data && data.type === 'stats' && data.data) {
       if (data.data.overall) {
         updateStats(data.data.overall);
       }
-      if (data.data.network) {
-        updateNetworkStatus(data.data.network);
-      }
-      // Render sessions - handle both array directly or from data.data
       const sessionsData = data.data.sessions;
       if (sessionsData && Array.isArray(sessionsData)) {
         console.log('[Whatsaly] Rendering', sessionsData.length, 'sessions');
@@ -772,11 +626,7 @@ import Layout from '../layouts/Layout.astro';
           pushName: s.pushName,
           push_name: s.push_name,
         })));
-      } else {
-        console.log('[Whatsaly] No sessions array found in data');
       }
-    } else {
-      console.log('[Whatsaly] Invalid data structure received');
     }
   });
 
@@ -799,7 +649,7 @@ import Layout from '../layouts/Layout.astro';
     const result = await api.createSession(phoneNumber);
 
     if (result.success && result.data) {
-      window.location.href = `/pairing/${result.data.id}?code=${result.data.pairingCode}`;
+      window.location.href = `/pairing/${result.data.id}?code=${result.data.code}`;
     } else {
       showError(result.error || 'Failed to create session');
       submitBtn.disabled = false;
@@ -849,24 +699,6 @@ import Layout from '../layouts/Layout.astro';
     }
   });
 
-  // Network Status section collapse functionality
-  const networkStatusHeader = document.getElementById('network-status-header');
-  const networkStatusContent = document.getElementById('network-status-content');
-  const networkStatusChevron = document.getElementById('network-status-chevron');
-  let networkStatusCollapsed = false;
-
-  networkStatusHeader?.addEventListener('click', () => {
-    networkStatusCollapsed = !networkStatusCollapsed;
-    if (networkStatusCollapsed) {
-      networkStatusContent?.classList.add('hidden');
-      networkStatusChevron?.classList.add('-rotate-90');
-    } else {
-      networkStatusContent?.classList.remove('hidden');
-      networkStatusChevron?.classList.remove('-rotate-90');
-    }
-  });
-
-  // Mobile sidebar functionality
   const mobileCreateSession = document.getElementById('mobile-create-session');
   const mobileConsole = document.getElementById('mobile-console');
 
@@ -879,14 +711,12 @@ import Layout from '../layouts/Layout.astro';
     updateLogsDisplay();
   });
 
-  // Logs modal functionality
   const logsModal = document.getElementById('logs-modal');
   const logsModalBackdrop = document.getElementById('logs-modal-backdrop');
   const closeLogsModal = document.getElementById('close-logs-modal');
   const sidebarConsole = document.getElementById('sidebar-console');
   const logsContainer = document.getElementById('logs-container');
 
-  // Store logs
   const appLogs: string[] = [];
   const MAX_LOGS = 100;
 
@@ -977,7 +807,7 @@ import Layout from '../layouts/Layout.astro';
     const result = await api.createSession(phoneNumber);
 
     if (result.success && result.data) {
-      window.location.href = `/pairing/${result.data.id}?code=${result.data.pairingCode}`;
+      window.location.href = `/pairing/${result.data.id}?code=${result.data.code}`;
     } else {
       if (modalErrorDiv) {
         modalErrorDiv.textContent = result.error || 'Failed to create session';

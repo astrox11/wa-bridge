@@ -6,16 +6,8 @@ export interface Session {
   status: StatusType;
   client?: WASocket | null;
   user_info?: Contact | null;
-  network?: NetworkState;
   msgRetryCounterCache?: CacheStore;
   created_at?: number;
-}
-
-export interface NetworkState {
-  isHealthy: boolean;
-  consecutiveFailures: number;
-  lastCheck: number;
-  isPaused: boolean;
 }
 
 export enum StatusType {

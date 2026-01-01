@@ -1,13 +1,9 @@
-/**
- * Service layer middleware - API functions backed by core module
- * Provides all session management and data access functions for the service layer
- */
-
 import {
   sessionManager,
   getAllMessages,
   getMessagesCount,
   getAllGroups,
+  StatusType,
 } from "../core";
 import config from "../config";
 import type {
@@ -20,27 +16,20 @@ import type {
   MessagesData,
   ConfigData,
   GroupsData,
-  NetworkStateData,
 } from "./types";
 
-/**
- * Runtime stats tracking for sessions
- */
 class RuntimeStats {
   private sessionStats = new Map<
     string,
-    { messagesReceived: number; messagesSent: number; startTime: number }
+    { messagesReceived: number; messagesSent: number }
   >();
-  private startTime = Date.now();
-  private totalMessagesReceived = 0;
-  private totalMessagesSent = 0;
+  private totalMessages = 0;
 
   initSession(sessionId: string): void {
     if (!this.sessionStats.has(sessionId)) {
       this.sessionStats.set(sessionId, {
         messagesReceived: 0,
         messagesSent: 0,
-        startTime: Date.now(),
       });
     }
   }
@@ -49,7 +38,7 @@ class RuntimeStats {
     const stats = this.sessionStats.get(sessionId);
     if (stats) {
       stats.messagesReceived++;
-      this.totalMessagesReceived++;
+      this.totalMessages++;
     }
   }
 
@@ -57,41 +46,32 @@ class RuntimeStats {
     const stats = this.sessionStats.get(sessionId);
     if (stats) {
       stats.messagesSent++;
-      this.totalMessagesSent++;
+      this.totalMessages++;
     }
   }
 
   getStats(sessionId: string): SessionStatsData {
     const stats = this.sessionStats.get(sessionId);
     if (!stats) {
-      return { messagesReceived: 0, messagesSent: 0, uptime: 0 };
+      return { messagesReceived: 0, messagesSent: 0 };
     }
     return {
       messagesReceived: stats.messagesReceived,
       messagesSent: stats.messagesSent,
-      uptime: Math.floor((Date.now() - stats.startTime) / 1000),
     };
   }
 
   getOverallStats(): OverallStatsData {
     const sessions = sessionManager.listExtended();
     const activeSessions = sessions.filter(
-      (s) => s.status === 2 || s.status === 7,
+      (s) => s.status === StatusType.Connected || s.status === StatusType.Active,
     ).length;
-
-    const memUsage = process.memoryUsage();
 
     return {
       totalSessions: sessions.length,
       activeSessions,
-      totalMessagesReceived: this.totalMessagesReceived,
-      totalMessagesSent: this.totalMessagesSent,
-      uptime: Math.floor((Date.now() - this.startTime) / 1000),
-      memoryUsage: {
-        heapUsed: memUsage.heapUsed,
-        heapTotal: memUsage.heapTotal,
-        rss: memUsage.rss,
-      },
+      totalMessages: this.totalMessages,
+      version: config.VERSION,
     };
   }
 
@@ -102,9 +82,23 @@ class RuntimeStats {
 
 export const runtimeStats = new RuntimeStats();
 
-/**
- * Get all sessions
- */
+function getStatusString(status: number): string {
+  switch (status) {
+    case StatusType.Connected:
+    case StatusType.Active:
+      return "active";
+    case StatusType.Pairing:
+      return "pairing";
+    case StatusType.PausedUser:
+      return "paused_user";
+    case StatusType.Disconnected:
+    case StatusType.Inactive:
+      return "inactive";
+    default:
+      return "inactive";
+  }
+}
+
 export function getSessions(): ApiResponse<SessionData[]> {
   const sessions = sessionManager.listExtended();
   return {
@@ -119,9 +113,6 @@ export function getSessions(): ApiResponse<SessionData[]> {
   };
 }
 
-/**
- * Get a specific session by ID or phone number
- */
 export function getSession(
   idOrPhone: string | undefined,
 ): ApiResponse<SessionData> {
@@ -146,9 +137,6 @@ export function getSession(
   };
 }
 
-/**
- * Create a new session
- */
 export async function createSession(
   phoneNumber: string,
 ): Promise<ApiResponse<SessionCreateResult>> {
@@ -169,9 +157,6 @@ export async function createSession(
   };
 }
 
-/**
- * Delete a session
- */
 export async function deleteSession(
   idOrPhone: string,
 ): Promise<ApiResponse<{ message: string }>> {
@@ -189,9 +174,6 @@ export async function deleteSession(
   };
 }
 
-/**
- * Pause a session
- */
 export async function pauseSession(
   idOrPhone: string,
 ): Promise<ApiResponse<{ message: string }>> {
@@ -207,9 +189,6 @@ export async function pauseSession(
   };
 }
 
-/**
- * Resume a paused session
- */
 export async function resumeSession(
   idOrPhone: string,
 ): Promise<ApiResponse<{ message: string }>> {
@@ -225,9 +204,6 @@ export async function resumeSession(
   };
 }
 
-/**
- * Get auth status for a session
- */
 export function getAuthStatus(
   sessionId: string | undefined,
 ): ApiResponse<AuthStatusData> {
@@ -240,20 +216,18 @@ export function getAuthStatus(
     return { success: false, error: "Session not found" };
   }
 
-  // Status 2 = Connected, 7 = Active (authenticated)
-  const isAuthenticated = session.status === 2 || session.status === 7;
+  const isAuthenticated = session.status === StatusType.Connected || session.status === StatusType.Active;
 
   return {
     success: true,
     data: {
       isAuthenticated,
+      status: getStatusString(session.status),
+      phoneNumber: session.phone_number,
     },
   };
 }
 
-/**
- * Get overall runtime stats
- */
 export function getOverallStats(): ApiResponse<OverallStatsData> {
   return {
     success: true,
@@ -261,9 +235,6 @@ export function getOverallStats(): ApiResponse<OverallStatsData> {
   };
 }
 
-/**
- * Get stats for a specific session
- */
 export function getSessionStats(
   sessionId: string,
 ): ApiResponse<SessionStatsData> {
@@ -282,9 +253,6 @@ export function getSessionStats(
   };
 }
 
-/**
- * Get messages for a session
- */
 export function getMessages(
   sessionId: string,
   limit: number = 100,
@@ -318,34 +286,16 @@ export function getMessages(
   }
 }
 
-/**
- * Get configuration
- */
 export function getConfig(): ApiResponse<ConfigData> {
   return {
     success: true,
     data: {
       version: config.VERSION,
       botName: config.BOT_NAME,
-      debug: config.DEBUG,
     },
   };
 }
 
-/**
- * Get network state
- */
-export function getNetworkState(): ApiResponse<NetworkStateData> {
-  const networkState = sessionManager.getNetworkState();
-  return {
-    success: true,
-    data: networkState,
-  };
-}
-
-/**
- * Get groups for a session
- */
 export function getGroups(sessionId: string): ApiResponse<GroupsData> {
   if (!sessionId) {
     return { success: false, error: "Session ID is required" };

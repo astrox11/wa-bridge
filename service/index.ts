@@ -1,11 +1,3 @@
-/**
- * Service Layer
- *
- * Provides HTTP API and WebSocket request handling for the Whatsaly dashboard.
- * Uses core module directly for session management.
- */
-
-// Re-export middleware functions for service access
 export {
   runtimeStats,
   getSessions,
@@ -19,11 +11,9 @@ export {
   getSessionStats,
   getMessages,
   getConfig,
-  getNetworkState,
   getGroups,
 } from "./middleware";
 
-// Export all types
 export type {
   ApiResponse,
   SessionData,
@@ -41,15 +31,12 @@ export type {
   WsResponse,
   WsResponsePayloads,
   MessageResult,
-  NetworkStateData,
   StatsUpdate,
   RouteHandler,
 } from "./types";
 
-// Export service-specific errors
 export { ApiResponseErrors, WsResponseErrors } from "./errors";
 
-// Export predicates/validators
 export {
   validateSessionId,
   validatePhoneNumber,
@@ -63,7 +50,6 @@ export {
   validateActionParams,
 } from "./predicates";
 
-// Export handler utilities
 export {
   parseBody,
   createWsResponse,
@@ -75,5 +61,4 @@ export {
   createApiSuccess,
 } from "./handler";
 
-// Export API handling
 export { handleApiRequest } from "./api";

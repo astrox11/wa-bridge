@@ -1,11 +1,3 @@
-/**
- * Service layer error definitions
- * Defines all error constants for API and WebSocket responses
- */
-
-/**
- * API Response Errors - used for HTTP API responses
- */
 export enum ApiResponseErrors {
   INVALID_SESSION = "invalid_session_id",
   INVALID_PHONE_NUMBER = "invalid_phone_number",
@@ -15,9 +7,6 @@ export enum ApiResponseErrors {
   INTERNAL_ERROR = "internal_error",
 }
 
-/**
- * WebSocket Response Errors - service-specific for WebSocket action responses
- */
 export enum WsResponseErrors {
   UNKNOWN_ACTION = "unknown_action",
   INVALID_REQUEST = "invalid_request",

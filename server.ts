@@ -15,13 +15,27 @@ if (wsListener) {
   if (WebSocket.prototype.addListener) WebSocket.prototype.addListener = patch;
 }
 
-import { log, sessionManager } from "./core";
+import { log, sessionManager, StatusType } from "./core";
 import config from "./config";
 import { handleApiRequest, handleWsAction } from "./service/api";
 import { runtimeStats, type ApiResponse } from "./service";
 import type { WsRequest } from "./service/types";
 
 const wsClients: Set<any> = new Set();
+
+function getStatusString(status: number): string {
+  switch (status) {
+    case StatusType.Connected:
+    case StatusType.Active:
+      return "active";
+    case StatusType.Pairing:
+      return "pairing";
+    case StatusType.PausedUser:
+      return "paused_user";
+    default:
+      return "inactive";
+  }
+}
 
 function BroadCast() {
   if (wsClients.size === 0) return;
@@ -30,17 +44,20 @@ function BroadCast() {
 
   const overallStats = runtimeStats.getOverallStats();
   const sessions = sessionManager.listExtended();
-  const networkState = sessionManager.getNetworkState();
 
   const message = JSON.stringify({
     type: "stats",
     data: {
       overall: overallStats,
       sessions: sessions.map((s) => ({
-        ...s,
+        id: s.id,
+        phone_number: s.phone_number,
+        status: getStatusString(s.status),
+        user_info: s.user_info ?? null,
+        created_at: s.created_at,
+        pushName: s.user_info?.name,
         stats: runtimeStats.getStats(s.id),
       })),
-      network: networkState,
     },
   });
 
@@ -144,9 +161,6 @@ async function proxyToAstro(req: Request): Promise<Response> {
   }
 }
 
-/**
- * Main server handler
- */
 const server = Bun.serve({
   port: config.API_PORT,
   hostname: config.API_HOST,
@@ -170,8 +184,6 @@ const server = Bun.serve({
         data: {
           status: "healthy",
           version: config.VERSION,
-          uptime: process.uptime(),
-          network: sessionManager.getNetworkState(),
         },
       });
     }
@@ -201,7 +213,6 @@ const server = Bun.serve({
 
       const overallStats = runtimeStats.getOverallStats();
       const sessions = sessionManager.listExtended();
-      const networkState = sessionManager.getNetworkState();
 
       ws.send(
         JSON.stringify({
@@ -209,10 +220,14 @@ const server = Bun.serve({
           data: {
             overall: overallStats,
             sessions: sessions.map((s) => ({
-              ...s,
+              id: s.id,
+              phone_number: s.phone_number,
+              status: getStatusString(s.status),
+              user_info: s.user_info ?? null,
+              created_at: s.created_at,
+              pushName: s.user_info?.name,
               stats: runtimeStats.getStats(s.id),
             })),
-            network: networkState,
           },
         }),
       );

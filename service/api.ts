@@ -1,8 +1,3 @@
-/**
- * Service layer API routing
- * HTTP and WebSocket request handling
- */
-
 import { log } from "../core";
 import {
   getSessions,
@@ -14,19 +9,14 @@ import {
   getSessionStats,
   getMessages,
   getConfig,
-  getNetworkState,
 } from "./middleware";
 import type { ApiResponse, SessionCreateRequest } from "./types";
 import { ApiResponseErrors } from "./errors";
 import { validatePhoneNumber, validatePagination } from "./predicates";
 import { parseBody, matchRoute, createApiError } from "./handler";
 
-// Re-export handleWsAction from handler
 export { handleWsAction } from "./handler";
 
-/**
- * API route definitions
- */
 const routes: Record<
   string,
   (req: Request, params?: Record<string, string>) => Promise<ApiResponse>
@@ -76,18 +66,11 @@ const routes: Record<
     return getSessionStats(params?.sessionId as string);
   },
 
-  "GET /api/network": async () => {
-    return getNetworkState();
-  },
-
   "GET /api/config": async () => {
     return getConfig();
   },
 };
 
-/**
- * Handle HTTP API requests
- */
 export async function handleApiRequest(req: Request): Promise<ApiResponse> {
   const url = new URL(req.url);
   const path = url.pathname;

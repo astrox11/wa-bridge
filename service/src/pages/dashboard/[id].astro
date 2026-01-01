@@ -83,14 +83,14 @@ const hashedId = hashSessionId(id || "");
             fill="currentColor"
           >
             <path
-              d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm7-3.25v2.992l2.028.812a.75.75 0 0 1-.557 1.392l-2.5-1A.751.751 0 0 1 7 8.25v-3.5a.75.75 0 0 1 1.5 0Z"
-            ></path>
+              d="M4.75 0h6.5a.75.75 0 0 1 0 1.5h-6.5a.75.75 0 0 1 0-1.5ZM2 4.75A.75.75 0 0 1 2.75 4h10.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 4.75Zm-.5 3a1.75 1.75 0 0 1 1.75-1.75h9.5a1.75 1.75 0 0 1 1.75 1.75v7.5A1.75 1.75 0 0 1 12.75 17h-9.5A1.75 1.75 0 0 1 1.5 15.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"
+              transform="translate(0, -1)"></path>
           </svg>
-          <p class="text-xs text-gh-text-secondary">Uptime</p>
+          <p class="text-xs text-gh-text-secondary">Created</p>
         </div>
-        <p id="uptime" class="text-base font-semibold text-gh-text">
+        <p id="created-date" class="text-base font-semibold text-gh-text">
           <span
-            class="inline-block w-10 h-4 bg-gh-bg-tertiary rounded animate-pulse"
+            class="inline-block w-16 h-4 bg-gh-bg-tertiary rounded animate-pulse"
           ></span>
         </p>
       </div>
@@ -102,14 +102,14 @@ const hashedId = hashSessionId(id || "");
             fill="currentColor"
           >
             <path
-              d="M4.75 0h6.5a.75.75 0 0 1 0 1.5h-6.5a.75.75 0 0 1 0-1.5ZM2 4.75A.75.75 0 0 1 2.75 4h10.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 4.75Zm-.5 3a1.75 1.75 0 0 1 1.75-1.75h9.5a1.75 1.75 0 0 1 1.75 1.75v7.5A1.75 1.75 0 0 1 12.75 17h-9.5A1.75 1.75 0 0 1 1.5 15.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"
-              transform="translate(0, -1)"></path>
+              d="M11.93 8.5a4.002 4.002 0 0 1-7.86 0H.75a.75.75 0 0 1 0-1.5h3.32a4.002 4.002 0 0 1 7.86 0h3.32a.75.75 0 0 1 0 1.5Zm-1.43-.75a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Z"
+            ></path>
           </svg>
-          <p class="text-xs text-gh-text-secondary">Created</p>
+          <p class="text-xs text-gh-text-secondary">Messages Sent</p>
         </div>
-        <p id="created-date" class="text-base font-semibold text-gh-text">
+        <p id="messages-sent" class="text-base font-semibold text-gh-text">
           <span
-            class="inline-block w-16 h-4 bg-gh-bg-tertiary rounded animate-pulse"
+            class="inline-block w-10 h-4 bg-gh-bg-tertiary rounded animate-pulse"
           ></span>
         </p>
       </div>
@@ -282,26 +282,10 @@ const hashedId = hashSessionId(id || "");
                 >Session: <span class="text-gh-text">Authenticated</span></span
               >
             </div>
-            <div class="flex items-center gap-2">
-              <svg
-                class="w-3 h-3 text-gh-success"
-                viewBox="0 0 16 16"
-                fill="currentColor"
-              >
-                <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"></path>
-                <path
-                  d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z"
-                ></path>
-              </svg>
-              <span id="health-network" class="text-gh-text-secondary"
-                >Network: <span class="text-gh-text">Stable</span></span
-              >
-            </div>
           </div>
         </div>
       </div>
 
-      <!-- Runtime Stats Card -->
       <div class="bg-gh-bg border border-gh-border rounded-gh">
         <div class="p-4 border-b border-gh-border flex items-center gap-2">
           <svg
@@ -340,18 +324,9 @@ const hashedId = hashSessionId(id || "");
               ></span></span
             >
           </div>
-          <div class="flex justify-between items-center">
-            <span class="text-gh-text-secondary">Server Uptime</span>
-            <span id="server-uptime" class="text-gh-text font-medium"
-              ><span
-                class="inline-block w-12 h-3 bg-gh-bg-tertiary rounded animate-pulse"
-              ></span></span
-            >
-          </div>
         </div>
       </div>
 
-      <!-- Session Info Card -->
       <div class="bg-gh-bg border border-gh-border rounded-gh">
         <div class="p-4 border-b border-gh-border flex items-center gap-2">
           <svg
@@ -380,14 +355,6 @@ const hashedId = hashSessionId(id || "");
               id="session-id-display"
               class="text-gh-text font-mono text-xs bg-gh-bg-secondary px-1.5 py-0.5 rounded"
               title={id}>{hashedId}</span
-            >
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-gh-text-secondary">Avg/Hour</span>
-            <span id="avg-messages" class="text-gh-text font-medium"
-              ><span
-                class="inline-block w-8 h-3 bg-gh-bg-tertiary rounded animate-pulse"
-              ></span></span
             >
           </div>
           <div class="flex justify-between items-center">
@@ -470,11 +437,8 @@ const hashedId = hashSessionId(id || "");
   const sessionId = window.location.pathname.split("/").pop() || "";
 
   interface SessionStats {
-    messages: number;
-    uptimeFormatted: string;
-    uptime: number;
-    avgMessagesPerHour: number;
-    hourlyActivity?: number[];
+    messagesReceived: number;
+    messagesSent: number;
   }
 
   interface SessionData {
@@ -504,7 +468,6 @@ const hashedId = hashSessionId(id || "");
   }
 
   function updateSessionDisplay(sessionData: SessionData) {
-    // User name (pushName or phone number)
     const displayName =
       sessionData.pushName ||
       sessionData.push_name ||
@@ -512,38 +475,29 @@ const hashedId = hashSessionId(id || "");
     const userNameEl = document.getElementById("user-name");
     if (userNameEl) userNameEl.textContent = displayName;
 
-    // Phone number
     const phoneEl = document.getElementById("phone-number");
     if (phoneEl) phoneEl.textContent = `+${sessionData.phone_number}`;
 
-    // Stats from the stats object
     if (sessionData.stats) {
       const messagesCountEl = document.getElementById("messages-count");
-      const uptimeEl = document.getElementById("uptime");
-      const avgMessagesEl = document.getElementById("avg-messages");
+      const messagesSentEl = document.getElementById("messages-sent");
 
-      if (messagesCountEl)
+      if (messagesCountEl) {
         messagesCountEl.textContent =
-          sessionData.stats.messages.toLocaleString();
-      if (uptimeEl)
-        uptimeEl.textContent = sessionData.stats.uptimeFormatted || "0s";
-      if (avgMessagesEl)
-        avgMessagesEl.textContent =
-          sessionData.stats.avgMessagesPerHour.toFixed(1);
-
-      if (sessionData.stats.hourlyActivity) {
-        renderActivityChart(sessionData.stats.hourlyActivity);
+          sessionData.stats.messagesReceived.toLocaleString();
+      }
+      if (messagesSentEl) {
+        messagesSentEl.textContent =
+          sessionData.stats.messagesSent.toLocaleString();
       }
     }
 
-    // Created date
     if (sessionData.created_at) {
       const createdEl = document.getElementById("created-date");
       if (createdEl)
         createdEl.textContent = formatRelativeTime(sessionData.created_at);
     }
 
-    // Status indicator
     updateHealthStatus(sessionData.status);
   }
 
@@ -554,7 +508,6 @@ const hashedId = hashSessionId(id || "");
     const healthText = document.getElementById("health-text");
     const healthWs = document.getElementById("health-ws");
     const healthSession = document.getElementById("health-session");
-    const healthNetwork = document.getElementById("health-network");
 
     if (!statusEl || !healthBadge || !healthIcon || !healthText) return;
 
@@ -577,9 +530,6 @@ const hashedId = hashSessionId(id || "");
       if (healthSession)
         healthSession.innerHTML =
           'Session: <span class="text-gh-text">Authenticated</span>';
-      if (healthNetwork)
-        healthNetwork.innerHTML =
-          'Network: <span class="text-gh-text">Stable</span>';
     } else if (status === "pairing") {
       statusEl.innerHTML = `
         <svg class="w-4 h-4 text-gh-warning animate-pulse" viewBox="0 0 16 16" fill="currentColor">
@@ -600,9 +550,6 @@ const hashedId = hashSessionId(id || "");
       if (healthSession)
         healthSession.innerHTML =
           'Session: <span class="text-gh-warning">Awaiting scan</span>';
-      if (healthNetwork)
-        healthNetwork.innerHTML =
-          'Network: <span class="text-gh-text">Stable</span>';
     } else {
       statusEl.innerHTML = `
         <svg class="w-4 h-4 text-gh-text-muted" viewBox="0 0 16 16" fill="currentColor">
@@ -623,9 +570,6 @@ const hashedId = hashSessionId(id || "");
       if (healthSession)
         healthSession.innerHTML =
           'Session: <span class="text-gh-text-muted">Disconnected</span>';
-      if (healthNetwork)
-        healthNetwork.innerHTML =
-          'Network: <span class="text-gh-text-muted">Unknown</span>';
     }
   }
 
@@ -641,7 +585,6 @@ const hashedId = hashSessionId(id || "");
     const avg = total / 24;
     const peakHour = hourlyData.indexOf(maxValue);
 
-    // Update chart stats
     if (peakEl) {
       const peakTime =
         peakHour < 12
@@ -671,14 +614,12 @@ const hashedId = hashSessionId(id || "");
     container.innerHTML = html;
   }
 
-  // Subscribe to real-time updates via WebSocket
   api.onStats((data) => {
     if (data.type === "stats") {
       if (data.data.overall) {
         const totalSessionsEl = document.getElementById("total-sessions");
         const activeSessionsEl = document.getElementById("active-sessions");
         const totalMessagesEl = document.getElementById("total-messages");
-        const serverUptimeEl = document.getElementById("server-uptime");
 
         if (totalSessionsEl)
           totalSessionsEl.textContent =
@@ -689,12 +630,8 @@ const hashedId = hashSessionId(id || "");
         if (totalMessagesEl)
           totalMessagesEl.textContent =
             data?.data?.overall.totalMessages?.toLocaleString();
-        if (serverUptimeEl)
-          serverUptimeEl.textContent =
-            data?.data?.overall?.serverUptimeFormatted;
       }
 
-      // Find current session stats
       if (data.data.sessions) {
         const sessionData = data.data.sessions.find(
           (s: { id: string }) => s.id === sessionId
@@ -706,7 +643,6 @@ const hashedId = hashSessionId(id || "");
     }
   });
 
-  // Load config via WebSocket
   api.getConfig().then((result) => {
     if (result.success && result.data) {
       const versionEl = document.getElementById("runtime-version");

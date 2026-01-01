@@ -1,15 +1,6 @@
-/**
- * Service layer predicates and validators
- * Consistent with middleware/api/utils/vaildators.ts pattern
- */
-
 import type { ApiResponse, WsRequest, WsAction } from "./types";
 import { ApiResponseErrors, WsResponseErrors } from "./errors";
 
-/**
- * Validate session ID parameter
- * Returns error response if invalid, null if valid
- */
 export function validateSessionId(
   sessionId: string | undefined,
 ): ApiResponse | null {
@@ -19,10 +10,6 @@ export function validateSessionId(
   return null;
 }
 
-/**
- * Validate phone number parameter
- * Returns error response if invalid, null if valid
- */
 export function validatePhoneNumber(
   phoneNumber: string | undefined,
 ): ApiResponse | null {
@@ -36,10 +23,6 @@ export function validatePhoneNumber(
   return null;
 }
 
-/**
- * Validate numeric parameter
- * Returns a validated number or default value
- */
 export function validateNumericParam(
   value: unknown,
   defaultValue: number,
@@ -51,9 +34,6 @@ export function validateNumericParam(
   return isNaN(num) ? defaultValue : num;
 }
 
-/**
- * Validate pagination parameters
- */
 export function validatePagination(
   limit: unknown,
   offset: unknown,
@@ -63,10 +43,6 @@ export function validatePagination(
     offset: validateNumericParam(offset, 0),
   };
 }
-
-/**
- * WebSocket request predicates
- */
 
 const VALID_WS_ACTIONS = new Set<WsAction>([
   "getSessions",
@@ -78,23 +54,15 @@ const VALID_WS_ACTIONS = new Set<WsAction>([
   "getSessionStats",
   "getMessages",
   "getConfig",
-  "getNetworkState",
   "getGroups",
   "pauseSession",
   "resumeSession",
 ]);
 
-/**
- * Check if a string is a valid WebSocket action
- */
 export function isValidWsAction(action: string): action is WsAction {
   return VALID_WS_ACTIONS.has(action as WsAction);
 }
 
-/**
- * Validate WebSocket request structure
- * Returns error message if invalid, null if valid
- */
 export function validateWsRequest(data: unknown): string | null {
   if (!data || typeof data !== "object") {
     return WsResponseErrors.INVALID_REQUEST;
@@ -113,10 +81,6 @@ export function validateWsRequest(data: unknown): string | null {
   return null;
 }
 
-/**
- * Parse WebSocket request safely
- * Returns parsed request or null if parsing fails
- */
 export function parseWsRequest(data: unknown): WsRequest | null {
   if (typeof data === "string") {
     try {
@@ -134,9 +98,6 @@ export function parseWsRequest(data: unknown): WsRequest | null {
   return data as WsRequest;
 }
 
-/**
- * Check if request requires session ID parameter
- */
 export function requiresSessionId(action: WsAction): boolean {
   const actionsRequiringSession: WsAction[] = [
     "getSession",
@@ -151,16 +112,10 @@ export function requiresSessionId(action: WsAction): boolean {
   return actionsRequiringSession.includes(action);
 }
 
-/**
- * Check if request requires phone number parameter
- */
 export function requiresPhoneNumber(action: WsAction): boolean {
   return action === "createSession";
 }
 
-/**
- * Validate request parameters based on action
- */
 export function validateActionParams(
   action: WsAction,
   params: Record<string, unknown> | undefined,

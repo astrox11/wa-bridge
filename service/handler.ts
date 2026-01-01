@@ -1,11 +1,6 @@
-/**
- * Service layer request handlers
- * Consistent with middleware/handler.ts pattern
- */
-
 import { log } from "../core";
 import type { ApiResponse, WsRequest, WsResponse, WsAction } from "./types";
-import { WsResponseErrors, ApiResponseErrors } from "./errors";
+import { WsResponseErrors } from "./errors";
 import {
   validateWsRequest,
   validateActionParams,
@@ -23,13 +18,9 @@ import {
   getSessionStats,
   getMessages,
   getConfig,
-  getNetworkState,
   getGroups,
 } from "./middleware";
 
-/**
- * Parse JSON body from request safely
- */
 export async function parseBody<T>(req: Request): Promise<T | null> {
   try {
     return (await req.json()) as T;
@@ -38,9 +29,6 @@ export async function parseBody<T>(req: Request): Promise<T | null> {
   }
 }
 
-/**
- * Create a success WebSocket response
- */
 export function createWsResponse(
   action: WsAction,
   requestId: string | undefined,
@@ -54,9 +42,6 @@ export function createWsResponse(
   };
 }
 
-/**
- * Create an error WebSocket response
- */
 export function createWsErrorResponse(
   action: WsAction,
   requestId: string | undefined,
@@ -70,56 +55,35 @@ export function createWsErrorResponse(
   };
 }
 
-/**
- * Action handler map for WebSocket actions
- */
 type ActionHandler = (
   params: Record<string, unknown>,
 ) => ApiResponse | Promise<ApiResponse>;
 
 const actionHandlers: Record<WsAction, ActionHandler> = {
   getSessions: () => getSessions(),
-
   getSession: (params) => getSession(params.id as string),
-
   createSession: (params) => createSession(params.phoneNumber as string),
-
   deleteSession: (params) => deleteSession(params.id as string),
-
   getAuthStatus: (params) => getAuthStatus(params.sessionId as string),
-
   getStats: () => getOverallStats(),
-
   getSessionStats: (params) => getSessionStats(params.sessionId as string),
-
   getMessages: (params) =>
     getMessages(
       params.sessionId as string,
       (params.limit as number) || 100,
       (params.offset as number) || 0,
     ),
-
   getConfig: () => getConfig(),
-
-  getNetworkState: () => getNetworkState(),
-
   getGroups: (params) => getGroups(params.sessionId as string),
-
   pauseSession: (params) => pauseSession(params.id as string),
-
   resumeSession: (params) => resumeSession(params.id as string),
 };
 
-/**
- * Handle WebSocket action request
- * Main entry point for WebSocket message handling
- */
 export async function handleWsAction(request: WsRequest): Promise<WsResponse> {
   const { action, requestId, params = {} } = request;
 
   log.debug("WebSocket action received:", action, params);
 
-  // Validate action params
   const paramsError = validateActionParams(action, params);
   if (paramsError) {
     return createWsErrorResponse(action, requestId, paramsError);
@@ -153,17 +117,12 @@ export async function handleWsAction(request: WsRequest): Promise<WsResponse> {
   }
 }
 
-/**
- * Parse and handle raw WebSocket message
- * Validates message format before processing
- */
 export async function handleRawWsMessage(
   data: unknown,
 ): Promise<WsResponse | { success: false; error: string }> {
   const request = parseWsRequest(data);
 
   if (!request) {
-    // Return a minimal error response without action for invalid requests
     return {
       success: false,
       error: WsResponseErrors.INVALID_REQUEST,
@@ -173,9 +132,6 @@ export async function handleRawWsMessage(
   return handleWsAction(request);
 }
 
-/**
- * Route matching result
- */
 interface RouteMatch {
   handler: (
     req: Request,
@@ -184,9 +140,6 @@ interface RouteMatch {
   params: Record<string, string>;
 }
 
-/**
- * Match a route pattern against a path
- */
 export function matchRoute(
   method: string,
   path: string,
@@ -197,12 +150,10 @@ export function matchRoute(
 ): RouteMatch | null {
   const routeKey = `${method} ${path}`;
 
-  // Exact match
   if (routes[routeKey]) {
     return { handler: routes[routeKey], params: {} };
   }
 
-  // Pattern matching
   for (const [pattern, handler] of Object.entries(routes)) {
     const [routeMethod, routePath] = pattern.split(" ");
     if (routeMethod !== method) continue;
@@ -232,16 +183,10 @@ export function matchRoute(
   return null;
 }
 
-/**
- * Create an API error response
- */
 export function createApiError(error: string): ApiResponse {
   return { success: false, error };
 }
 
-/**
- * Create an API success response
- */
 export function createApiSuccess<T>(data: T): ApiResponse<T> {
   return { success: true, data };
 }

@@ -1,4 +1,4 @@
-type WsAction =
+export type WsAction =
   | "getSessions"
   | "getSession"
   | "createSession"
@@ -8,18 +8,17 @@ type WsAction =
   | "getSessionStats"
   | "getMessages"
   | "getConfig"
-  | "getNetworkState"
   | "getGroups"
   | "pauseSession"
   | "resumeSession";
 
-interface WsRequest {
+export interface WsRequest {
   action: WsAction;
   requestId?: string;
   params?: Record<string, unknown>;
 }
 
-interface WsResponse {
+export interface WsResponse {
   action: WsAction;
   requestId?: string;
   success: boolean;
@@ -27,7 +26,7 @@ interface WsResponse {
   error?: string;
 }
 
-interface Session {
+export interface Session {
   id: string;
   phone_number: string;
   created_at: number;
@@ -36,75 +35,60 @@ interface Session {
   push_name?: string;
 }
 
-interface SessionCreateResponse {
+export interface SessionCreateResponse {
   id: string;
-  pairingCode: string;
-  pairingCodeFormatted: string;
+  code?: string;
 }
 
-interface AuthStatus {
-  sessionId: string;
-  phoneNumber: string;
-  status: string;
+export interface AuthStatus {
   isAuthenticated: boolean;
-  isPairing: boolean;
+  status: string;
+  phoneNumber: string;
 }
 
-interface RuntimeStats {
+export interface RuntimeStats {
   totalSessions: number;
   activeSessions: number;
   totalMessages: number;
   version: string;
-  serverUptime: number;
-  serverUptimeFormatted: string;
 }
 
-interface SessionStats {
-  session: Session & { pushName?: string };
-  messages: number;
-  uptime: number;
-  uptimeFormatted: string;
-  hourlyActivity: number[];
-  avgMessagesPerHour: number;
+export interface SessionStats {
+  messagesReceived: number;
+  messagesSent: number;
 }
 
-interface Config {
+export interface Config {
   version: string;
-  defaultBotName: string;
+  botName: string;
 }
 
-interface NetworkState {
-  isHealthy: boolean;
-  consecutiveFailures: number;
-  lastCheck: number;
-  isPaused: boolean;
-}
-
-interface StatsUpdate {
+export interface StatsUpdate {
   type: "stats";
   data: {
     overall: RuntimeStats;
     sessions: Array<Session & { stats: SessionStats }>;
-    network: NetworkState;
   };
 }
 
-interface ApiResponse<T = unknown> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
 }
 
-interface MessagesResponse {
+export interface MessagesResponse {
   messages: Array<{ id: string; message: unknown }>;
   total: number;
   limit: number;
   offset: number;
 }
 
-/**
- * WebSocket-based API Client
- */
+export interface GroupsResponse {
+  groups: Array<{ id: string; subject: string; participantCount: number }>;
+  total: number;
+}
+
 interface PendingRequest {
   resolve: (value: WsResponse) => void;
   reject: (error: Error) => void;
@@ -133,13 +117,8 @@ class WsApiClient {
 
     this.connectionPromise = new Promise((resolve, reject) => {
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-
-      // In production, when served by Astro SSR server (port 4321), connect to backend (port 3000)
-      // In development, Vite proxies /ws to backend so use same host
       let wsHost = window.location.host;
 
-      // If we're on the Astro SSR port (4321), redirect WebSocket to backend port (3000)
-      // This handles the case where users access the Astro server directly
       if (window.location.port === "4321") {
         wsHost = `${window.location.hostname}:3000`;
       }
@@ -193,13 +172,11 @@ class WsApiClient {
         this.connectionPromise = null;
         this.ws = null;
 
-        // Reject all pending requests
         this.pendingRequests.forEach(({ reject }) => {
           reject(new Error("WebSocket connection closed"));
         });
         this.pendingRequests.clear();
 
-        // Reconnect after delay
         if (!this.isReconnecting) {
           this.isReconnecting = true;
           console.log("[Whatsaly] Reconnecting in 3 seconds...");
@@ -237,7 +214,6 @@ class WsApiClient {
 
         this.ws!.send(JSON.stringify(request));
 
-        // Timeout after 30 seconds
         setTimeout(() => {
           if (this.pendingRequests.has(requestId)) {
             this.pendingRequests.delete(requestId);
@@ -259,11 +235,9 @@ class WsApiClient {
     }
   }
 
-  // Subscribe to stats updates
   onStats(callback: (data: StatsUpdate) => void): () => void {
     this.statsCallbacks.add(callback);
 
-    // Immediately send the last known stats to new subscribers
     if (this.lastStatsData) {
       console.log("[Whatsaly] Sending cached stats to new subscriber");
       setTimeout(() => callback(this.lastStatsData!), 0);
@@ -274,7 +248,6 @@ class WsApiClient {
     };
   }
 
-  // Session management
   async getSessions(): Promise<ApiResponse<Session[]>> {
     return this.send<Session[]>("getSessions");
   }
@@ -293,12 +266,10 @@ class WsApiClient {
     return this.send<{ message: string }>("deleteSession", { id });
   }
 
-  // Authentication
   async getAuthStatus(sessionId: string): Promise<ApiResponse<AuthStatus>> {
     return this.send<AuthStatus>("getAuthStatus", { sessionId });
   }
 
-  // Statistics
   async getOverallStats(): Promise<ApiResponse<RuntimeStats>> {
     return this.send<RuntimeStats>("getStats");
   }
@@ -307,7 +278,6 @@ class WsApiClient {
     return this.send<SessionStats>("getSessionStats", { sessionId });
   }
 
-  // Messages
   async getMessages(
     sessionId: string,
     limit = 100,
@@ -320,23 +290,61 @@ class WsApiClient {
     });
   }
 
-  // Config
   async getConfig(): Promise<ApiResponse<Config>> {
     return this.send<Config>("getConfig");
   }
 
-  // Network
-  async getNetworkState(): Promise<ApiResponse<NetworkState>> {
-    return this.send<NetworkState>("getNetworkState");
+  async getGroups(sessionId: string): Promise<ApiResponse<GroupsResponse>> {
+    return this.send<GroupsResponse>("getGroups", { sessionId });
   }
 
-  // Legacy method for backward compatibility
   connectStats(onMessage: (data: StatsUpdate) => void): WebSocket | null {
     this.onStats(onMessage);
     return this.ws;
   }
 
-  // Cleanup
+  async sendAction(
+    action: WsAction,
+    params?: Record<string, unknown>,
+  ): Promise<WsResponse> {
+    try {
+      await this.connect();
+
+      if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+        throw new Error("WebSocket not connected");
+      }
+
+      const requestId = `req_${++this.requestId}`;
+
+      const response = await new Promise<WsResponse>((resolve, reject) => {
+        this.pendingRequests.set(requestId, { resolve, reject });
+
+        const request: WsRequest = {
+          action,
+          requestId,
+          params,
+        };
+
+        this.ws!.send(JSON.stringify(request));
+
+        setTimeout(() => {
+          if (this.pendingRequests.has(requestId)) {
+            this.pendingRequests.delete(requestId);
+            reject(new Error("Request timeout"));
+          }
+        }, 30000);
+      });
+
+      return response;
+    } catch (error) {
+      return {
+        action,
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
+
   destroy() {
     if (this.reconnectTimeout) {
       clearTimeout(this.reconnectTimeout);
@@ -349,7 +357,6 @@ class WsApiClient {
   }
 }
 
-// Singleton instance
 let apiClientInstance: WsApiClient | null = null;
 
 function getApiClient(): WsApiClient {
@@ -360,7 +367,6 @@ function getApiClient(): WsApiClient {
 }
 
 export const api = {
-  // Session management
   async getSessions(): Promise<ApiResponse<Session[]>> {
     return getApiClient().getSessions();
   },
@@ -379,12 +385,10 @@ export const api = {
     return getApiClient().deleteSession(id);
   },
 
-  // Authentication
   async getAuthStatus(sessionId: string): Promise<ApiResponse<AuthStatus>> {
     return getApiClient().getAuthStatus(sessionId);
   },
 
-  // Statistics
   async getOverallStats(): Promise<ApiResponse<RuntimeStats>> {
     return getApiClient().getOverallStats();
   },
@@ -393,7 +397,6 @@ export const api = {
     return getApiClient().getSessionStats(sessionId);
   },
 
-  // Messages
   async getMessages(
     sessionId: string,
     limit = 100,
@@ -402,44 +405,26 @@ export const api = {
     return getApiClient().getMessages(sessionId, limit, offset);
   },
 
-  // Config
   async getConfig(): Promise<ApiResponse<Config>> {
     return getApiClient().getConfig();
   },
 
-  // Network
-  async getNetworkState(): Promise<ApiResponse<NetworkState>> {
-    return getApiClient().getNetworkState();
+  async getGroups(sessionId: string): Promise<ApiResponse<GroupsResponse>> {
+    return getApiClient().getGroups(sessionId);
   },
 
-  // Generic action sender (for custom actions)
   async sendAction(
     action: WsAction,
     params?: Record<string, unknown>,
   ): Promise<WsResponse> {
-    return getApiClient().send(action, params);
+    return getApiClient().sendAction(action, params);
   },
 
-  // Stats subscription
   onStats(callback: (data: StatsUpdate) => void): () => void {
     return getApiClient().onStats(callback);
   },
 
-  // Legacy method
   connectStats: (onMessage: (data: StatsUpdate) => void): WebSocket | null => {
     return getApiClient().connectStats(onMessage);
   },
-};
-
-export type {
-  Session,
-  SessionCreateResponse,
-  AuthStatus,
-  RuntimeStats,
-  SessionStats,
-  Config,
-  ApiResponse,
-  StatsUpdate,
-  NetworkState,
-  MessagesResponse,
 };
