@@ -124,11 +124,9 @@ class WsApiClient {
       }
 
       const wsUrl = `${protocol}//${wsHost}/ws/stats`;
-      console.log("[Whatsaly] Connecting to WebSocket:", wsUrl);
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
-        console.log("[Whatsaly] WebSocket connected");
         this.isReconnecting = false;
         resolve();
       };
@@ -138,11 +136,11 @@ class WsApiClient {
         try {
           data = JSON.parse(event.data);
         } catch (e) {
-          console.error("[Whatsaly] Invalid JSON:", e);
+          console.error(e);
           return;
         }
 
-        console.log("[Whatsaly] WebSocket message received:", data.type);
+        console.log(data.type);
 
         if (data.requestId && this.pendingRequests.has(data.requestId)) {
           const pending = this.pendingRequests.get(data.requestId)!;
@@ -158,12 +156,12 @@ class WsApiClient {
       };
 
       this.ws.onerror = (error) => {
-        console.error("[Whatsaly] WebSocket error:", error);
+        console.error(error);
         reject(new Error("WebSocket connection failed"));
       };
 
       this.ws.onclose = (event) => {
-        console.log("[Whatsaly] WebSocket closed:", event.code, event.reason);
+        console.log("WebSocket closed:", event.code, event.reason);
         this.connectionPromise = null;
         this.ws = null;
 
@@ -174,7 +172,7 @@ class WsApiClient {
 
         if (!this.isReconnecting) {
           this.isReconnecting = true;
-          console.log("[Whatsaly] Reconnecting in 3 seconds...");
+          console.log("Reconnecting in 3 seconds...");
           this.reconnectTimeout = setTimeout(() => {
             this.connect();
           }, 3000);
@@ -233,10 +231,7 @@ class WsApiClient {
   onStats(callback: (data: StatsUpdate) => void): () => void {
     this.statsCallbacks.add(callback);
 
-    if (this.lastStatsData) {
-      console.log("[Whatsaly] Sending cached stats to new subscriber");
-      setTimeout(() => callback(this.lastStatsData!), 0);
-    }
+    if (this.lastStatsData) setTimeout(() => callback(this.lastStatsData!), 0);
 
     return () => {
       this.statsCallbacks.delete(callback);

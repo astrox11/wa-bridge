@@ -24,6 +24,7 @@ import type { WsRequest } from "./service/types";
 const wsClients: Set<any> = new Set();
 
 function getStatusString(status: number): string {
+  log.debug("Converting status:", status);
   switch (status) {
     case StatusType.Connected:
     case StatusType.Active:
@@ -37,19 +38,22 @@ function getStatusString(status: number): string {
   }
 }
 
-let wsSize = 0;
+// let wsSize = 0;
 
 function BroadCast() {
-  if (wsClients.size === wsSize) return;
+  if (wsClients.size === 0) return;
 
-  if (wsClients.size !== wsSize) {
-    wsSize = wsClients.size;
-    log.info(`WebSocket clients connected: ${wsSize}`);
-  }
+  // if (wsClients.size !== wsSize) {
+  //   wsSize = wsClients.size;
+  //   log.info(`WebSocket clients connected: ${wsSize}`);
+  // }
 
   const overallStats = runtimeStats.getOverallStats();
   const sessions = sessionManager.listExtended();
-
+  log.debug(
+    "Sessions:",
+    sessions.map((s) => ({ id: s.id, status: s.status })),
+  );
   const message = JSON.stringify({
     type: "stats",
     data: {

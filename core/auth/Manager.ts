@@ -87,7 +87,12 @@ class SessionManager {
     this.runtimeData.set(sessionId, runtime);
 
     try {
-      const code = await this.initializeSession(sessionId, phone_number, runtime, true);
+      const code = await this.initializeSession(
+        sessionId,
+        phone_number,
+        runtime,
+        true,
+      );
       createSession(sessionId, phone_number);
       log.debug("Session created:", sessionId);
       return { success: true, code, id: sessionId };
@@ -111,7 +116,9 @@ class SessionManager {
   ): Promise<string | undefined> {
     const dbSession = getSession(sessionId);
     if (dbSession && UserPausedStatus(dbSession.status)) {
-      log.info(`Session ${sessionId} initialization skipped - session is paused in database`);
+      log.info(
+        `Session ${sessionId} initialization skipped - session is paused in database`,
+      );
       return undefined;
     }
 
@@ -179,19 +186,30 @@ class SessionManager {
         );
 
         if (connection === "close") {
-          const statusCode = (lastDisconnect?.error as Boom)?.output?.statusCode;
-          log.debug(`Session ${sessionId} disconnected with status code:`, statusCode);
-          
+          const statusCode = (lastDisconnect?.error as Boom)?.output
+            ?.statusCode;
+          log.debug(
+            `Session ${sessionId} disconnected with status code:`,
+            statusCode,
+          );
+
           if (statusCode !== DisconnectReason.loggedOut) {
             const dbSession = getSession(sessionId);
             if (dbSession?.status === StatusType.PausedUser) {
-              log.info(`Session ${sessionId} reconnection skipped - session is paused by user`);
+              log.info(
+                `Session ${sessionId} reconnection skipped - session is paused by user`,
+              );
               return;
             }
 
             updateSessionStatus(sessionId, StatusType.Connecting);
             log.info(`Session ${sessionId} reconnecting...`);
-            this.initializeSession(sessionId, phoneNumber, runtime, false).catch((error) => {
+            this.initializeSession(
+              sessionId,
+              phoneNumber,
+              runtime,
+              false,
+            ).catch((error) => {
               log.error(`Session ${sessionId} reconnection failed:`, error);
             });
           } else {
@@ -235,7 +253,10 @@ class SessionManager {
               await cmd.load("./core/plugins");
               await Promise.allSettled([cmd.text(), cmd.eventUser(type)]);
             } catch (error) {
-              log.error(`Session ${sessionId} failed to handle message:`, error);
+              log.error(
+                `Session ${sessionId} failed to handle message:`,
+                error,
+              );
             }
           }),
         );
@@ -247,8 +268,12 @@ class SessionManager {
       }
 
       if (events["group-participants.update"]) {
-        const { id, participants, action } = events["group-participants.update"];
-        if (action === "remove" && participants[0].id === jidNormalizedUser(sock.user.lid)) {
+        const { id, participants, action } =
+          events["group-participants.update"];
+        if (
+          action === "remove" &&
+          participants[0].id === jidNormalizedUser(sock.user.lid)
+        ) {
           return;
         }
         const metadata = await sock.groupMetadata(id);
@@ -280,12 +305,17 @@ class SessionManager {
       }
 
       if (events["messages.delete"]) {
-        log.debug(`Session ${sessionId} message deleted:`, events["messages.delete"]);
+        log.debug(
+          `Session ${sessionId} message deleted:`,
+          events["messages.delete"],
+        );
       }
     });
   }
 
-  async delete(idOrPhone: string): Promise<{ success: boolean; error?: string }> {
+  async delete(
+    idOrPhone: string,
+  ): Promise<{ success: boolean; error?: string }> {
     const dbSession = this.get(idOrPhone);
     if (!dbSession) {
       return { success: false, error: SessionErrorType.SessionNotFound };
@@ -321,7 +351,9 @@ class SessionManager {
     return getSession(i || idOrPhone);
   }
 
-  async pause(idOrPhone: string): Promise<{ success: boolean; error?: string }> {
+  async pause(
+    idOrPhone: string,
+  ): Promise<{ success: boolean; error?: string }> {
     const dbSession = this.get(idOrPhone);
     if (!dbSession) {
       return { success: false, error: "Session not found" };
@@ -351,7 +383,9 @@ class SessionManager {
     return { success: true };
   }
 
-  async resume(idOrPhone: string): Promise<{ success: boolean; error?: string }> {
+  async resume(
+    idOrPhone: string,
+  ): Promise<{ success: boolean; error?: string }> {
     const dbSession = this.get(idOrPhone);
     if (!dbSession) {
       return { success: false, error: "Session not found" };
@@ -381,7 +415,12 @@ class SessionManager {
     updateSessionStatus(sessionId, StatusType.Connecting);
 
     try {
-      await this.initializeSession(sessionId, dbSession.phone_number, runtime, false);
+      await this.initializeSession(
+        sessionId,
+        dbSession.phone_number,
+        runtime,
+        false,
+      );
       log.info(`Session ${sessionId} resumed`);
       return { success: true };
     } catch (error) {
@@ -389,7 +428,8 @@ class SessionManager {
       updateSessionStatus(sessionId, StatusType.PausedNetwork);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Failed to resume session",
+        error:
+          error instanceof Error ? error.message : "Failed to resume session",
       };
     }
   }
@@ -419,7 +459,12 @@ class SessionManager {
       this.runtimeData.set(sessionRecord.id, runtime);
 
       try {
-        await this.initializeSession(sessionRecord.id, sessionRecord.phone_number, runtime, false);
+        await this.initializeSession(
+          sessionRecord.id,
+          sessionRecord.phone_number,
+          runtime,
+          false,
+        );
       } catch (error) {
         log.error(`Failed to restore session ${sessionRecord.id}:`, error);
         updateSessionStatus(sessionRecord.id, StatusType.Disconnected);
@@ -431,12 +476,15 @@ class SessionManager {
 
   getActiveCount(): number {
     return getAllSessions().filter(
-      (s) => s.status === StatusType.Connected || s.status === StatusType.Active,
+      (s) =>
+        s.status === StatusType.Connected || s.status === StatusType.Active,
     ).length;
   }
 
   listExtended(): Session[] {
     const dbSessions = getAllSessions();
+    log.debug("Listing extended sessions, count:", dbSessions.length);
+    log.debug("session object:", dbSessions);
 
     return dbSessions.map((dbSession) => {
       const runtime = this.runtimeData.get(dbSession.id);
