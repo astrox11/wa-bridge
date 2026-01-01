@@ -69,9 +69,14 @@ export const getAllMessages = (
   offset: number = 0,
 ): Array<{ id: string; message: WAMessage }> => {
   const tableName = getMessagesTable(sessionId);
+
+  // Ensure limit and offset are numbers
+  const safeLimit = Number(limit) || 100;
+  const safeOffset = Number(offset) || 0;
+
+  // SQLite prefers literal numbers in some cases
   const results = bunql.query<{ id: string; msg: string }>(
-    `SELECT id, msg FROM "${tableName}" ORDER BY rowid DESC LIMIT ? OFFSET ?`,
-    [limit, offset],
+    `SELECT id, msg FROM "${tableName}" ORDER BY rowid DESC LIMIT ${safeLimit} OFFSET ${safeOffset}`,
   );
 
   return results.map((row) => ({

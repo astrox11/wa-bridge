@@ -4,79 +4,43 @@ import {
   getMessagesCount,
   getAllGroups,
   StatusType,
+  log,
 } from "../core";
 import config from "../config";
-import type {
-  ApiResponse,
-  SessionData,
-  SessionCreateResult,
-  AuthStatusData,
-  SessionStatsData,
-  OverallStatsData,
-  MessagesData,
-  ConfigData,
-  GroupsData,
-} from "./types";
+import type { SessionStatsData, OverallStatsData } from "./types";
 
 class RuntimeStats {
-  private sessionStats = new Map<
-    string,
-    { messagesReceived: number; messagesSent: number }
-  >();
-  private totalMessages = 0;
-
-  initSession(sessionId: string): void {
-    if (!this.sessionStats.has(sessionId)) {
-      this.sessionStats.set(sessionId, {
-        messagesReceived: 0,
-        messagesSent: 0,
-      });
-    }
-  }
-
-  recordMessageReceived(sessionId: string): void {
-    const stats = this.sessionStats.get(sessionId);
-    if (stats) {
-      stats.messagesReceived++;
-      this.totalMessages++;
-    }
-  }
-
-  recordMessageSent(sessionId: string): void {
-    const stats = this.sessionStats.get(sessionId);
-    if (stats) {
-      stats.messagesSent++;
-      this.totalMessages++;
-    }
-  }
-
   getStats(sessionId: string): SessionStatsData {
-    const stats = this.sessionStats.get(sessionId);
-    if (!stats) {
-      return { messagesReceived: 0, messagesSent: 0 };
-    }
+    const stats = getAllMessages(sessionId, null, null);
+
+    const m = stats.map((m) => m.message);
+
+    const messagesReceived = m.filter((m) => m.key.fromMe === false).length;
+    const messagesSent = m.filter((m) => m.key.fromMe === true).length;
+
     return {
-      messagesReceived: stats.messagesReceived,
-      messagesSent: stats.messagesSent,
+      messagesReceived,
+      messagesSent,
     };
   }
 
   getOverallStats(): OverallStatsData {
     const sessions = sessionManager.listExtended();
     const activeSessions = sessions.filter(
-      (s) => s.status === StatusType.Connected || s.status === StatusType.Active,
+      (s) =>
+        s.status === StatusType.Connected || s.status === StatusType.Active,
     ).length;
+    const totalMessages = sessions.reduce((acc, session) => {
+      const count = getMessagesCount(session.id);
+      return acc + count;
+    }, 0);
 
     return {
       totalSessions: sessions.length,
       activeSessions,
-      totalMessages: this.totalMessages,
+      totalMessages,
       version: config.VERSION,
     };
-  }
-
-  removeSession(sessionId: string): void {
-    this.sessionStats.delete(sessionId);
   }
 }
 
@@ -99,7 +63,7 @@ function getStatusString(status: number): string {
   }
 }
 
-export function getSessions(): ApiResponse<SessionData[]> {
+export function getSessions() {
   const sessions = sessionManager.listExtended();
   return {
     success: true,
@@ -113,9 +77,7 @@ export function getSessions(): ApiResponse<SessionData[]> {
   };
 }
 
-export function getSession(
-  idOrPhone: string | undefined,
-): ApiResponse<SessionData> {
+export function getSession(idOrPhone: string | undefined) {
   if (!idOrPhone) {
     return { success: false, error: "Session ID is required" };
   }
@@ -137,16 +99,15 @@ export function getSession(
   };
 }
 
-export async function createSession(
-  phoneNumber: string,
-): Promise<ApiResponse<SessionCreateResult>> {
+export async function createSession(phoneNumber: string) {
   const result = await sessionManager.create(phoneNumber);
 
   if (!result.success || !result.id) {
-    return { success: false, error: result.error || "Failed to create session" };
+    return {
+      success: false,
+      error: result.error || "Failed to create session",
+    };
   }
-
-  runtimeStats.initSession(result.id);
 
   return {
     success: true,
@@ -157,16 +118,12 @@ export async function createSession(
   };
 }
 
-export async function deleteSession(
-  idOrPhone: string,
-): Promise<ApiResponse<{ message: string }>> {
+export async function deleteSession(idOrPhone: string) {
   const result = await sessionManager.delete(idOrPhone);
 
   if (!result.success) {
     return { success: false, error: result.error };
   }
-
-  runtimeStats.removeSession(idOrPhone);
 
   return {
     success: true,
@@ -174,9 +131,7 @@ export async function deleteSession(
   };
 }
 
-export async function pauseSession(
-  idOrPhone: string,
-): Promise<ApiResponse<{ message: string }>> {
+export async function pauseSession(idOrPhone: string) {
   const result = await sessionManager.pause(idOrPhone);
 
   if (!result.success) {
@@ -189,9 +144,7 @@ export async function pauseSession(
   };
 }
 
-export async function resumeSession(
-  idOrPhone: string,
-): Promise<ApiResponse<{ message: string }>> {
+export async function resumeSession(idOrPhone: string) {
   const result = await sessionManager.resume(idOrPhone);
 
   if (!result.success) {
@@ -204,9 +157,7 @@ export async function resumeSession(
   };
 }
 
-export function getAuthStatus(
-  sessionId: string | undefined,
-): ApiResponse<AuthStatusData> {
+export function getAuthStatus(sessionId: string | undefined) {
   if (!sessionId) {
     return { success: false, error: "Session ID is required" };
   }
@@ -216,7 +167,9 @@ export function getAuthStatus(
     return { success: false, error: "Session not found" };
   }
 
-  const isAuthenticated = session.status === StatusType.Connected || session.status === StatusType.Active;
+  const isAuthenticated =
+    session.status === StatusType.Connected ||
+    session.status === StatusType.Active;
 
   return {
     success: true,
@@ -228,16 +181,14 @@ export function getAuthStatus(
   };
 }
 
-export function getOverallStats(): ApiResponse<OverallStatsData> {
+export function getOverallStats() {
   return {
     success: true,
     data: runtimeStats.getOverallStats(),
   };
 }
 
-export function getSessionStats(
-  sessionId: string,
-): ApiResponse<SessionStatsData> {
+export function getSessionStats(sessionId: string) {
   if (!sessionId) {
     return { success: false, error: "Session ID is required" };
   }
@@ -257,7 +208,7 @@ export function getMessages(
   sessionId: string,
   limit: number = 100,
   offset: number = 0,
-): ApiResponse<MessagesData> {
+) {
   if (!sessionId) {
     return { success: false, error: "Session ID is required" };
   }
@@ -267,26 +218,19 @@ export function getMessages(
     return { success: false, error: "Session not found" };
   }
 
-  try {
-    const messages = getAllMessages(sessionId, limit, offset);
-    const total = getMessagesCount(sessionId);
+  const messages = getAllMessages(sessionId, limit, offset);
+  const total = getMessagesCount(sessionId);
 
-    return {
-      success: true,
-      data: {
-        messages,
-        total,
-      },
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to get messages",
-    };
-  }
+  return {
+    success: true,
+    data: {
+      messages,
+      total,
+    },
+  };
 }
 
-export function getConfig(): ApiResponse<ConfigData> {
+export function getConfig() {
   return {
     success: true,
     data: {
@@ -296,7 +240,7 @@ export function getConfig(): ApiResponse<ConfigData> {
   };
 }
 
-export function getGroups(sessionId: string): ApiResponse<GroupsData> {
+export function getGroups(sessionId: string) {
   if (!sessionId) {
     return { success: false, error: "Session ID is required" };
   }
