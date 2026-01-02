@@ -18,6 +18,7 @@ const ALLOWED_TABLE_SUFFIXES = [
   "group_event",
   "sticker",
   "bgm",
+  "activity_settings",
 ] as const;
 
 type TableSuffix = (typeof ALLOWED_TABLE_SUFFIXES)[number];
@@ -382,6 +383,32 @@ export function createUserBgmTable(phoneNumber: string): string {
   return tableName;
 }
 
+export function createUserActivitySettingsTable(phoneNumber: string): string {
+  const tableName = getUserTableName(phoneNumber, "activity_settings");
+
+  if (!createdTables.has(tableName)) {
+    try {
+      bunql.exec(`
+        CREATE TABLE IF NOT EXISTS "${tableName}" (
+          id INTEGER PRIMARY KEY CHECK (id = 1),
+          auto_read_messages INTEGER NOT NULL DEFAULT 0,
+          auto_recover_deleted_messages INTEGER NOT NULL DEFAULT 0,
+          auto_antispam INTEGER NOT NULL DEFAULT 0,
+          auto_typing INTEGER NOT NULL DEFAULT 0,
+          auto_recording INTEGER NOT NULL DEFAULT 0,
+          auto_reject_calls INTEGER NOT NULL DEFAULT 0,
+          auto_always_online INTEGER NOT NULL DEFAULT 0
+        )
+      `);
+      createdTables.add(tableName);
+    } catch (error) {
+      log.error(`Failed to create table ${tableName}:`, error);
+    }
+  }
+
+  return tableName;
+}
+
 export function initializeSql(phoneNumber: string): void {
   createUserAuthTable(phoneNumber);
   createUserMessagesTable(phoneNumber);
@@ -399,6 +426,7 @@ export function initializeSql(phoneNumber: string): void {
   createUserGroupEventTable(phoneNumber);
   createUserStickerTable(phoneNumber);
   createUserBgmTable(phoneNumber);
+  createUserActivitySettingsTable(phoneNumber);
   log.debug(`Initialized tables for user ${phoneNumber}`);
 }
 

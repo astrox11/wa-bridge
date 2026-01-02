@@ -10,7 +10,9 @@ export type WsAction =
   | "getConfig"
   | "getGroups"
   | "pauseSession"
-  | "resumeSession";
+  | "resumeSession"
+  | "getActivitySettings"
+  | "updateActivitySettings";
 
 export interface WsRequest {
   action: WsAction;
@@ -91,6 +93,16 @@ export interface MessagesResponse {
 export interface GroupsResponse {
   groups: Array<{ id: string; subject: string; participantCount: number }>;
   total: number;
+}
+
+export interface ActivitySettings {
+  auto_read_messages: boolean;
+  auto_recover_deleted_messages: boolean;
+  auto_antispam: boolean;
+  auto_typing: boolean;
+  auto_recording: boolean;
+  auto_reject_calls: boolean;
+  auto_always_online: boolean;
 }
 
 interface PendingRequest {
@@ -335,6 +347,22 @@ class WsApiClient {
     return this.send<GroupsResponse>("getGroups", { sessionId });
   }
 
+  async getActivitySettings(
+    sessionId: string,
+  ): Promise<ApiResponse<ActivitySettings>> {
+    return this.send<ActivitySettings>("getActivitySettings", { sessionId });
+  }
+
+  async updateActivitySettings(
+    sessionId: string,
+    settings: Partial<ActivitySettings>,
+  ): Promise<ApiResponse<ActivitySettings>> {
+    return this.send<ActivitySettings>("updateActivitySettings", {
+      sessionId,
+      settings,
+    });
+  }
+
   connectStats(onMessage: (data: StatsUpdate) => void): WebSocket | null {
     this.onStats(onMessage);
     return this.ws;
@@ -449,6 +477,19 @@ export const api = {
 
   async getGroups(sessionId: string): Promise<ApiResponse<GroupsResponse>> {
     return getApiClient().getGroups(sessionId);
+  },
+
+  async getActivitySettings(
+    sessionId: string,
+  ): Promise<ApiResponse<ActivitySettings>> {
+    return getApiClient().getActivitySettings(sessionId);
+  },
+
+  async updateActivitySettings(
+    sessionId: string,
+    settings: Partial<ActivitySettings>,
+  ): Promise<ApiResponse<ActivitySettings>> {
+    return getApiClient().updateActivitySettings(sessionId, settings);
   },
 
   async sendAction(

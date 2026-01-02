@@ -57,6 +57,8 @@ const VALID_WS_ACTIONS = new Set<WsAction>([
   "getGroups",
   "pauseSession",
   "resumeSession",
+  "getActivitySettings",
+  "updateActivitySettings",
 ]);
 
 export function isValidWsAction(action: string): action is WsAction {
@@ -108,6 +110,8 @@ export function requiresSessionId(action: WsAction): boolean {
     "getGroups",
     "pauseSession",
     "resumeSession",
+    "getActivitySettings",
+    "updateActivitySettings",
   ];
   return actionsRequiringSession.includes(action);
 }

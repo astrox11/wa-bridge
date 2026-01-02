@@ -1,5 +1,5 @@
 import { log } from "../core";
-import type { ApiResponse, WsRequest, WsResponse, WsAction } from "./types";
+import type { ApiResponse, WsRequest, WsResponse, WsAction, ActivitySettingsData } from "./types";
 import { WsResponseErrors } from "./errors";
 import {
   validateWsRequest,
@@ -19,6 +19,8 @@ import {
   getMessages,
   getConfig,
   getGroups,
+  getActivitySettings,
+  updateActivitySettings,
 } from "./middleware";
 
 export async function parseBody<T>(req: Request): Promise<T | null> {
@@ -77,6 +79,13 @@ const actionHandlers: Record<WsAction, ActionHandler> = {
   getGroups: (params) => getGroups(params.sessionId as string),
   pauseSession: (params) => pauseSession(params.id as string),
   resumeSession: (params) => resumeSession(params.id as string),
+  getActivitySettings: (params) =>
+    getActivitySettings(params.sessionId as string),
+  updateActivitySettings: (params) =>
+    updateActivitySettings(
+      params.sessionId as string,
+      params.settings as Partial<ActivitySettingsData>,
+    ),
 };
 
 export async function handleWsAction(request: WsRequest): Promise<WsResponse> {

@@ -1,4 +1,5 @@
 export * from "./_sql";
+export * from "./activity_settings";
 export * from "./afk";
 export * from "./alive";
 export * from "./antidelete";

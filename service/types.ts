@@ -70,6 +70,21 @@ export interface SessionCreateRequest {
   phoneNumber: string;
 }
 
+export interface ActivitySettingsData {
+  auto_read_messages: boolean;
+  auto_recover_deleted_messages: boolean;
+  auto_antispam: boolean;
+  auto_typing: boolean;
+  auto_recording: boolean;
+  auto_reject_calls: boolean;
+  auto_always_online: boolean;
+}
+
+export interface UpdateActivitySettingsRequest {
+  sessionId: string;
+  settings: Partial<ActivitySettingsData>;
+}
+
 export type WsAction =
   | "getSessions"
   | "getSession"
@@ -82,7 +97,9 @@ export type WsAction =
   | "getConfig"
   | "getGroups"
   | "pauseSession"
-  | "resumeSession";
+  | "resumeSession"
+  | "getActivitySettings"
+  | "updateActivitySettings";
 
 export interface WsRequest {
   action: WsAction;
@@ -111,6 +128,8 @@ export interface WsResponsePayloads {
   getGroups: GroupsData;
   pauseSession: MessageResult;
   resumeSession: MessageResult;
+  getActivitySettings: ActivitySettingsData;
+  updateActivitySettings: ActivitySettingsData;
 }
 
 export interface MessageResult {

@@ -4,9 +4,11 @@ import {
   getMessagesCount,
   getAllGroups,
   StatusType,
+  getActivitySettings as getActivitySettingsFromDb,
+  setActivitySettings as setActivitySettingsInDb,
 } from "../core";
 import config from "../config";
-import type { SessionStatsData, OverallStatsData } from "./types";
+import type { SessionStatsData, OverallStatsData, ActivitySettingsData } from "./types";
 
 class RuntimeStats {
   getStats(sessionId: string): SessionStatsData {
@@ -284,6 +286,63 @@ export function getGroups(sessionId: string) {
     return {
       success: false,
       error: error instanceof Error ? error.message : "Failed to get groups",
+    };
+  }
+}
+
+export function getActivitySettings(sessionId: string) {
+  if (!sessionId) {
+    return { success: false, error: "Session ID is required" };
+  }
+
+  const session = sessionManager.get(sessionId);
+  if (!session) {
+    return { success: false, error: "Session not found" };
+  }
+
+  try {
+    const settings = getActivitySettingsFromDb(sessionId);
+    return {
+      success: true,
+      data: settings,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to get activity settings",
+    };
+  }
+}
+
+export function updateActivitySettings(
+  sessionId: string,
+  settings: Partial<ActivitySettingsData>,
+) {
+  if (!sessionId) {
+    return { success: false, error: "Session ID is required" };
+  }
+
+  const session = sessionManager.get(sessionId);
+  if (!session) {
+    return { success: false, error: "Session not found" };
+  }
+
+  try {
+    const updatedSettings = setActivitySettingsInDb(sessionId, settings);
+    return {
+      success: true,
+      data: updatedSettings,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to update activity settings",
     };
   }
 }

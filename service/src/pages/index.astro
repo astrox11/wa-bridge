@@ -22,13 +22,13 @@ import Layout from "../layouts/Layout.astro";
       </svg>
     </a>
     <button
-      id="sidebar-create-session"
-      class="p-2 text-gh-text-secondary hover:text-gh-success hover:bg-gh-bg-tertiary rounded-gh transition-colors"
-      title="Create New Session"
+      id="sidebar-settings"
+      class="p-2 text-gh-text-secondary hover:text-gh-accent hover:bg-gh-bg-tertiary rounded-gh transition-colors"
+      title="Settings"
     >
       <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor">
         <path
-          d="m11.28 3.22 4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L13.94 8l-3.72-3.72a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215Zm-6.56 0a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L2.06 8l3.72 3.72a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L.47 8.53a.75.75 0 0 1 0-1.06Z"
+          d="M8 0a8.2 8.2 0 0 1 .701.031C9.444.095 9.99.645 10.16 1.29l.288 1.107c.018.066.079.158.212.224.231.114.454.243.668.386.123.082.233.09.299.071l1.103-.303c.644-.176 1.392.021 1.82.63.27.385.506.792.704 1.218.315.675.111 1.422-.364 1.891l-.814.806c-.049.048-.098.147-.088.294.016.257.016.515 0 .772-.01.147.04.246.088.294l.814.806c.475.469.679 1.216.364 1.891a7.977 7.977 0 0 1-.704 1.217c-.428.61-1.176.807-1.82.63l-1.102-.302c-.067-.019-.177-.011-.3.071a5.909 5.909 0 0 1-.668.386c-.133.066-.194.158-.212.224l-.288 1.107c-.17.645-.715 1.195-1.458 1.26a8.006 8.006 0 0 1-1.402 0c-.743-.065-1.289-.615-1.458-1.26l-.289-1.106c-.018-.066-.079-.158-.212-.225a5.893 5.893 0 0 1-.668-.386c-.123-.082-.233-.09-.299-.071l-1.103.303c-.644.176-1.392-.021-1.82-.63a8.004 8.004 0 0 1-.704-1.217c-.315-.675-.111-1.422.363-1.891l.815-.806c.05-.048.098-.147.088-.294a6.854 6.854 0 0 1 0-.772c.01-.147-.04-.246-.088-.294l-.815-.806C.635 6.045.431 5.298.746 4.623a7.92 7.92 0 0 1 .704-1.217c.428-.61 1.176-.807 1.82-.63l1.102.302c.067.019.177.011.3-.071.214-.143.437-.272.668-.386.133-.066.194-.158.212-.224l.289-1.106C6.009.645 6.556.095 7.299.03 7.53.01 7.764 0 8 0Zm-.571 1.525c-.036.003-.108.036-.137.146l-.289 1.106c-.1.386-.396.71-.771.9-.31.157-.6.346-.87.562-.262.211-.597.3-.912.214l-1.103-.303c-.109-.03-.175.016-.195.045-.22.312-.412.644-.573.99-.014.031-.021.11.059.19l.815.806c.278.275.41.657.397 1.036-.007.21-.007.42 0 .628.013.379-.119.762-.397 1.037l-.814.806c-.08.08-.073.159-.059.19.161.347.353.678.573.99.02.029.086.074.195.045l1.103-.303c.315-.086.65.003.912.214.27.216.56.405.87.562.375.19.671.514.77.9l.29 1.106c.028.11.1.143.136.146a6.66 6.66 0 0 0 1.142 0c.036-.003.108-.036.137-.146l.289-1.106c.1-.386.396-.71.771-.9.31-.157.6-.346.87-.562.262-.211.597-.3.912-.214l1.103.303c.109.029.175-.016.194-.045.22-.312.413-.644.573-.99.015-.031.022-.11-.058-.19l-.815-.806a1.337 1.337 0 0 1-.397-1.037c.007-.21.007-.42 0-.628-.013-.379.119-.762.397-1.036l.814-.806c.08-.08.073-.159.059-.19a6.964 6.964 0 0 0-.574-.99c-.02-.029-.085-.074-.194-.045l-1.103.303c-.315.086-.65-.003-.912-.214a5.421 5.421 0 0 0-.87-.562c-.375-.19-.67-.514-.77-.9l-.29-1.106c-.028-.11-.1-.143-.136-.146a6.66 6.66 0 0 0-1.142 0ZM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-1.5 0a1.5 1.5 0 1 0-3.001.001A1.5 1.5 0 0 0 9.5 8Z"
         ></path>
       </svg>
     </button>
@@ -91,16 +91,16 @@ import Layout from "../layouts/Layout.astro";
         <span class="text-[10px] mt-0.5">GitHub</span>
       </a>
       <button
-        id="mobile-create-session"
-        class="flex flex-col items-center p-2 text-gh-text-secondary hover:text-gh-success transition-colors"
-        title="Create Session"
+        id="mobile-settings"
+        class="flex flex-col items-center p-2 text-gh-text-secondary hover:text-gh-accent transition-colors"
+        title="Settings"
       >
         <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor">
           <path
-            d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"
+            d="M8 0a8.2 8.2 0 0 1 .701.031C9.444.095 9.99.645 10.16 1.29l.288 1.107c.018.066.079.158.212.224.231.114.454.243.668.386.123.082.233.09.299.071l1.103-.303c.644-.176 1.392.021 1.82.63.27.385.506.792.704 1.218.315.675.111 1.422-.364 1.891l-.814.806c-.049.048-.098.147-.088.294.016.257.016.515 0 .772-.01.147.04.246.088.294l.814.806c.475.469.679 1.216.364 1.891a7.977 7.977 0 0 1-.704 1.217c-.428.61-1.176.807-1.82.63l-1.102-.302c-.067-.019-.177-.011-.3.071a5.909 5.909 0 0 1-.668.386c-.133.066-.194.158-.212.224l-.288 1.107c-.17.645-.715 1.195-1.458 1.26a8.006 8.006 0 0 1-1.402 0c-.743-.065-1.289-.615-1.458-1.26l-.289-1.106c-.018-.066-.079-.158-.212-.225a5.893 5.893 0 0 1-.668-.386c-.123-.082-.233-.09-.299-.071l-1.103.303c-.644.176-1.392-.021-1.82-.63a8.004 8.004 0 0 1-.704-1.217c-.315-.675-.111-1.422.363-1.891l.815-.806c.05-.048.098-.147.088-.294a6.854 6.854 0 0 1 0-.772c.01-.147-.04-.246-.088-.294l-.815-.806C.635 6.045.431 5.298.746 4.623a7.92 7.92 0 0 1 .704-1.217c.428-.61 1.176-.807 1.82-.63l1.102.302c.067.019.177.011.3-.071.214-.143.437-.272.668-.386.133-.066.194-.158.212-.224l.289-1.106C6.009.645 6.556.095 7.299.03 7.53.01 7.764 0 8 0Zm-.571 1.525c-.036.003-.108.036-.137.146l-.289 1.106c-.1.386-.396.71-.771.9-.31.157-.6.346-.87.562-.262.211-.597.3-.912.214l-1.103-.303c-.109-.03-.175.016-.195.045-.22.312-.412.644-.573.99-.014.031-.021.11.059.19l.815.806c.278.275.41.657.397 1.036-.007.21-.007.42 0 .628.013.379-.119.762-.397 1.037l-.814.806c-.08.08-.073.159-.059.19.161.347.353.678.573.99.02.029.086.074.195.045l1.103-.303c.315-.086.65.003.912.214.27.216.56.405.87.562.375.19.671.514.77.9l.29 1.106c.028.11.1.143.136.146a6.66 6.66 0 0 0 1.142 0c.036-.003.108-.036.137-.146l.289-1.106c.1-.386.396-.71.771-.9.31-.157.6-.346.87-.562.262-.211.597-.3.912-.214l1.103.303c.109.029.175-.016.194-.045.22-.312.413-.644.573-.99.015-.031.022-.11-.058-.19l-.815-.806a1.337 1.337 0 0 1-.397-1.037c.007-.21.007-.42 0-.628-.013-.379.119-.762.397-1.036l.814-.806c.08-.08.073-.159.059-.19a6.964 6.964 0 0 0-.574-.99c-.02-.029-.085-.074-.194-.045l-1.103.303c-.315.086-.65-.003-.912-.214a5.421 5.421 0 0 0-.87-.562c-.375-.19-.67-.514-.77-.9l-.29-1.106c-.028-.11-.1-.143-.136-.146a6.66 6.66 0 0 0-1.142 0ZM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-1.5 0a1.5 1.5 0 1 0-3.001.001A1.5 1.5 0 0 0 9.5 8Z"
           ></path>
         </svg>
-        <span class="text-[10px] mt-0.5">Create</span>
+        <span class="text-[10px] mt-0.5">Settings</span>
       </button>
       <button
         id="mobile-console"
@@ -268,6 +268,236 @@ import Layout from "../layouts/Layout.astro";
           Create Session
         </button>
       </form>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50" id="settings-modal-backdrop"></div>
+    <div
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-gh-bg border border-gh-border rounded-gh shadow-xl max-h-[90vh] flex flex-col"
+    >
+      <div
+        class="p-4 border-b border-gh-border flex items-center justify-between"
+      >
+        <div class="flex items-center gap-2">
+          <svg
+            class="w-4 h-4 text-gh-accent"
+            viewBox="0 0 16 16"
+            fill="currentColor"
+          >
+            <path
+              d="M8 0a8.2 8.2 0 0 1 .701.031C9.444.095 9.99.645 10.16 1.29l.288 1.107c.018.066.079.158.212.224.231.114.454.243.668.386.123.082.233.09.299.071l1.103-.303c.644-.176 1.392.021 1.82.63.27.385.506.792.704 1.218.315.675.111 1.422-.364 1.891l-.814.806c-.049.048-.098.147-.088.294.016.257.016.515 0 .772-.01.147.04.246.088.294l.814.806c.475.469.679 1.216.364 1.891a7.977 7.977 0 0 1-.704 1.217c-.428.61-1.176.807-1.82.63l-1.102-.302c-.067-.019-.177-.011-.3.071a5.909 5.909 0 0 1-.668.386c-.133.066-.194.158-.212.224l-.288 1.107c-.17.645-.715 1.195-1.458 1.26a8.006 8.006 0 0 1-1.402 0c-.743-.065-1.289-.615-1.458-1.26l-.289-1.106c-.018-.066-.079-.158-.212-.225a5.893 5.893 0 0 1-.668-.386c-.123-.082-.233-.09-.299-.071l-1.103.303c-.644.176-1.392-.021-1.82-.63a8.004 8.004 0 0 1-.704-1.217c-.315-.675-.111-1.422.363-1.891l.815-.806c.05-.048.098-.147.088-.294a6.854 6.854 0 0 1 0-.772c.01-.147-.04-.246-.088-.294l-.815-.806C.635 6.045.431 5.298.746 4.623a7.92 7.92 0 0 1 .704-1.217c.428-.61 1.176-.807 1.82-.63l1.102.302c.067.019.177.011.3-.071.214-.143.437-.272.668-.386.133-.066.194-.158.212-.224l.289-1.106C6.009.645 6.556.095 7.299.03 7.53.01 7.764 0 8 0Zm-.571 1.525c-.036.003-.108.036-.137.146l-.289 1.106c-.1.386-.396.71-.771.9-.31.157-.6.346-.87.562-.262.211-.597.3-.912.214l-1.103-.303c-.109-.03-.175.016-.195.045-.22.312-.412.644-.573.99-.014.031-.021.11.059.19l.815.806c.278.275.41.657.397 1.036-.007.21-.007.42 0 .628.013.379-.119.762-.397 1.037l-.814.806c-.08.08-.073.159-.059.19.161.347.353.678.573.99.02.029.086.074.195.045l1.103-.303c.315-.086.65.003.912.214.27.216.56.405.87.562.375.19.671.514.77.9l.29 1.106c.028.11.1.143.136.146a6.66 6.66 0 0 0 1.142 0c.036-.003.108-.036.137-.146l.289-1.106c.1-.386.396-.71.771-.9.31-.157.6-.346.87-.562.262-.211.597-.3.912-.214l1.103.303c.109.029.175-.016.194-.045.22-.312.413-.644.573-.99.015-.031.022-.11-.058-.19l-.815-.806a1.337 1.337 0 0 1-.397-1.037c.007-.21.007-.42 0-.628-.013-.379.119-.762.397-1.036l.814-.806c.08-.08.073-.159.059-.19a6.964 6.964 0 0 0-.574-.99c-.02-.029-.085-.074-.194-.045l-1.103.303c-.315.086-.65-.003-.912-.214a5.421 5.421 0 0 0-.87-.562c-.375-.19-.67-.514-.77-.9l-.29-1.106c-.028-.11-.1-.143-.136-.146a6.66 6.66 0 0 0-1.142 0ZM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-1.5 0a1.5 1.5 0 1 0-3.001.001A1.5 1.5 0 0 0 9.5 8Z"
+            ></path>
+          </svg>
+          <h2 class="text-sm font-semibold text-gh-text">Activity Settings</h2>
+        </div>
+        <button
+          id="close-settings-modal"
+          class="p-1 text-gh-text-secondary hover:text-gh-text transition-colors"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor">
+            <path
+              d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"
+            ></path>
+          </svg>
+        </button>
+      </div>
+      <div class="p-4 overflow-y-auto flex-1">
+        <!-- Session Selector -->
+        <div class="mb-4">
+          <label for="settings-session-select" class="block text-sm font-medium text-gh-text mb-1">
+            Select Session
+          </label>
+          <select
+            id="settings-session-select"
+            class="w-full px-3 py-1.5 text-sm bg-gh-bg border border-gh-border rounded-gh text-gh-text focus:outline-none focus:border-gh-accent focus:ring-1 focus:ring-gh-accent"
+          >
+            <option value="">-- Select a session --</option>
+          </select>
+          <p id="settings-no-sessions" class="text-xs text-gh-text-muted mt-1 hidden">
+            No active sessions available. Create a session first.
+          </p>
+        </div>
+
+        <!-- Settings List -->
+        <div id="settings-list" class="space-y-3 hidden">
+          <!-- Always Online -->
+          <div class="flex items-center justify-between p-3 bg-gh-bg-secondary rounded-gh">
+            <div class="flex items-center gap-3">
+              <svg class="w-5 h-5 text-gh-success" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5ZM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0Z"></path>
+                <path d="M8 0a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0V.75A.75.75 0 0 1 8 0Zm0 13a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 13ZM.75 7.25a.75.75 0 0 0 0 1.5h1.5a.75.75 0 0 0 0-1.5H.75Zm12.5 0a.75.75 0 0 0 0 1.5h1.5a.75.75 0 0 0 0-1.5h-1.5ZM2.343 2.343a.75.75 0 0 1 1.061 0l1.06 1.061a.75.75 0 0 1-1.06 1.06l-1.06-1.06a.75.75 0 0 1 0-1.06Zm9.193 9.193a.75.75 0 0 1 1.06 0l1.061 1.06a.75.75 0 0 1-1.06 1.061l-1.061-1.06a.75.75 0 0 1 0-1.061ZM2.343 13.657a.75.75 0 0 1 0-1.061l1.06-1.06a.75.75 0 0 1 1.061 1.06l-1.06 1.06a.75.75 0 0 1-1.06 0Zm9.193-9.193a.75.75 0 0 1 0-1.06l1.061-1.061a.75.75 0 1 1 1.06 1.06l-1.06 1.061a.75.75 0 0 1-1.06 0Z"></path>
+              </svg>
+              <span class="text-sm font-medium text-gh-text">Always Online</span>
+            </div>
+            <button
+              id="toggle-auto_always_online"
+              class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gh-accent focus:ring-offset-2 bg-gh-bg-tertiary"
+              role="switch"
+              aria-checked="false"
+              data-setting="auto_always_online"
+            >
+              <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0"></span>
+            </button>
+          </div>
+
+          <!-- Typing Indicator -->
+          <div class="flex items-center justify-between p-3 bg-gh-bg-secondary rounded-gh">
+            <div class="flex items-center gap-3">
+              <svg class="w-5 h-5 text-gh-accent" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M1.75 1h8.5c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 10.25 10H7.061l-2.574 2.573A1.458 1.458 0 0 1 2 11.543V10h-.25A1.75 1.75 0 0 1 0 8.25v-5.5C0 1.784.784 1 1.75 1ZM1.5 2.75v5.5c0 .138.112.25.25.25h1a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h3.5a.25.25 0 0 0 .25-.25v-5.5a.25.25 0 0 0-.25-.25h-8.5a.25.25 0 0 0-.25.25Zm13 2a.25.25 0 0 0-.25-.25h-.5a.75.75 0 0 1 0-1.5h.5c.966 0 1.75.784 1.75 1.75v5.5a1.75 1.75 0 0 1-1.75 1.75H14v1.543a1.458 1.458 0 0 1-2.487 1.03L9.22 11.28a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l2.22 2.22v-2.19a.75.75 0 0 1 .75-.75h1a.25.25 0 0 0 .25-.25Z"></path>
+              </svg>
+              <span class="text-sm font-medium text-gh-text">Typing Indicator</span>
+            </div>
+            <button
+              id="toggle-auto_typing"
+              class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gh-accent focus:ring-offset-2 bg-gh-bg-tertiary"
+              role="switch"
+              aria-checked="false"
+              data-setting="auto_typing"
+            >
+              <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0"></span>
+            </button>
+          </div>
+
+          <!-- Recording Indicator -->
+          <div class="flex items-center justify-between p-3 bg-gh-bg-secondary rounded-gh">
+            <div class="flex items-center gap-3">
+              <svg class="w-5 h-5 text-gh-danger" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 1a.75.75 0 0 1 .75.75v6.5a.75.75 0 0 1-1.5 0v-6.5A.75.75 0 0 1 8 1ZM3.5 8a.75.75 0 0 1 .75.75v1.5a3.75 3.75 0 1 0 7.5 0v-1.5a.75.75 0 0 1 1.5 0v1.5a5.25 5.25 0 1 1-10.5 0v-1.5A.75.75 0 0 1 3.5 8Z"></path>
+              </svg>
+              <span class="text-sm font-medium text-gh-text">Recording Indicator</span>
+            </div>
+            <button
+              id="toggle-auto_recording"
+              class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gh-accent focus:ring-offset-2 bg-gh-bg-tertiary"
+              role="switch"
+              aria-checked="false"
+              data-setting="auto_recording"
+            >
+              <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0"></span>
+            </button>
+          </div>
+
+          <!-- Auto Read Messages -->
+          <div class="flex items-center justify-between p-3 bg-gh-bg-secondary rounded-gh">
+            <div class="flex items-center gap-3">
+              <svg class="w-5 h-5 text-gh-link" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M1.75 2h12.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0 1 14.25 14H1.75A1.75 1.75 0 0 1 0 12.25v-8.5C0 2.784.784 2 1.75 2ZM1.5 12.251c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V5.809L8.38 9.397a.75.75 0 0 1-.76 0L1.5 5.809v6.442Zm13-8.181v-.32a.25.25 0 0 0-.25-.25H1.75a.25.25 0 0 0-.25.25v.32L8 7.88Z"></path>
+              </svg>
+              <span class="text-sm font-medium text-gh-text">Auto Read Messages</span>
+            </div>
+            <button
+              id="toggle-auto_read_messages"
+              class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gh-accent focus:ring-offset-2 bg-gh-bg-tertiary"
+              role="switch"
+              aria-checked="false"
+              data-setting="auto_read_messages"
+            >
+              <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0"></span>
+            </button>
+          </div>
+
+          <!-- Auto Reject Calls -->
+          <div class="flex items-center justify-between p-3 bg-gh-bg-secondary rounded-gh">
+            <div class="flex items-center gap-3">
+              <svg class="w-5 h-5 text-gh-danger" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 0 0 4.168 6.608 17.569 17.569 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.678.678 0 0 0-.58-.122l-2.19.547a1.745 1.745 0 0 1-1.657-.459L5.482 8.062a1.745 1.745 0 0 1-.46-1.657l.548-2.19a.678.678 0 0 0-.122-.58L3.654 1.328ZM1.884.511a2.178 2.178 0 0 1 3.26.202l1.794 2.307a2.178 2.178 0 0 1 .39 1.86l-.548 2.19c-.031.127.008.265.104.36l2.457 2.457a.263.263 0 0 0 .36.104l2.19-.547a2.178 2.178 0 0 1 1.86.388l2.307 1.794a2.178 2.178 0 0 1 .202 3.26l-1.034 1.034c-.74.74-1.847 1.065-2.877.702a18.634 18.634 0 0 1-7.01-4.42 18.634 18.634 0 0 1-4.42-7.009c-.363-1.03-.038-2.136.702-2.877L1.884.511Z"></path>
+                <path d="M11.5 3.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0V4.707l-2.646 2.647a.5.5 0 0 1-.708-.708L13.793 4H12.5a.5.5 0 0 1-.5-.5Z"></path>
+              </svg>
+              <span class="text-sm font-medium text-gh-text">Auto Reject Calls</span>
+            </div>
+            <button
+              id="toggle-auto_reject_calls"
+              class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gh-accent focus:ring-offset-2 bg-gh-bg-tertiary"
+              role="switch"
+              aria-checked="false"
+              data-setting="auto_reject_calls"
+            >
+              <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0"></span>
+            </button>
+          </div>
+
+          <!-- Auto Recover Deleted Messages -->
+          <div class="flex items-center justify-between p-3 bg-gh-bg-secondary rounded-gh">
+            <div class="flex items-center gap-3">
+              <svg class="w-5 h-5 text-gh-warning" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M9.669.864 8 0 6.331.864l-1.858.282-.842 1.68-1.337 1.32L2.6 6l-.306 1.854 1.337 1.32.842 1.68 1.858.282L8 12l1.669-.864 1.858-.282.842-1.68 1.337-1.32L13.4 6l.306-1.854-1.337-1.32-.842-1.68L9.669.864zm1.196 1.193.684 1.365 1.086 1.072L12.387 6l.248 1.506-1.086 1.072-.684 1.365-1.51.229L8 10.874l-1.355-.702-1.51-.229-.684-1.365-1.086-1.072L3.613 6l-.248-1.506 1.086-1.072.684-1.365 1.51-.229L8 1.126l1.356.702 1.509.229z"></path>
+                <path d="M4 11.794V16l4-1 4 1v-4.206l-2.018.306L8 13.126 6.018 12.1 4 11.794z"></path>
+              </svg>
+              <span class="text-sm font-medium text-gh-text">Auto Recover Deleted</span>
+            </div>
+            <button
+              id="toggle-auto_recover_deleted_messages"
+              class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gh-accent focus:ring-offset-2 bg-gh-bg-tertiary"
+              role="switch"
+              aria-checked="false"
+              data-setting="auto_recover_deleted_messages"
+            >
+              <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0"></span>
+            </button>
+          </div>
+
+          <!-- Auto Anti-Spam -->
+          <div class="flex items-center justify-between p-3 bg-gh-bg-secondary rounded-gh">
+            <div class="flex items-center gap-3">
+              <svg class="w-5 h-5 text-gh-done" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path>
+              </svg>
+              <span class="text-sm font-medium text-gh-text">Auto Anti-Spam</span>
+            </div>
+            <button
+              id="toggle-auto_antispam"
+              class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gh-accent focus:ring-offset-2 bg-gh-bg-tertiary"
+              role="switch"
+              aria-checked="false"
+              data-setting="auto_antispam"
+            >
+              <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="settings-loading" class="hidden text-center py-8">
+          <svg class="w-8 h-8 mx-auto text-gh-text-muted animate-spin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="8" cy="8" r="6" stroke-dasharray="28" stroke-dashoffset="7"></circle>
+          </svg>
+          <p class="text-sm text-gh-text-muted mt-2">Loading settings...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirm-modal" class="fixed inset-0 z-[60] hidden">
+    <div class="absolute inset-0 bg-black/50" id="confirm-modal-backdrop"></div>
+    <div
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-gh-bg border border-gh-border rounded-gh shadow-xl"
+    >
+      <div class="p-4 border-b border-gh-border">
+        <h2 id="confirm-modal-title" class="text-sm font-semibold text-gh-text">Confirm Action</h2>
+      </div>
+      <div class="p-4">
+        <p id="confirm-modal-message" class="text-sm text-gh-text-secondary mb-4">
+          Are you sure you want to proceed?
+        </p>
+        <div class="flex gap-2">
+          <button
+            id="confirm-modal-cancel"
+            class="flex-1 py-1.5 px-4 text-sm font-medium rounded-gh bg-gh-bg-secondary border border-gh-border text-gh-text hover:bg-gh-bg-tertiary transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            id="confirm-modal-continue"
+            class="flex-1 py-1.5 px-4 text-sm font-medium rounded-gh bg-gh-danger text-white hover:bg-red-700 transition-colors"
+          >
+            Continue
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -628,6 +858,43 @@ import Layout from "../layouts/Layout.astro";
   let sessionsLoaded = false;
   let varCounter = 0;
 
+  // Confirmation modal elements and functions (defined early so they can be used by deleteSession)
+  const confirmModal = document.getElementById("confirm-modal");
+  const confirmModalBackdrop = document.getElementById("confirm-modal-backdrop");
+  const confirmModalTitle = document.getElementById("confirm-modal-title");
+  const confirmModalMessage = document.getElementById("confirm-modal-message");
+  const confirmModalCancel = document.getElementById("confirm-modal-cancel");
+  const confirmModalContinue = document.getElementById("confirm-modal-continue");
+
+  type ConfirmCallback = () => void;
+  let pendingConfirmCallback: ConfirmCallback | null = null;
+
+  function showConfirmModal(
+    title: string,
+    message: string,
+    onConfirm: ConfirmCallback
+  ) {
+    if (confirmModalTitle) confirmModalTitle.textContent = title;
+    if (confirmModalMessage) confirmModalMessage.textContent = message;
+    pendingConfirmCallback = onConfirm;
+    confirmModal?.classList.remove("hidden");
+  }
+
+  function hideConfirmModal() {
+    confirmModal?.classList.add("hidden");
+    pendingConfirmCallback = null;
+  }
+
+  confirmModalCancel?.addEventListener("click", hideConfirmModal);
+  confirmModalBackdrop?.addEventListener("click", hideConfirmModal);
+
+  confirmModalContinue?.addEventListener("click", () => {
+    if (pendingConfirmCallback) {
+      pendingConfirmCallback();
+    }
+    hideConfirmModal();
+  });
+
   function addCustomVar(name = "", value = "") {
     const varId = ++varCounter;
     const varHtml = `
@@ -713,12 +980,16 @@ import Layout from "../layouts/Layout.astro";
   });
 
   async function deleteSession(id: string) {
-    if (!confirm("Delete this session?")) return;
-
-    const result = await api.deleteSession(id);
-    if (!result.success) {
-      alert(result.error || "Failed to delete session");
-    }
+    showConfirmModal(
+      "Delete Session",
+      "Are you sure you want to delete this session? This action cannot be undone.",
+      async () => {
+        const result = await api.deleteSession(id);
+        if (!result.success) {
+          console.error(result.error || "Failed to delete session");
+        }
+      }
+    );
   }
 
   function renderSessions(
@@ -1014,11 +1285,12 @@ import Layout from "../layouts/Layout.astro";
     }
   });
 
-  const mobileCreateSession = document.getElementById("mobile-create-session");
+  const mobileSettings = document.getElementById("mobile-settings");
   const mobileConsole = document.getElementById("mobile-console");
 
-  mobileCreateSession?.addEventListener("click", () => {
-    createModal?.classList.remove("hidden");
+  mobileSettings?.addEventListener("click", () => {
+    settingsModal?.classList.remove("hidden");
+    loadSessionsIntoSelect();
   });
 
   mobileConsole?.addEventListener("click", () => {
@@ -1083,17 +1355,10 @@ import Layout from "../layouts/Layout.astro";
     "create-session-modal-backdrop"
   );
   const closeCreateModal = document.getElementById("close-create-modal");
-  const sidebarCreateSession = document.getElementById(
-    "sidebar-create-session"
-  );
   const modalForm = document.getElementById(
     "modal-session-form"
   ) as HTMLFormElement;
   const modalErrorDiv = document.getElementById("modal-error-message");
-
-  sidebarCreateSession?.addEventListener("click", () => {
-    createModal?.classList.remove("hidden");
-  });
 
   closeCreateModal?.addEventListener("click", () => {
     createModal?.classList.add("hidden");
@@ -1146,4 +1411,184 @@ import Layout from "../layouts/Layout.astro";
 
   // Add initial log
   addLog("Application initialized");
+
+  // Settings modal functionality
+  const settingsModal = document.getElementById("settings-modal");
+  const settingsModalBackdrop = document.getElementById("settings-modal-backdrop");
+  const closeSettingsModal = document.getElementById("close-settings-modal");
+  const sidebarSettings = document.getElementById("sidebar-settings");
+  const settingsSessionSelect = document.getElementById("settings-session-select") as HTMLSelectElement;
+  const settingsList = document.getElementById("settings-list");
+  const settingsLoading = document.getElementById("settings-loading");
+  const settingsNoSessions = document.getElementById("settings-no-sessions");
+
+  interface ActivitySettings {
+    auto_read_messages: boolean;
+    auto_recover_deleted_messages: boolean;
+    auto_antispam: boolean;
+    auto_typing: boolean;
+    auto_recording: boolean;
+    auto_reject_calls: boolean;
+    auto_always_online: boolean;
+  }
+
+  let currentSettings: ActivitySettings | null = null;
+  let currentSessionId: string | null = null;
+  let availableSessions: Array<{ id: string; phone_number: string; status: string; user_info?: { name: string } }> = [];
+
+  function loadSessionsIntoSelect() {
+    if (!settingsSessionSelect) return;
+
+    // Clear existing options (except the first one)
+    while (settingsSessionSelect.options.length > 1) {
+      settingsSessionSelect.remove(1);
+    }
+
+    if (availableSessions.length === 0) {
+      settingsNoSessions?.classList.remove("hidden");
+      settingsList?.classList.add("hidden");
+      return;
+    }
+
+    settingsNoSessions?.classList.add("hidden");
+
+    availableSessions.forEach((session) => {
+      const option = document.createElement("option");
+      option.value = session.id;
+      option.textContent = session.user_info?.name || `+${session.phone_number}`;
+      settingsSessionSelect.appendChild(option);
+    });
+
+    // If there's only one session, select it automatically
+    if (availableSessions.length === 1) {
+      settingsSessionSelect.value = availableSessions[0].id;
+      loadSettingsForSession(availableSessions[0].id);
+    }
+  }
+
+  async function loadSettingsForSession(sessionId: string) {
+    if (!sessionId) {
+      settingsList?.classList.add("hidden");
+      return;
+    }
+
+    currentSessionId = sessionId;
+    settingsLoading?.classList.remove("hidden");
+    settingsList?.classList.add("hidden");
+
+    try {
+      const result = await api.getActivitySettings(sessionId);
+      if (result.success && result.data) {
+        currentSettings = result.data;
+        updateSettingsUI(result.data);
+        settingsList?.classList.remove("hidden");
+      } else {
+        console.error("Failed to load settings:", result.error);
+      }
+    } catch (error) {
+      console.error("Error loading settings:", error);
+    } finally {
+      settingsLoading?.classList.add("hidden");
+    }
+  }
+
+  function updateSettingsUI(settings: ActivitySettings) {
+    const settingKeys: (keyof ActivitySettings)[] = [
+      "auto_always_online",
+      "auto_typing",
+      "auto_recording",
+      "auto_read_messages",
+      "auto_reject_calls",
+      "auto_recover_deleted_messages",
+      "auto_antispam",
+    ];
+
+    settingKeys.forEach((key) => {
+      const toggle = document.getElementById(`toggle-${key}`);
+      if (toggle) {
+        const isEnabled = settings[key];
+        toggle.setAttribute("aria-checked", String(isEnabled));
+        
+        if (isEnabled) {
+          toggle.classList.remove("bg-gh-bg-tertiary");
+          toggle.classList.add("bg-gh-success");
+          const span = toggle.querySelector("span");
+          if (span) {
+            span.classList.remove("translate-x-0");
+            span.classList.add("translate-x-5");
+          }
+        } else {
+          toggle.classList.remove("bg-gh-success");
+          toggle.classList.add("bg-gh-bg-tertiary");
+          const span = toggle.querySelector("span");
+          if (span) {
+            span.classList.remove("translate-x-5");
+            span.classList.add("translate-x-0");
+          }
+        }
+      }
+    });
+  }
+
+  async function toggleSetting(settingKey: keyof ActivitySettings) {
+    if (!currentSessionId || !currentSettings) return;
+
+    const newValue = !currentSettings[settingKey];
+
+    try {
+      const result = await api.updateActivitySettings(currentSessionId, {
+        [settingKey]: newValue,
+      });
+
+      if (result.success && result.data) {
+        currentSettings = result.data;
+        updateSettingsUI(result.data);
+        console.log(`Setting ${settingKey} updated to ${newValue}`);
+      } else {
+        console.error("Failed to update setting:", result.error);
+      }
+    } catch (error) {
+      console.error("Error updating setting:", error);
+    }
+  }
+
+  // Add click handlers for toggle buttons
+  document.querySelectorAll("[data-setting]").forEach((toggle) => {
+    toggle.addEventListener("click", () => {
+      const settingKey = toggle.getAttribute("data-setting") as keyof ActivitySettings;
+      if (settingKey) {
+        toggleSetting(settingKey);
+      }
+    });
+  });
+
+  settingsSessionSelect?.addEventListener("change", (e) => {
+    const target = e.target as HTMLSelectElement;
+    loadSettingsForSession(target.value);
+  });
+
+  sidebarSettings?.addEventListener("click", () => {
+    settingsModal?.classList.remove("hidden");
+    loadSessionsIntoSelect();
+  });
+
+  closeSettingsModal?.addEventListener("click", () => {
+    settingsModal?.classList.add("hidden");
+  });
+
+  settingsModalBackdrop?.addEventListener("click", () => {
+    settingsModal?.classList.add("hidden");
+  });
+
+  // Store sessions from stats updates
+  api.onStats((data) => {
+    if (data && data.type === "stats" && data.data && data.data.sessions) {
+      availableSessions = data.data.sessions.map((s: any) => ({
+        id: s.id,
+        phone_number: s.phone_number,
+        status: s.status,
+        user_info: s.user_info,
+      }));
+    }
+  });
 </script>
