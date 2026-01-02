@@ -1529,7 +1529,9 @@ const hashedId = hashSessionId(id || "");
             <input type="hidden" id="param-input-value" />
             <div id="participant-suggestions" class="absolute z-10 w-full mt-1 bg-gh-bg border border-gh-border rounded-gh shadow-lg max-h-48 overflow-y-auto hidden">
               ${action === "add" ? "" : filteredParticipants.map((p: any) => {
-                const phoneNumber = p.id?.replace("@s.whatsapp.net", "") || "";
+                // Use phoneNumber field if available, otherwise fall back to id
+                const rawPhone = p.phoneNumber || p.id || "";
+                const phoneNumber = rawPhone.split("@")[0];
                 const isAdmin = p.admin === "admin" || p.admin === "superadmin";
                 return `
                   <div class="participant-option px-3 py-2 hover:bg-gh-bg-secondary cursor-pointer flex items-center justify-between" data-phone="${escapeHtml(phoneNumber)}">
@@ -1735,7 +1737,22 @@ const hashedId = hashSessionId(id || "");
           const link = copyBtn.getAttribute("data-link");
           if (link) {
             try {
-              await navigator.clipboard.writeText(link);
+              // Use clipboard API with fallback
+              if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+                await navigator.clipboard.writeText(link);
+              } else {
+                // Fallback for non-HTTPS or unsupported browsers
+                const textArea = document.createElement("textarea");
+                textArea.value = link;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-999999px";
+                textArea.style.top = "-999999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                document.execCommand("copy");
+                document.body.removeChild(textArea);
+              }
               // Show success feedback
               const originalTitle = copyBtn.getAttribute("title");
               copyBtn.setAttribute("title", "Copied!");
@@ -1746,6 +1763,27 @@ const hashedId = hashSessionId(id || "");
               }, 2000);
             } catch (err) {
               console.error("Failed to copy:", err);
+              // Try fallback on error
+              try {
+                const textArea = document.createElement("textarea");
+                textArea.value = link;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-999999px";
+                textArea.style.top = "-999999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                document.execCommand("copy");
+                document.body.removeChild(textArea);
+                copyBtn.setAttribute("title", "Copied!");
+                copyBtn.classList.add("text-gh-success");
+                setTimeout(() => {
+                  copyBtn.setAttribute("title", "Copy Link");
+                  copyBtn.classList.remove("text-gh-success");
+                }, 2000);
+              } catch (fallbackErr) {
+                console.error("Fallback copy also failed:", fallbackErr);
+              }
             }
           }
         });
