@@ -19,8 +19,7 @@
   },
   "scripts": {
     "start": "bun run server.ts",
-    "dev": "concurrently --kill-others \"bun run server.ts\" \"bun run web:dev\"",
-    "web:dev": "cd service && npx astro dev --port 4321",
+    "dev": "concurrently --kill-others \"bun run server.ts\" \"cd service && npx astro dev --port 4321\"",
     "build": "cd service && npx astro build",
     "postinstall": "bun run hooks/index.ts",
     "lint": "eslint . --ext .ts --fix",

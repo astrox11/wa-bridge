@@ -5,12 +5,12 @@ import node from "@astrojs/node";
 export default defineConfig({
   output: "server",
   adapter: node({
-    mode: "middleware",
+    mode: "standalone",
   }),
   integrations: [tailwind()],
   server: {
     port: 4321,
-    host: true,
+    host: "127.0.0.1", // Only listen on localhost (internal)
   },
   vite: {
     server: {

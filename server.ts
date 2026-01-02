@@ -1,6 +1,7 @@
 import { WebSocket } from "ws";
 import Bun from "bun";
 import { join } from "path";
+import { spawn } from "child_process";
 
 const wsListener = WebSocket.prototype.on || WebSocket.prototype.addListener;
 const mockEvent = (event: string) =>
@@ -21,13 +22,62 @@ import { handleApiRequest, handleWsAction } from "./service/api";
 import type { ApiResponse } from "./service";
 import type { WsRequest } from "./service/types";
 
-// Import Astro SSR handler (middleware mode)
-// @ts-ignore - Dynamic import of Astro build output
-import { handler as astroHandler } from "./service/dist/server/entry.mjs";
-
 const wsClients: Set<any> = new Set();
 
 const STATIC_DIR = join(import.meta.dir, "service", "dist", "client");
+const ASTRO_PORT = 4321;
+const ASTRO_SERVER_URL = `http://localhost:${ASTRO_PORT}`;
+
+// Start Astro SSR server as a child process (internal port only)
+function startAstroServer(): void {
+  const astroProcess = spawn("node", ["./dist/server/entry.mjs"], {
+    cwd: join(import.meta.dir, "service"),
+    env: {
+      ...process.env,
+      PORT: String(ASTRO_PORT),
+      HOST: "127.0.0.1", // Only listen on localhost (internal)
+    },
+    stdio: "pipe",
+  });
+
+  astroProcess.stdout?.on("data", (data) => {
+    log.debug("[Astro]", data.toString().trim());
+  });
+
+  astroProcess.stderr?.on("data", (data) => {
+    log.error("[Astro]", data.toString().trim());
+  });
+
+  astroProcess.on("error", (err) => {
+    log.error("Failed to start Astro server:", err);
+  });
+
+  astroProcess.on("exit", (code) => {
+    if (code !== 0) {
+      log.error(`Astro server exited with code ${code}`);
+    }
+  });
+
+  // Cleanup on process exit
+  process.on("exit", () => {
+    astroProcess.kill();
+  });
+
+  process.on("SIGINT", () => {
+    astroProcess.kill();
+    process.exit(0);
+  });
+
+  process.on("SIGTERM", () => {
+    astroProcess.kill();
+    process.exit(0);
+  });
+
+  log.info(`Starting Astro SSR server on internal port ${ASTRO_PORT}...`);
+}
+
+// Start Astro server on startup
+startAstroServer();
 
 const MIME_TYPES: Record<string, string> = {
   ".html": "text/html",
@@ -91,17 +141,26 @@ async function serveStaticFile(filePath: string): Promise<Response | null> {
   return null;
 }
 
-async function handleAstroRequest(req: Request): Promise<Response> {
+async function proxyToAstro(req: Request): Promise<Response> {
   try {
-    log.debug("Handling Astro SSR request:", req.url);
-    const response = await astroHandler(req);
+    log.debug("Proxying request to Astro SSR server:", req.url);
+    const url = new URL(req.url);
+    const astroUrl = new URL(url.pathname + url.search, ASTRO_SERVER_URL);
+
+    const proxyReq = new Request(astroUrl.toString(), {
+      method: req.method,
+      headers: req.headers,
+      body: req.body,
+    });
+
+    const response = await fetch(proxyReq);
     return response;
   } catch (error) {
-    log.error("Astro handler error:", error);
+    log.error("Failed to proxy to Astro server:", error);
     return new Response(
-      "Internal server error",
+      "Frontend server is starting up, please wait a moment and refresh...",
       {
-        status: 500,
+        status: 503,
         headers: { "Content-Type": "text/plain" },
       },
     );
@@ -163,7 +222,7 @@ const server = Bun.serve({
       if (response) return response;
     }
 
-    return handleAstroRequest(req);
+    return proxyToAstro(req);
   },
   websocket: {
     open(ws) {
