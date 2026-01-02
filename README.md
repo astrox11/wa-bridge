@@ -12,6 +12,15 @@ Whatsaly is an open source WhatsApp Web runtime built on Baileys and Astro.js. I
 
 ## Setup Instructions
 
+#### Prerequisites
+
+Ensure these are installed on your system.
+
+[Bun.js](https://bun.sh)
+[Node.js](https://nodejs.org)
+[FFmpeg](https://ffmpeg.org)
+[libwebp](https://developers.google.com/speed/webp)
+
 #### Installation
 
 ```bash
