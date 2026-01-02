@@ -20,6 +20,8 @@
   "scripts": {
     "start": "concurrently --kill-others \"bun run server\" \"bun run web\"",
     "dev": "concurrently --kill-others \"bun run server\" \"bun run web:dev\"",
+    "web": "cd service && node ./dist/server/entry.mjs",
+    "web:dev": "cd service && npx astro dev",
     "postinstall": "bun run hooks/index.ts",
     "lint": "eslint . --ext .ts --fix",
     "format": "prettier --write ."

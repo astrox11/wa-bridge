@@ -152,7 +152,8 @@ const hashedId = hashSessionId(id || "");
           id="chart-tooltip"
           class="absolute z-10 px-2 py-1 text-xs font-medium text-gh-text bg-gh-bg-secondary border border-gh-border rounded-gh shadow-lg pointer-events-none opacity-0 transition-opacity duration-150"
           style="transform: translateX(-50%);"
-        ></div>
+        >
+        </div>
         <div
           id="activity-chart"
           class="h-32 flex items-end justify-between gap-0.5"
@@ -504,8 +505,9 @@ const hashedId = hashSessionId(id || "");
       const messagesSentEl = document.getElementById("messages-sent");
 
       if (messagesCountEl) {
-        messagesCountEl.textContent =
-          sessionData.stats.messagesReceived.toLocaleString();
+        messagesCountEl.textContent = (
+          sessionData.stats.messagesReceived + sessionData.stats.messagesSent
+        ).toLocaleString();
       }
       if (messagesSentEl) {
         messagesSentEl.textContent =
@@ -629,31 +631,33 @@ const hashedId = hashSessionId(id || "");
     const maxValue = Math.max(...hourlyActivity.hourlyData, 1);
 
     // Generate chart bars
-    const bars = hourlyActivity.hourlyData.map((count, index) => {
-      const heightPercent = (count / maxValue) * 100;
-      const minHeight = count > 0 ? 4 : 8; // Taller minimum for empty bars to show placeholder
-      const height = Math.max(heightPercent, minHeight);
+    const bars = hourlyActivity.hourlyData
+      .map((count, index) => {
+        const heightPercent = (count / maxValue) * 100;
+        const minHeight = count > 0 ? 4 : 8; // Taller minimum for empty bars to show placeholder
+        const height = Math.max(heightPercent, minHeight);
 
-      // Color intensity based on value - faded gray for no data
-      const intensity = count / maxValue;
-      let bgClass = "bg-gh-bg-tertiary/50"; // Faded gray placeholder for no data
-      if (count > 0) {
-        if (intensity > 0.7) {
-          bgClass = "bg-gh-success";
-        } else if (intensity > 0.4) {
-          bgClass = "bg-gh-success/70";
-        } else {
-          bgClass = "bg-gh-success/40";
+        // Color intensity based on value - faded gray for no data
+        const intensity = count / maxValue;
+        let bgClass = "bg-gh-bg-tertiary/50"; // Faded gray placeholder for no data
+        if (count > 0) {
+          if (intensity > 0.7) {
+            bgClass = "bg-gh-success";
+          } else if (intensity > 0.4) {
+            bgClass = "bg-gh-success/70";
+          } else {
+            bgClass = "bg-gh-success/40";
+          }
         }
-      }
 
-      return `<div 
+        return `<div 
         class="flex-1 ${bgClass} rounded-t transition-all duration-300 cursor-pointer hover:opacity-80 chart-bar" 
         style="height: ${height}%"
         data-count="${count}"
         data-hour="${formatChartHour(index)}"
       ></div>`;
-    }).join("");
+      })
+      .join("");
 
     chartEl.innerHTML = bars;
 
@@ -661,26 +665,28 @@ const hashedId = hashSessionId(id || "");
     // Clear existing listeners by cloning the element
     const newChartEl = chartEl.cloneNode(true) as HTMLElement;
     chartEl.parentNode?.replaceChild(newChartEl, chartEl);
-    
+
     if (tooltipEl) {
       newChartEl.addEventListener("mouseover", (e) => {
-        const target = (e.target as HTMLElement).closest(".chart-bar") as HTMLElement | null;
+        const target = (e.target as HTMLElement).closest(
+          ".chart-bar"
+        ) as HTMLElement | null;
         if (!target) return;
 
         const count = target.dataset.count || "0";
         const hour = target.dataset.hour || "";
         const countNum = parseInt(count, 10);
-        
+
         tooltipEl.textContent = `${hour}: ${count} message${countNum !== 1 ? "s" : ""}`;
         tooltipEl.style.opacity = "1";
-        
+
         // Position tooltip above the bar using top positioning
         const rect = target.getBoundingClientRect();
         const containerRect = newChartEl.parentElement?.getBoundingClientRect();
         if (containerRect) {
           const left = rect.left - containerRect.left + rect.width / 2;
           const top = rect.top - containerRect.top - 28; // Position above bar
-          
+
           tooltipEl.style.left = `${left}px`;
           tooltipEl.style.top = `${top}px`;
           tooltipEl.style.bottom = "auto";
@@ -689,8 +695,12 @@ const hashedId = hashSessionId(id || "");
 
       newChartEl.addEventListener("mouseout", (e) => {
         const target = (e.target as HTMLElement).closest(".chart-bar");
-        const relatedTarget = (e as MouseEvent).relatedTarget as HTMLElement | null;
-        if (target && (!relatedTarget || !relatedTarget.closest(".chart-bar"))) {
+        const relatedTarget = (e as MouseEvent)
+          .relatedTarget as HTMLElement | null;
+        if (
+          target &&
+          (!relatedTarget || !relatedTarget.closest(".chart-bar"))
+        ) {
           tooltipEl.style.opacity = "0";
         }
       });
