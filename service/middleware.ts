@@ -6,9 +6,11 @@ import {
   StatusType,
   getActivitySettings as getActivitySettingsFromDb,
   setActivitySettings as setActivitySettingsInDb,
+  GetGroupMeta,
+  Group,
 } from "../core";
 import config from "../config";
-import type { SessionStatsData, OverallStatsData, ActivitySettingsData, HourlyActivityData } from "./types";
+import type { SessionStatsData, OverallStatsData, ActivitySettingsData, HourlyActivityData, GroupActionType } from "./types";
 
 class RuntimeStats {
   getStats(sessionId: string): SessionStatsData {
@@ -401,6 +403,270 @@ export function updateActivitySettings(
         error instanceof Error
           ? error.message
           : "Failed to update activity settings",
+    };
+  }
+}
+
+export function getGroupMetadata(sessionId: string, groupId: string) {
+  if (!sessionId) {
+    return { success: false, error: "Session ID is required" };
+  }
+
+  if (!groupId) {
+    return { success: false, error: "Group ID is required" };
+  }
+
+  const session = sessionManager.get(sessionId);
+  if (!session) {
+    return { success: false, error: "Session not found" };
+  }
+
+  try {
+    const metadata = GetGroupMeta(sessionId, groupId);
+
+    if (!metadata) {
+      return { success: false, error: "Group not found" };
+    }
+
+    return {
+      success: true,
+      data: {
+        id: metadata.id,
+        subject: metadata.subject || "Unknown Group",
+        owner: metadata.owner,
+        creation: metadata.creation,
+        desc: metadata.desc,
+        descOwner: metadata.descOwner,
+        descId: metadata.descId,
+        restrict: metadata.restrict,
+        announce: metadata.announce,
+        memberAddMode: metadata.memberAddMode,
+        joinApprovalMode: metadata.joinApprovalMode,
+        isCommunity: metadata.isCommunity,
+        size: metadata.size || metadata.participants?.length || 0,
+        participants: (metadata.participants || []).map((p: { id: string; admin?: string | null; isAdmin?: boolean; isSuperAdmin?: boolean }) => ({
+          id: p.id,
+          admin: p.admin,
+          isAdmin: p.isAdmin || p.admin === "admin" || p.admin === "superadmin",
+          isSuperAdmin: p.isSuperAdmin || p.admin === "superadmin",
+        })),
+        ephemeralDuration: metadata.ephemeralDuration,
+        inviteCode: metadata.inviteCode,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to get group metadata",
+    };
+  }
+}
+
+export async function executeGroupAction(
+  sessionId: string,
+  groupId: string,
+  action: GroupActionType,
+  params?: Record<string, string | number | boolean>,
+) {
+  if (!sessionId) {
+    return { success: false, error: "Session ID is required" };
+  }
+
+  if (!groupId) {
+    return { success: false, error: "Group ID is required" };
+  }
+
+  const session = sessionManager.get(sessionId);
+  if (!session) {
+    return { success: false, error: "Session not found" };
+  }
+
+  const client = sessionManager.getClient(sessionId);
+  if (!client) {
+    return { success: false, error: "Session not connected" };
+  }
+
+  try {
+    const group = new Group(sessionId, groupId, client);
+    let result: unknown;
+    let message = "Action completed successfully";
+
+    switch (action) {
+      case "leave":
+        result = await group.Leave();
+        message = "Left the group";
+        break;
+
+      case "kickAll":
+        result = await group.KickAll();
+        message = "Kicked all non-admin participants";
+        break;
+
+      case "inviteCode":
+        result = await group.InviteCode();
+        message = "Invite link generated";
+        break;
+
+      case "revokeInvite":
+        result = await group.RevokeInvite();
+        message = "Invite link revoked and new one generated";
+        break;
+
+      case "mute":
+        result = await group.SetAnnouncementMode("announcement");
+        if (result === null) {
+          return { success: false, error: "Group is already muted" };
+        }
+        message = "Group muted (only admins can send messages)";
+        break;
+
+      case "unmute":
+        result = await group.SetAnnouncementMode("not_announcement");
+        if (result === null) {
+          return { success: false, error: "Group is already unmuted" };
+        }
+        message = "Group unmuted (all members can send messages)";
+        break;
+
+      case "lock":
+        result = await group.SetRestrictedMode("locked");
+        if (result === null) {
+          return { success: false, error: "Group is already locked" };
+        }
+        message = "Group locked (only admins can edit settings)";
+        break;
+
+      case "unlock":
+        result = await group.SetRestrictedMode("unlocked");
+        if (result === null) {
+          return { success: false, error: "Group is already unlocked" };
+        }
+        message = "Group unlocked (all members can edit settings)";
+        break;
+
+      case "name":
+        if (!params?.name || typeof params.name !== "string") {
+          return { success: false, error: "Name parameter is required" };
+        }
+        result = await group.Name(params.name);
+        message = "Group name updated";
+        break;
+
+      case "description":
+        if (params?.description === undefined) {
+          return { success: false, error: "Description parameter is required" };
+        }
+        result = await group.Description(String(params.description));
+        message = "Group description updated";
+        break;
+
+      case "add":
+        if (!params?.participant || typeof params.participant !== "string") {
+          return { success: false, error: "Participant number is required" };
+        }
+        const addParticipant = params.participant.includes("@s.whatsapp.net")
+          ? params.participant
+          : params.participant + "@s.whatsapp.net";
+        result = await group.Add(addParticipant);
+        message = "Participant added";
+        break;
+
+      case "remove":
+        if (!params?.participant || typeof params.participant !== "string") {
+          return { success: false, error: "Participant number is required" };
+        }
+        const removeParticipant = params.participant.includes("@s.whatsapp.net")
+          ? params.participant
+          : params.participant + "@s.whatsapp.net";
+        result = await group.Remove(removeParticipant);
+        if (result === null) {
+          return { success: false, error: "User not in group" };
+        }
+        message = "Participant removed";
+        break;
+
+      case "promote":
+        if (!params?.participant || typeof params.participant !== "string") {
+          return { success: false, error: "Participant number is required" };
+        }
+        const promoteParticipant = params.participant.includes("@s.whatsapp.net")
+          ? params.participant
+          : params.participant + "@s.whatsapp.net";
+        result = await group.Promote(promoteParticipant);
+        if (result === null) {
+          return { success: false, error: "User not in group or already admin" };
+        }
+        message = "Participant promoted to admin";
+        break;
+
+      case "demote":
+        if (!params?.participant || typeof params.participant !== "string") {
+          return { success: false, error: "Participant number is required" };
+        }
+        const demoteParticipant = params.participant.includes("@s.whatsapp.net")
+          ? params.participant
+          : params.participant + "@s.whatsapp.net";
+        result = await group.Demote(demoteParticipant);
+        if (result === null) {
+          return { success: false, error: "User not in group or not admin" };
+        }
+        message = "Participant demoted from admin";
+        break;
+
+      case "ephemeral":
+        const duration = typeof params?.duration === "number" ? params.duration : parseInt(String(params?.duration));
+        const acceptedDurations = [0, 86400, 604800, 7776000];
+        if (isNaN(duration) || !acceptedDurations.includes(duration)) {
+          return {
+            success: false,
+            error: "Invalid duration. Accepted values: 0 (off), 86400 (1 day), 604800 (7 days), 7776000 (90 days)",
+          };
+        }
+        result = await group.EphermalSetting(duration);
+        if (result === null) {
+          return { success: false, error: "Already set to this duration" };
+        }
+        message = duration === 0 ? "Disappearing messages disabled" : `Disappearing messages set to ${duration} seconds`;
+        break;
+
+      case "addMode":
+        if (!params?.mode || (params.mode !== "admin" && params.mode !== "member")) {
+          return { success: false, error: "Mode must be 'admin' or 'member'" };
+        }
+        result = await group.MemberJoinMode(params.mode === "admin" ? "admin_add" : "all_member_add");
+        if (result === null) {
+          return { success: false, error: "Already set to this mode" };
+        }
+        message = `Member add mode set to ${params.mode}`;
+        break;
+
+      case "joinMode":
+        if (!params?.mode || (params.mode !== "approval" && params.mode !== "open")) {
+          return { success: false, error: "Mode must be 'approval' or 'open'" };
+        }
+        result = await group.GroupJoinMode(params.mode === "approval" ? "on" : "off");
+        if (result === null) {
+          return { success: false, error: "Already set to this mode" };
+        }
+        message = `Join mode set to ${params.mode}`;
+        break;
+
+      default:
+        return { success: false, error: `Unknown action: ${action}` };
+    }
+
+    return {
+      success: true,
+      data: {
+        success: true,
+        message,
+        data: result,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to execute group action",
     };
   }
 }

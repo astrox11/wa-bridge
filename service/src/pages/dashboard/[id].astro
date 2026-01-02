@@ -436,6 +436,311 @@ const hashedId = hashSessionId(id || "");
       </button>
     </div>
   </main>
+
+  <!-- Group Info Modal -->
+  <div id="group-info-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50" id="group-info-modal-backdrop"></div>
+    <div
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-gh-bg border border-gh-border rounded-gh shadow-xl max-h-[90vh] flex flex-col"
+    >
+      <div
+        class="p-4 border-b border-gh-border flex items-center justify-between"
+      >
+        <div class="flex items-center gap-2">
+          <svg
+            class="w-4 h-4 text-gh-accent"
+            viewBox="0 0 16 16"
+            fill="currentColor"
+          >
+            <path
+              d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"
+            ></path>
+          </svg>
+          <h2 id="group-info-title" class="text-sm font-semibold text-gh-text">Group Information</h2>
+        </div>
+        <button
+          id="close-group-info-modal"
+          class="p-1 text-gh-text-secondary hover:text-gh-text transition-colors"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor">
+            <path
+              d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"
+            ></path>
+          </svg>
+        </button>
+      </div>
+      <div id="group-info-content" class="p-4 overflow-y-auto flex-1 space-y-4">
+        <!-- Loading State -->
+        <div id="group-info-loading" class="text-center py-8">
+          <svg
+            class="w-8 h-8 mx-auto text-gh-text-muted animate-spin"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <circle
+              cx="8"
+              cy="8"
+              r="6"
+              stroke-dasharray="28"
+              stroke-dashoffset="7"></circle>
+          </svg>
+          <p class="text-sm text-gh-text-muted mt-2">Loading group info...</p>
+        </div>
+        <!-- Info Sections (populated dynamically) -->
+        <div id="group-info-data" class="hidden space-y-4"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Group Actions Modal -->
+  <div id="group-actions-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50" id="group-actions-modal-backdrop"></div>
+    <div
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-gh-bg border border-gh-border rounded-gh shadow-xl max-h-[90vh] flex flex-col"
+    >
+      <div
+        class="p-4 border-b border-gh-border flex items-center justify-between"
+      >
+        <div class="flex items-center gap-2">
+          <svg
+            class="w-4 h-4 text-gh-accent"
+            viewBox="0 0 16 16"
+            fill="currentColor"
+          >
+            <path
+              d="M8 0a8.2 8.2 0 0 1 .701.031C9.444.095 9.99.645 10.16 1.29l.288 1.107c.018.066.079.158.212.224.231.114.454.243.668.386.123.082.233.09.299.071l1.103-.303c.644-.176 1.392.021 1.82.63.27.385.506.792.704 1.218.315.675.111 1.422-.364 1.891l-.814.806c-.049.048-.098.147-.088.294.016.257.016.515 0 .772-.01.147.04.246.088.294l.814.806c.475.469.679 1.216.364 1.891a7.977 7.977 0 0 1-.704 1.217c-.428.61-1.176.807-1.82.63l-1.102-.302c-.067-.019-.177-.011-.3.071a5.909 5.909 0 0 1-.668.386c-.133.066-.194.158-.212.224l-.288 1.107c-.17.645-.715 1.195-1.458 1.26a8.006 8.006 0 0 1-1.402 0c-.743-.065-1.289-.615-1.458-1.26l-.289-1.106c-.018-.066-.079-.158-.212-.225a5.893 5.893 0 0 1-.668-.386c-.123-.082-.233-.09-.299-.071l-1.103.303c-.644.176-1.392-.021-1.82-.63a8.004 8.004 0 0 1-.704-1.217c-.315-.675-.111-1.422.363-1.891l.815-.806c.05-.048.098-.147.088-.294a6.854 6.854 0 0 1 0-.772c.01-.147-.04-.246-.088-.294l-.815-.806C.635 6.045.431 5.298.746 4.623a7.92 7.92 0 0 1 .704-1.217c.428-.61 1.176-.807 1.82-.63l1.102.302c.067.019.177.011.3-.071.214-.143.437-.272.668-.386.133-.066.194-.158.212-.224l.289-1.106C6.009.645 6.556.095 7.299.03 7.53.01 7.764 0 8 0Zm-.571 1.525c-.036.003-.108.036-.137.146l-.289 1.106c-.1.386-.396.71-.771.9-.31.157-.6.346-.87.562-.262.211-.597.3-.912.214l-1.103-.303c-.109-.03-.175.016-.195.045-.22.312-.412.644-.573.99-.014.031-.021.11.059.19l.815.806c.278.275.41.657.397 1.036-.007.21-.007.42 0 .628.013.379-.119.762-.397 1.037l-.814.806c-.08.08-.073.159-.059.19.161.347.353.678.573.99.02.029.086.074.195.045l1.103-.303c.315-.086.65.003.912.214.27.216.56.405.87.562.375.19.671.514.77.9l.29 1.106c.028.11.1.143.136.146a6.66 6.66 0 0 0 1.142 0c.036-.003.108-.036.137-.146l.289-1.106c.1-.386.396-.71.771-.9.31-.157.6-.346.87-.562.262-.211.597-.3.912-.214l1.103.303c.109.029.175-.016.194-.045.22-.312.413-.644.573-.99.015-.031.022-.11-.058-.19l-.815-.806a1.337 1.337 0 0 1-.397-1.037c.007-.21.007-.42 0-.628-.013-.379.119-.762.397-1.036l.814-.806c.08-.08.073-.159.059-.19a6.964 6.964 0 0 0-.574-.99c-.02-.029-.085-.074-.194-.045l-1.103.303c-.315.086-.65-.003-.912-.214a5.421 5.421 0 0 0-.87-.562c-.375-.19-.67-.514-.77-.9l-.29-1.106c-.028-.11-.1-.143-.136-.146a6.66 6.66 0 0 0-1.142 0ZM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-1.5 0a1.5 1.5 0 1 0-3.001.001A1.5 1.5 0 0 0 9.5 8Z"
+            ></path>
+          </svg>
+          <h2 id="group-actions-title" class="text-sm font-semibold text-gh-text">Group Actions</h2>
+        </div>
+        <button
+          id="close-group-actions-modal"
+          class="p-1 text-gh-text-secondary hover:text-gh-text transition-colors"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor">
+            <path
+              d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"
+            ></path>
+          </svg>
+        </button>
+      </div>
+      <div id="group-actions-content" class="p-4 overflow-y-auto flex-1">
+        <!-- Loading State -->
+        <div id="group-actions-loading" class="text-center py-8 hidden">
+          <svg
+            class="w-8 h-8 mx-auto text-gh-text-muted animate-spin"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <circle
+              cx="8"
+              cy="8"
+              r="6"
+              stroke-dasharray="28"
+              stroke-dashoffset="7"></circle>
+          </svg>
+          <p class="text-sm text-gh-text-muted mt-2">Executing action...</p>
+        </div>
+        <!-- Actions List -->
+        <div id="group-actions-list" class="space-y-3">
+          <!-- Toggle Actions -->
+          <div class="bg-gh-bg-secondary rounded-gh p-3">
+            <h3 class="text-xs font-semibold text-gh-text-muted uppercase tracking-wider mb-3">Settings</h3>
+            <div class="space-y-2">
+              <!-- Mute/Unmute Toggle -->
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 2.75a.75.75 0 0 0-1.238-.57L3.472 5H1.75A1.75 1.75 0 0 0 0 6.75v2.5C0 10.216.784 11 1.75 11h1.723l3.289 2.82A.75.75 0 0 0 8 13.25ZM4.238 6.32 6.5 4.38v7.24L4.238 9.68a.75.75 0 0 0-.488-.18H1.75a.25.25 0 0 1-.25-.25v-2.5a.25.25 0 0 1 .25-.25h1.999a.75.75 0 0 0 .489-.18Z"/>
+                  </svg>
+                  <span class="text-sm text-gh-text">Mute Group</span>
+                </div>
+                <button
+                  id="toggle-mute"
+                  class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-gh-bg-tertiary"
+                  role="switch"
+                  aria-checked="false"
+                  data-action="mute"
+                >
+                  <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0"></span>
+                </button>
+              </div>
+              <!-- Lock/Unlock Toggle -->
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M4 4a4 4 0 0 1 8 0v2h.25c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 12.25 15h-8.5A1.75 1.75 0 0 1 2 13.25v-5.5C2 6.784 2.784 6 3.75 6H4Zm8.25 3.5h-8.5a.25.25 0 0 0-.25.25v5.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-5.5a.25.25 0 0 0-.25-.25ZM10.5 6V4a2.5 2.5 0 1 0-5 0v2Z"/>
+                  </svg>
+                  <span class="text-sm text-gh-text">Lock Settings</span>
+                </div>
+                <button
+                  id="toggle-lock"
+                  class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-gh-bg-tertiary"
+                  role="switch"
+                  aria-checked="false"
+                  data-action="lock"
+                >
+                  <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Parameter Actions -->
+          <div class="bg-gh-bg-secondary rounded-gh p-3">
+            <h3 class="text-xs font-semibold text-gh-text-muted uppercase tracking-wider mb-3">Edit Group</h3>
+            <div class="space-y-2">
+              <button data-param-action="name" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-gh-text hover:bg-gh-bg-tertiary rounded-gh transition-colors text-left">
+                <svg class="w-4 h-4 text-gh-text-secondary flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064Zm1.238-3.763a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354Z"/>
+                </svg>
+                <span>Change Name</span>
+              </button>
+              <button data-param-action="description" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-gh-text hover:bg-gh-bg-tertiary rounded-gh transition-colors text-left">
+                <svg class="w-4 h-4 text-gh-text-secondary flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M0 1.75A.75.75 0 0 1 .75 1h4.253c1.227 0 2.317.59 3 1.501A3.743 3.743 0 0 1 11.006 1h4.245a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75h-4.507a2.25 2.25 0 0 0-1.591.659l-.622.621a.75.75 0 0 1-1.06 0l-.622-.621A2.25 2.25 0 0 0 5.258 13H.75a.75.75 0 0 1-.75-.75Z"/>
+                </svg>
+                <span>Change Description</span>
+              </button>
+              <button data-param-action="ephemeral" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-gh-text hover:bg-gh-bg-tertiary rounded-gh transition-colors text-left">
+                <svg class="w-4 h-4 text-gh-text-secondary flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M5.75.75A.75.75 0 0 1 6.5 0h3a.75.75 0 0 1 0 1.5h-.75v1l3.497 5.636a3.003 3.003 0 0 1-5.077 3.206L3.998 8.527a.75.75 0 0 1 .253-1.03l.003-.002a.75.75 0 0 1 1.03.254L7 10.564a1.5 1.5 0 0 0 2.536-1.6L5.75 2.5v-1a.75.75 0 0 1 0-1.5ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0ZM8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16Z"/>
+                </svg>
+                <span>Disappearing Messages</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Participant Actions -->
+          <div class="bg-gh-bg-secondary rounded-gh p-3">
+            <h3 class="text-xs font-semibold text-gh-text-muted uppercase tracking-wider mb-3">Participants</h3>
+            <div class="space-y-2">
+              <button data-param-action="add" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-gh-text hover:bg-gh-bg-tertiary rounded-gh transition-colors text-left">
+                <svg class="w-4 h-4 text-gh-success flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"/>
+                </svg>
+                <span>Add Participant</span>
+              </button>
+              <button data-param-action="remove" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-gh-text hover:bg-gh-bg-tertiary rounded-gh transition-colors text-left">
+                <svg class="w-4 h-4 text-gh-danger flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75ZM4.496 6.675l.66 6.6a.25.25 0 0 0 .249.225h5.19a.25.25 0 0 0 .249-.225l.66-6.6a.75.75 0 0 1 1.492.149l-.66 6.6A1.748 1.748 0 0 1 10.595 15h-5.19a1.75 1.75 0 0 1-1.741-1.575l-.66-6.6a.75.75 0 1 1 1.492-.15ZM6.5 1.75V3h3V1.75a.25.25 0 0 0-.25-.25h-2.5a.25.25 0 0 0-.25.25Z"/>
+                </svg>
+                <span>Remove Participant</span>
+              </button>
+              <button data-param-action="promote" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-gh-text hover:bg-gh-bg-tertiary rounded-gh transition-colors text-left">
+                <svg class="w-4 h-4 text-gh-warning flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="m4.427.879 1.164-.377a.695.695 0 0 1 .883.586l.108 1.209a.695.695 0 0 0 .587.587l1.21.108a.695.695 0 0 1 .585.883l-.377 1.164a.695.695 0 0 0 .183.81l.861.875a.695.695 0 0 1 0 1.047l-.86.876a.695.695 0 0 0-.184.81l.377 1.164a.695.695 0 0 1-.585.883l-1.21.108a.695.695 0 0 0-.587.587l-.108 1.21a.695.695 0 0 1-.883.585l-1.164-.377a.695.695 0 0 0-.81.183l-.875.861a.695.695 0 0 1-1.047 0l-.875-.86a.695.695 0 0 0-.81-.184l-1.164.377a.695.695 0 0 1-.883-.585l-.108-1.21a.695.695 0 0 0-.587-.587L.879 11.57a.695.695 0 0 1-.585-.883l.377-1.164a.695.695 0 0 0-.183-.81L.08 7.74a.695.695 0 0 1 0-1.047l.408-.415a.695.695 0 0 0 .183-.81L.294 4.305a.695.695 0 0 1 .585-.883l1.21-.108a.695.695 0 0 0 .587-.587l.108-1.21a.695.695 0 0 1 .883-.585l1.164.377a.695.695 0 0 0 .81-.183l.875-.86a.695.695 0 0 1 1.047 0l.875.86a.695.695 0 0 0 .81.183Z"/>
+                </svg>
+                <span>Promote to Admin</span>
+              </button>
+              <button data-param-action="demote" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-gh-text hover:bg-gh-bg-tertiary rounded-gh transition-colors text-left">
+                <svg class="w-4 h-4 text-gh-text-secondary flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M3.47 7.78a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0l4.25 4.25a.751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018L8.5 4.31v7.94a.75.75 0 0 1-1.5 0V4.31L3.53 7.78a.75.75 0 0 1-1.06 0Z"/>
+                </svg>
+                <span>Demote from Admin</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="bg-gh-bg-secondary rounded-gh p-3">
+            <h3 class="text-xs font-semibold text-gh-text-muted uppercase tracking-wider mb-3">Links</h3>
+            <div class="space-y-2">
+              <button data-action="inviteCode" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-gh-text hover:bg-gh-bg-tertiary rounded-gh transition-colors text-left">
+                <svg class="w-4 h-4 text-gh-link flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/>
+                  <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/>
+                </svg>
+                <span>Get Invite Link</span>
+              </button>
+              <button data-action="revokeInvite" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-gh-text hover:bg-gh-bg-tertiary rounded-gh transition-colors text-left">
+                <svg class="w-4 h-4 text-gh-warning flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z"/>
+                </svg>
+                <span>Revoke Invite Link</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Danger Zone -->
+          <div class="bg-gh-danger-subtle rounded-gh p-3 border border-gh-danger/20">
+            <h3 class="text-xs font-semibold text-gh-danger uppercase tracking-wider mb-3">Danger Zone</h3>
+            <div class="space-y-2">
+              <button data-action="kickAll" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-gh-danger hover:bg-gh-danger/10 rounded-gh transition-colors text-left">
+                <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75Z"/>
+                </svg>
+                <span>Kick All Members</span>
+              </button>
+              <button data-action="leave" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-white bg-gh-danger hover:bg-red-700 rounded-gh transition-colors text-left">
+                <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M2 2.75C2 1.784 2.784 1 3.75 1h2.5a.75.75 0 0 1 0 1.5h-2.5a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h2.5a.75.75 0 0 1 0 1.5h-2.5A1.75 1.75 0 0 1 2 13.25Zm10.44 4.5-1.97-1.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734l1.97-1.97H6.75a.75.75 0 0 1 0-1.5Z"/>
+                </svg>
+                <span>Leave Group</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Parameter Input Modal -->
+  <div id="param-input-modal" class="fixed inset-0 z-[60] hidden">
+    <div class="absolute inset-0 bg-black/50" id="param-input-modal-backdrop"></div>
+    <div
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-gh-bg border border-gh-border rounded-gh shadow-xl"
+    >
+      <div class="p-4 border-b border-gh-border">
+        <h2 id="param-input-title" class="text-sm font-semibold text-gh-text">Enter Value</h2>
+      </div>
+      <div class="p-4">
+        <div id="param-input-field" class="mb-4">
+          <!-- Input field will be dynamically inserted here -->
+        </div>
+        <div id="param-input-error" class="p-3 rounded-gh bg-gh-danger-subtle border border-gh-danger text-gh-danger text-sm hidden mb-4"></div>
+        <div class="flex gap-2">
+          <button
+            id="param-input-cancel"
+            class="flex-1 py-1.5 px-4 text-sm font-medium rounded-gh bg-gh-bg-secondary border border-gh-border text-gh-text hover:bg-gh-bg-tertiary transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            id="param-input-execute"
+            class="flex-1 py-1.5 px-4 text-sm font-medium rounded-gh bg-gh-success text-white hover:bg-green-700 transition-colors"
+          >
+            Execute
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Result Modal -->
+  <div id="action-result-modal" class="fixed inset-0 z-[60] hidden">
+    <div class="absolute inset-0 bg-black/50" id="action-result-modal-backdrop"></div>
+    <div
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-gh-bg border border-gh-border rounded-gh shadow-xl"
+    >
+      <div class="p-4 border-b border-gh-border">
+        <h2 id="action-result-title" class="text-sm font-semibold text-gh-text">Result</h2>
+      </div>
+      <div class="p-4">
+        <div id="action-result-content" class="text-sm text-gh-text-secondary mb-4"></div>
+        <button
+          id="action-result-close"
+          class="w-full py-1.5 px-4 text-sm font-medium rounded-gh bg-gh-bg-secondary border border-gh-border text-gh-text hover:bg-gh-bg-tertiary transition-colors"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
 </Layout>
 
 <script>
@@ -772,7 +1077,7 @@ const hashedId = hashSessionId(id || "");
                 subject: string;
                 participantCount: number;
               }) => `
-            <div class="flex items-center justify-between p-3 hover:bg-gh-bg-secondary transition-colors">
+            <div class="flex items-center justify-between p-3 hover:bg-gh-bg-secondary transition-colors" data-group-id="${escapeHtml(group.id)}">
               <div class="flex items-center gap-3 flex-1 min-w-0">
                 <svg class="w-4 h-4 text-gh-text-secondary flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
                   <path d="M5.5 3.5A2 2 0 0 1 7.5 1.5h1A2 2 0 0 1 10.5 3.5v1A2 2 0 0 1 8.5 6.5h-1A2 2 0 0 1 5.5 4.5ZM7.5 3a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5ZM2 10.5A2 2 0 0 1 4 8.5h1a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2Zm2-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5Zm5.5 0a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2Zm2-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5Z"/>
@@ -782,10 +1087,33 @@ const hashedId = hashSessionId(id || "");
                   <p class="text-xs text-gh-text-muted">${group.participantCount} member${group.participantCount !== 1 ? "s" : ""}</p>
                 </div>
               </div>
+              <div class="flex items-center gap-1">
+                <button 
+                  class="p-1.5 text-gh-text-secondary hover:text-gh-accent hover:bg-gh-bg-tertiary rounded-gh transition-colors"
+                  data-group-info="${escapeHtml(group.id)}"
+                  title="View Info"
+                >
+                  <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/>
+                  </svg>
+                </button>
+                <button 
+                  class="p-1.5 text-gh-text-secondary hover:text-gh-success hover:bg-gh-bg-tertiary rounded-gh transition-colors"
+                  data-group-actions="${escapeHtml(group.id)}"
+                  title="Actions"
+                >
+                  <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 0a8.2 8.2 0 0 1 .701.031C9.444.095 9.99.645 10.16 1.29l.288 1.107c.018.066.079.158.212.224.231.114.454.243.668.386.123.082.233.09.299.071l1.103-.303c.644-.176 1.392.021 1.82.63.27.385.506.792.704 1.218.315.675.111 1.422-.364 1.891l-.814.806c-.049.048-.098.147-.088.294.016.257.016.515 0 .772-.01.147.04.246.088.294l.814.806c.475.469.679 1.216.364 1.891a7.977 7.977 0 0 1-.704 1.217c-.428.61-1.176.807-1.82.63l-1.102-.302c-.067-.019-.177-.011-.3.071a5.909 5.909 0 0 1-.668.386c-.133.066-.194.158-.212.224l-.288 1.107c-.17.645-.715 1.195-1.458 1.26a8.006 8.006 0 0 1-1.402 0c-.743-.065-1.289-.615-1.458-1.26l-.289-1.106c-.018-.066-.079-.158-.212-.225a5.893 5.893 0 0 1-.668-.386c-.123-.082-.233-.09-.299-.071l-1.103.303c-.644.176-1.392-.021-1.82-.63a8.004 8.004 0 0 1-.704-1.217c-.315-.675-.111-1.422.363-1.891l.815-.806c.05-.048.098-.147.088-.294a6.854 6.854 0 0 1 0-.772c.01-.147-.04-.246-.088-.294l-.815-.806C.635 6.045.431 5.298.746 4.623a7.92 7.92 0 0 1 .704-1.217c.428-.61 1.176-.807 1.82-.63l1.102.302c.067.019.177.011.3-.071.214-.143.437-.272.668-.386.133-.066.194-.158.212-.224l.289-1.106C6.009.645 6.556.095 7.299.03 7.53.01 7.764 0 8 0Zm-.571 1.525c-.036.003-.108.036-.137.146l-.289 1.106c-.1.386-.396.71-.771.9-.31.157-.6.346-.87.562-.262.211-.597.3-.912.214l-1.103-.303c-.109-.03-.175.016-.195.045-.22.312-.412.644-.573.99-.014.031-.021.11.059.19l.815.806c.278.275.41.657.397 1.036-.007.21-.007.42 0 .628.013.379-.119.762-.397 1.037l-.814.806c-.08.08-.073.159-.059.19.161.347.353.678.573.99.02.029.086.074.195.045l1.103-.303c.315-.086.65.003.912.214.27.216.56.405.87.562.375.19.671.514.77.9l.29 1.106c.028.11.1.143.136.146a6.66 6.66 0 0 0 1.142 0c.036-.003.108-.036.137-.146l.289-1.106c.1-.386.396-.71.771-.9.31-.157.6-.346.87-.562.262-.211.597-.3.912-.214l1.103.303c.109.029.175-.016.194-.045.22-.312.413-.644.573-.99.015-.031.022-.11-.058-.19l-.815-.806a1.337 1.337 0 0 1-.397-1.037c.007-.21.007-.42 0-.628-.013-.379.119-.762.397-1.036l.814-.806c.08-.08.073-.159.059-.19a6.964 6.964 0 0 0-.574-.99c-.02-.029-.085-.074-.194-.045l-1.103.303c-.315.086-.65-.003-.912-.214a5.421 5.421 0 0 0-.87-.562c-.375-.19-.67-.514-.77-.9l-.29-1.106c-.028-.11-.1-.143-.136-.146a6.66 6.66 0 0 0-1.142 0ZM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-1.5 0a1.5 1.5 0 1 0-3.001.001A1.5 1.5 0 0 0 9.5 8Z"/>
+                  </svg>
+                </button>
+              </div>
             </div>
           `
             )
             .join("");
+
+          // Add click handlers for group info and actions buttons
+          groupsList.addEventListener("click", handleGroupListClick);
         }
       } else {
         groupsCount.textContent = "Error";
@@ -797,6 +1125,471 @@ const hashedId = hashSessionId(id || "");
       }
     });
   }
+
+  // Handle clicks on group info and actions buttons
+  function handleGroupListClick(e: Event) {
+    const target = e.target as HTMLElement;
+    const infoBtn = target.closest("[data-group-info]") as HTMLElement | null;
+    const actionsBtn = target.closest("[data-group-actions]") as HTMLElement | null;
+
+    if (infoBtn) {
+      const groupId = infoBtn.getAttribute("data-group-info");
+      if (groupId) openGroupInfoModal(groupId);
+    }
+
+    if (actionsBtn) {
+      const groupId = actionsBtn.getAttribute("data-group-actions");
+      if (groupId) openGroupActionsModal(groupId);
+    }
+  }
+
+  // Current group being operated on
+  let currentGroupId: string | null = null;
+  let currentGroupMetadata: any = null;
+
+  // Group Info Modal
+  const groupInfoModal = document.getElementById("group-info-modal");
+  const groupInfoModalBackdrop = document.getElementById("group-info-modal-backdrop");
+  const closeGroupInfoModal = document.getElementById("close-group-info-modal");
+  const groupInfoTitle = document.getElementById("group-info-title");
+  const groupInfoLoading = document.getElementById("group-info-loading");
+  const groupInfoData = document.getElementById("group-info-data");
+
+  function openGroupInfoModal(groupId: string) {
+    currentGroupId = groupId;
+    groupInfoModal?.classList.remove("hidden");
+    groupInfoLoading?.classList.remove("hidden");
+    groupInfoData?.classList.add("hidden");
+
+    api.sendAction("getGroupMetadata", { sessionId, groupId }).then((result) => {
+      groupInfoLoading?.classList.add("hidden");
+
+      if (result.success && result.data) {
+        const metadata = result.data as any;
+        currentGroupMetadata = metadata;
+
+        if (groupInfoTitle) {
+          groupInfoTitle.textContent = escapeHtml(metadata.subject || "Group Information");
+        }
+
+        if (groupInfoData) {
+          const creationDate = metadata.creation
+            ? new Date(metadata.creation * 1000).toLocaleDateString()
+            : "Unknown";
+
+          const adminCount = (metadata.participants || []).filter(
+            (p: any) => p.isAdmin || p.admin === "admin" || p.admin === "superadmin"
+          ).length;
+
+          groupInfoData.innerHTML = `
+            <!-- Basic Info -->
+            <div class="bg-gh-bg-secondary rounded-gh p-3">
+              <h3 class="text-xs font-semibold text-gh-text-muted uppercase tracking-wider mb-2">Basic Info</h3>
+              <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gh-text-secondary">Name</span>
+                  <span class="text-sm font-medium text-gh-text">${escapeHtml(metadata.subject || "Unknown")}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gh-text-secondary">Created</span>
+                  <span class="text-sm font-medium text-gh-text">${creationDate}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gh-text-secondary">Members</span>
+                  <span class="text-sm font-medium text-gh-text">${metadata.size || metadata.participants?.length || 0}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gh-text-secondary">Admins</span>
+                  <span class="text-sm font-medium text-gh-text">${adminCount}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Description -->
+            ${metadata.desc ? `
+            <div class="bg-gh-bg-secondary rounded-gh p-3">
+              <h3 class="text-xs font-semibold text-gh-text-muted uppercase tracking-wider mb-2">Description</h3>
+              <p class="text-sm text-gh-text whitespace-pre-wrap">${escapeHtml(metadata.desc)}</p>
+            </div>
+            ` : ""}
+
+            <!-- Settings -->
+            <div class="bg-gh-bg-secondary rounded-gh p-3">
+              <h3 class="text-xs font-semibold text-gh-text-muted uppercase tracking-wider mb-2">Settings</h3>
+              <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gh-text-secondary">Muted</span>
+                  <span class="text-sm font-medium ${metadata.announce ? "text-gh-success" : "text-gh-text"}">${metadata.announce ? "Yes" : "No"}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gh-text-secondary">Locked</span>
+                  <span class="text-sm font-medium ${metadata.restrict ? "text-gh-success" : "text-gh-text"}">${metadata.restrict ? "Yes" : "No"}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gh-text-secondary">Join Approval</span>
+                  <span class="text-sm font-medium ${metadata.joinApprovalMode ? "text-gh-success" : "text-gh-text"}">${metadata.joinApprovalMode ? "Required" : "Open"}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gh-text-secondary">Who Can Add</span>
+                  <span class="text-sm font-medium text-gh-text">${metadata.memberAddMode ? "All Members" : "Admins Only"}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gh-text-secondary">Disappearing</span>
+                  <span class="text-sm font-medium text-gh-text">${formatEphemeral(metadata.ephemeralDuration)}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gh-text-secondary">Community</span>
+                  <span class="text-sm font-medium ${metadata.isCommunity ? "text-gh-success" : "text-gh-text"}">${metadata.isCommunity ? "Yes" : "No"}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ID -->
+            <div class="bg-gh-bg-secondary rounded-gh p-3">
+              <h3 class="text-xs font-semibold text-gh-text-muted uppercase tracking-wider mb-2">Group ID</h3>
+              <p class="text-xs font-mono text-gh-text-secondary break-all">${escapeHtml(metadata.id)}</p>
+            </div>
+          `;
+          groupInfoData.classList.remove("hidden");
+        }
+      } else {
+        if (groupInfoData) {
+          groupInfoData.innerHTML = `
+            <div class="p-4 text-center">
+              <p class="text-sm text-gh-danger">Failed to load group info: ${result.error || "Unknown error"}</p>
+            </div>
+          `;
+          groupInfoData.classList.remove("hidden");
+        }
+      }
+    });
+  }
+
+  function formatEphemeral(duration: number | undefined): string {
+    if (!duration || duration === 0) return "Off";
+    if (duration === 86400) return "24 hours";
+    if (duration === 604800) return "7 days";
+    if (duration === 7776000) return "90 days";
+    return `${duration} seconds`;
+  }
+
+  closeGroupInfoModal?.addEventListener("click", () => {
+    groupInfoModal?.classList.add("hidden");
+  });
+
+  groupInfoModalBackdrop?.addEventListener("click", () => {
+    groupInfoModal?.classList.add("hidden");
+  });
+
+  // Group Actions Modal
+  const groupActionsModal = document.getElementById("group-actions-modal");
+  const groupActionsModalBackdrop = document.getElementById("group-actions-modal-backdrop");
+  const closeGroupActionsModal = document.getElementById("close-group-actions-modal");
+  const groupActionsTitle = document.getElementById("group-actions-title");
+  const groupActionsLoading = document.getElementById("group-actions-loading");
+  const groupActionsList = document.getElementById("group-actions-list");
+
+  function openGroupActionsModal(groupId: string) {
+    currentGroupId = groupId;
+    groupActionsModal?.classList.remove("hidden");
+    groupActionsLoading?.classList.add("hidden");
+    groupActionsList?.classList.remove("hidden");
+
+    // Load group metadata to set toggle states
+    api.sendAction("getGroupMetadata", { sessionId, groupId }).then((result) => {
+      if (result.success && result.data) {
+        const metadata = result.data as any;
+        currentGroupMetadata = metadata;
+
+        if (groupActionsTitle) {
+          groupActionsTitle.textContent = `Actions: ${escapeHtml(metadata.subject || "Group")}`;
+        }
+
+        // Update toggle states
+        updateToggle("toggle-mute", metadata.announce);
+        updateToggle("toggle-lock", metadata.restrict);
+      }
+    });
+  }
+
+  function updateToggle(toggleId: string, isEnabled: boolean) {
+    const toggle = document.getElementById(toggleId);
+    if (!toggle) return;
+
+    toggle.setAttribute("aria-checked", String(isEnabled));
+
+    if (isEnabled) {
+      toggle.classList.remove("bg-gh-bg-tertiary");
+      toggle.classList.add("bg-gh-success");
+      const span = toggle.querySelector("span");
+      if (span) {
+        span.classList.remove("translate-x-0");
+        span.classList.add("translate-x-5");
+      }
+    } else {
+      toggle.classList.remove("bg-gh-success");
+      toggle.classList.add("bg-gh-bg-tertiary");
+      const span = toggle.querySelector("span");
+      if (span) {
+        span.classList.remove("translate-x-5");
+        span.classList.add("translate-x-0");
+      }
+    }
+  }
+
+  closeGroupActionsModal?.addEventListener("click", () => {
+    groupActionsModal?.classList.add("hidden");
+  });
+
+  groupActionsModalBackdrop?.addEventListener("click", () => {
+    groupActionsModal?.classList.add("hidden");
+  });
+
+  // Handle toggle clicks
+  document.getElementById("toggle-mute")?.addEventListener("click", async () => {
+    if (!currentGroupId) return;
+    const isCurrentlyMuted = currentGroupMetadata?.announce;
+    const action = isCurrentlyMuted ? "unmute" : "mute";
+    await executeGroupAction(action);
+  });
+
+  document.getElementById("toggle-lock")?.addEventListener("click", async () => {
+    if (!currentGroupId) return;
+    const isCurrentlyLocked = currentGroupMetadata?.restrict;
+    const action = isCurrentlyLocked ? "unlock" : "lock";
+    await executeGroupAction(action);
+  });
+
+  // Handle simple action clicks
+  groupActionsList?.addEventListener("click", async (e) => {
+    const target = e.target as HTMLElement;
+    const actionBtn = target.closest("[data-action]") as HTMLElement | null;
+    const paramActionBtn = target.closest("[data-param-action]") as HTMLElement | null;
+
+    if (actionBtn) {
+      const action = actionBtn.getAttribute("data-action");
+      if (action) {
+        if (action === "leave" || action === "kickAll") {
+          const confirmed = confirm(
+            action === "leave"
+              ? "Are you sure you want to leave this group?"
+              : "Are you sure you want to kick all non-admin members?"
+          );
+          if (!confirmed) return;
+        }
+        await executeGroupAction(action);
+      }
+    }
+
+    if (paramActionBtn) {
+      const action = paramActionBtn.getAttribute("data-param-action");
+      if (action) {
+        openParamInputModal(action);
+      }
+    }
+  });
+
+  // Execute group action
+  async function executeGroupAction(action: string, params?: Record<string, any>) {
+    if (!currentGroupId) return;
+
+    groupActionsLoading?.classList.remove("hidden");
+    groupActionsList?.classList.add("hidden");
+
+    try {
+      const result = await api.sendAction("executeGroupAction", {
+        sessionId,
+        groupId: currentGroupId,
+        action,
+        params,
+      });
+
+      groupActionsLoading?.classList.add("hidden");
+      groupActionsList?.classList.remove("hidden");
+
+      if (result.success && result.data) {
+        const actionResult = result.data as any;
+        showActionResult(
+          actionResult.success ? "Success" : "Failed",
+          actionResult.message || "Action completed",
+          actionResult.data
+        );
+
+        // Refresh metadata after action
+        if (actionResult.success) {
+          const metaResult = await api.sendAction("getGroupMetadata", {
+            sessionId,
+            groupId: currentGroupId,
+          });
+          if (metaResult.success && metaResult.data) {
+            currentGroupMetadata = metaResult.data;
+            updateToggle("toggle-mute", currentGroupMetadata.announce);
+            updateToggle("toggle-lock", currentGroupMetadata.restrict);
+          }
+
+          // Reload groups list if group was left
+          if (action === "leave") {
+            groupActionsModal?.classList.add("hidden");
+            loadGroups();
+          }
+        }
+      } else {
+        showActionResult("Error", result.error || "Failed to execute action");
+      }
+    } catch (error) {
+      groupActionsLoading?.classList.add("hidden");
+      groupActionsList?.classList.remove("hidden");
+      showActionResult("Error", error instanceof Error ? error.message : "Unknown error");
+    }
+  }
+
+  // Parameter Input Modal
+  const paramInputModal = document.getElementById("param-input-modal");
+  const paramInputModalBackdrop = document.getElementById("param-input-modal-backdrop");
+  const paramInputTitle = document.getElementById("param-input-title");
+  const paramInputField = document.getElementById("param-input-field");
+  const paramInputError = document.getElementById("param-input-error");
+  const paramInputCancel = document.getElementById("param-input-cancel");
+  const paramInputExecute = document.getElementById("param-input-execute");
+
+  let currentParamAction: string | null = null;
+
+  function openParamInputModal(action: string) {
+    currentParamAction = action;
+    paramInputError?.classList.add("hidden");
+
+    const configs: Record<string, { title: string; label: string; placeholder: string; type: string; options?: { value: string; label: string }[] }> = {
+      name: { title: "Change Group Name", label: "New Name", placeholder: "Enter new group name", type: "text" },
+      description: { title: "Change Description", label: "New Description", placeholder: "Enter new description", type: "textarea" },
+      add: { title: "Add Participant", label: "Phone Number", placeholder: "e.g., 14155551234", type: "tel" },
+      remove: { title: "Remove Participant", label: "Phone Number", placeholder: "e.g., 14155551234", type: "tel" },
+      promote: { title: "Promote to Admin", label: "Phone Number", placeholder: "e.g., 14155551234", type: "tel" },
+      demote: { title: "Demote from Admin", label: "Phone Number", placeholder: "e.g., 14155551234", type: "tel" },
+      ephemeral: {
+        title: "Disappearing Messages",
+        label: "Duration",
+        placeholder: "",
+        type: "select",
+        options: [
+          { value: "0", label: "Off" },
+          { value: "86400", label: "24 hours" },
+          { value: "604800", label: "7 days" },
+          { value: "7776000", label: "90 days" },
+        ],
+      },
+    };
+
+    const config = configs[action];
+    if (!config) return;
+
+    if (paramInputTitle) paramInputTitle.textContent = config.title;
+
+    if (paramInputField) {
+      if (config.type === "select" && config.options) {
+        paramInputField.innerHTML = `
+          <label class="block text-sm font-medium text-gh-text mb-1">${config.label}</label>
+          <select
+            id="param-input-value"
+            class="w-full px-3 py-1.5 text-sm bg-gh-bg border border-gh-border rounded-gh text-gh-text focus:outline-none focus:border-gh-accent focus:ring-1 focus:ring-gh-accent"
+          >
+            ${config.options.map((opt) => `<option value="${opt.value}">${opt.label}</option>`).join("")}
+          </select>
+        `;
+      } else if (config.type === "textarea") {
+        paramInputField.innerHTML = `
+          <label class="block text-sm font-medium text-gh-text mb-1">${config.label}</label>
+          <textarea
+            id="param-input-value"
+            rows="3"
+            placeholder="${config.placeholder}"
+            class="w-full px-3 py-1.5 text-sm bg-gh-bg border border-gh-border rounded-gh text-gh-text placeholder-gh-text-muted focus:outline-none focus:border-gh-accent focus:ring-1 focus:ring-gh-accent resize-none"
+          ></textarea>
+        `;
+      } else {
+        paramInputField.innerHTML = `
+          <label class="block text-sm font-medium text-gh-text mb-1">${config.label}</label>
+          <input
+            type="${config.type}"
+            id="param-input-value"
+            placeholder="${config.placeholder}"
+            class="w-full px-3 py-1.5 text-sm bg-gh-bg border border-gh-border rounded-gh text-gh-text placeholder-gh-text-muted focus:outline-none focus:border-gh-accent focus:ring-1 focus:ring-gh-accent"
+          />
+        `;
+      }
+    }
+
+    paramInputModal?.classList.remove("hidden");
+  }
+
+  paramInputCancel?.addEventListener("click", () => {
+    paramInputModal?.classList.add("hidden");
+    currentParamAction = null;
+  });
+
+  paramInputModalBackdrop?.addEventListener("click", () => {
+    paramInputModal?.classList.add("hidden");
+    currentParamAction = null;
+  });
+
+  paramInputExecute?.addEventListener("click", async () => {
+    if (!currentParamAction) return;
+
+    const inputEl = document.getElementById("param-input-value") as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null;
+    const value = inputEl?.value?.trim();
+
+    if (!value && currentParamAction !== "description") {
+      if (paramInputError) {
+        paramInputError.textContent = "Please enter a value";
+        paramInputError.classList.remove("hidden");
+      }
+      return;
+    }
+
+    paramInputModal?.classList.add("hidden");
+
+    const paramMap: Record<string, Record<string, any>> = {
+      name: { name: value },
+      description: { description: value || "" },
+      add: { participant: value },
+      remove: { participant: value },
+      promote: { participant: value },
+      demote: { participant: value },
+      ephemeral: { duration: parseInt(value || "0", 10) },
+    };
+
+    await executeGroupAction(currentParamAction, paramMap[currentParamAction]);
+    currentParamAction = null;
+  });
+
+  // Action Result Modal
+  const actionResultModal = document.getElementById("action-result-modal");
+  const actionResultModalBackdrop = document.getElementById("action-result-modal-backdrop");
+  const actionResultTitle = document.getElementById("action-result-title");
+  const actionResultContent = document.getElementById("action-result-content");
+  const actionResultClose = document.getElementById("action-result-close");
+
+  function showActionResult(title: string, message: string, data?: any) {
+    if (actionResultTitle) actionResultTitle.textContent = title;
+    if (actionResultContent) {
+      let content = `<p>${escapeHtml(message)}</p>`;
+      if (data && typeof data === "string" && data.includes("chat.whatsapp.com")) {
+        content += `<div class="mt-3 p-2 bg-gh-bg-secondary rounded-gh">
+          <p class="text-xs text-gh-text-muted mb-1">Invite Link:</p>
+          <a href="${escapeHtml(data)}" target="_blank" rel="noopener noreferrer" class="text-sm text-gh-link break-all">${escapeHtml(data)}</a>
+        </div>`;
+      }
+      actionResultContent.innerHTML = content;
+    }
+    actionResultModal?.classList.remove("hidden");
+  }
+
+  actionResultClose?.addEventListener("click", () => {
+    actionResultModal?.classList.add("hidden");
+  });
+
+  actionResultModalBackdrop?.addEventListener("click", () => {
+    actionResultModal?.classList.add("hidden");
+  });
 
   loadGroups();
 

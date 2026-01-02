@@ -12,7 +12,9 @@ export type WsAction =
   | "pauseSession"
   | "resumeSession"
   | "getActivitySettings"
-  | "updateActivitySettings";
+  | "updateActivitySettings"
+  | "getGroupMetadata"
+  | "executeGroupAction";
 
 export interface WsRequest {
   action: WsAction;
@@ -99,6 +101,57 @@ export interface MessagesResponse {
 export interface GroupsResponse {
   groups: Array<{ id: string; subject: string; participantCount: number }>;
   total: number;
+}
+
+export interface GroupParticipant {
+  id: string;
+  admin?: "admin" | "superadmin" | null;
+  isAdmin?: boolean;
+  isSuperAdmin?: boolean;
+}
+
+export interface GroupMetadata {
+  id: string;
+  subject: string;
+  owner?: string;
+  creation?: number;
+  desc?: string;
+  descOwner?: string;
+  descId?: string;
+  restrict?: boolean;
+  announce?: boolean;
+  memberAddMode?: boolean;
+  joinApprovalMode?: boolean;
+  isCommunity?: boolean;
+  size?: number;
+  participants: GroupParticipant[];
+  ephemeralDuration?: number;
+  inviteCode?: string;
+}
+
+export type GroupActionType =
+  | "leave"
+  | "kickAll"
+  | "inviteCode"
+  | "revokeInvite"
+  | "mute"
+  | "unmute"
+  | "lock"
+  | "unlock"
+  | "name"
+  | "description"
+  | "add"
+  | "remove"
+  | "promote"
+  | "demote"
+  | "ephemeral"
+  | "addMode"
+  | "joinMode";
+
+export interface GroupActionResult {
+  success: boolean;
+  message?: string;
+  data?: unknown;
 }
 
 export interface ActivitySettings {

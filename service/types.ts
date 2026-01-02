@@ -72,6 +72,64 @@ export interface GroupsData {
   total: number;
 }
 
+export interface GroupParticipantData {
+  id: string;
+  admin?: "admin" | "superadmin" | null;
+  isAdmin?: boolean;
+  isSuperAdmin?: boolean;
+}
+
+export interface GroupMetadataData {
+  id: string;
+  subject: string;
+  owner?: string;
+  creation?: number;
+  desc?: string;
+  descOwner?: string;
+  descId?: string;
+  restrict?: boolean;
+  announce?: boolean;
+  memberAddMode?: boolean;
+  joinApprovalMode?: boolean;
+  isCommunity?: boolean;
+  size?: number;
+  participants: GroupParticipantData[];
+  ephemeralDuration?: number;
+  inviteCode?: string;
+}
+
+export type GroupActionType =
+  | "leave"
+  | "kickAll"
+  | "inviteCode"
+  | "revokeInvite"
+  | "mute"
+  | "unmute"
+  | "lock"
+  | "unlock"
+  | "name"
+  | "description"
+  | "add"
+  | "remove"
+  | "promote"
+  | "demote"
+  | "ephemeral"
+  | "addMode"
+  | "joinMode";
+
+export interface GroupActionRequest {
+  sessionId: string;
+  groupId: string;
+  action: GroupActionType;
+  params?: Record<string, string | number | boolean>;
+}
+
+export interface GroupActionResult {
+  success: boolean;
+  message?: string;
+  data?: unknown;
+}
+
 export interface SessionCreateRequest {
   phoneNumber: string;
 }
@@ -105,7 +163,9 @@ export type WsAction =
   | "pauseSession"
   | "resumeSession"
   | "getActivitySettings"
-  | "updateActivitySettings";
+  | "updateActivitySettings"
+  | "getGroupMetadata"
+  | "executeGroupAction";
 
 export interface WsRequest {
   action: WsAction;
@@ -136,6 +196,8 @@ export interface WsResponsePayloads {
   resumeSession: MessageResult;
   getActivitySettings: ActivitySettingsData;
   updateActivitySettings: ActivitySettingsData;
+  getGroupMetadata: GroupMetadataData;
+  executeGroupAction: GroupActionResult;
 }
 
 export interface MessageResult {
