@@ -1169,7 +1169,7 @@ const hashedId = hashSessionId(id || "");
         currentGroupMetadata = metadata;
 
         if (groupInfoTitle) {
-          groupInfoTitle.textContent = escapeHtml(metadata.subject || "Group Information");
+          groupInfoTitle.textContent = metadata.subject || "Group Information";
         }
 
         if (groupInfoData) {
@@ -1219,11 +1219,11 @@ const hashedId = hashSessionId(id || "");
               <div class="space-y-2">
                 <div class="flex justify-between items-center">
                   <span class="text-sm text-gh-text-secondary">Muted</span>
-                  <span class="text-sm font-medium ${metadata.announce ? "text-gh-success" : "text-gh-text"}">${metadata.announce ? "Yes" : "No"}</span>
+                  <span class="text-sm font-medium ${metadata.announce ? "text-gh-warning" : "text-gh-text"}">${metadata.announce ? "Yes (Admins only)" : "No"}</span>
                 </div>
                 <div class="flex justify-between items-center">
                   <span class="text-sm text-gh-text-secondary">Locked</span>
-                  <span class="text-sm font-medium ${metadata.restrict ? "text-gh-success" : "text-gh-text"}">${metadata.restrict ? "Yes" : "No"}</span>
+                  <span class="text-sm font-medium ${metadata.restrict ? "text-gh-warning" : "text-gh-text"}">${metadata.restrict ? "Yes (Admins only)" : "No"}</span>
                 </div>
                 <div class="flex justify-between items-center">
                   <span class="text-sm text-gh-text-secondary">Join Approval</span>
