@@ -559,6 +559,7 @@ export async function executeGroupAction(
       "ephemeral",
       "addMode",
       "joinMode",
+      "inviteCode",
       "revokeInvite",
       "linkGroup",
       "unlinkGroup",
