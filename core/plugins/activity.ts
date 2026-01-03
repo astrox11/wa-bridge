@@ -272,4 +272,29 @@ export default [
       }
     },
   },
+  {
+    event: true,
+    async exec(msg, sock) {
+      const activity = getActivitySettings(msg.sessionId);
+      if (activity.auto_read_messages) {
+        await sock.readMessages([msg.key]);
+      }
+
+      if (activity.auto_typing) {
+        await sock.sendPresenceUpdate("composing", msg.chat);
+      }
+
+      if (activity.auto_recording) {
+        await sock.sendPresenceUpdate("recording", msg.chat);
+      }
+
+      if (activity.auto_always_online) {
+        await sock.sendPresenceUpdate("available");
+      }
+
+      if (activity.auto_antispam) {
+        // Implement anti-spam logic here
+      }
+    },
+  },
 ] satisfies CommandProperty[];

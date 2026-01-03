@@ -6,6 +6,7 @@ import makeWASocket, {
   makeCacheableSignalKeyStore,
   type CacheStore,
   type WASocket,
+  isJidGroup,
 } from "baileys";
 import { Boom } from "@hapi/boom";
 import MAIN_LOGGER from "pino";
@@ -32,6 +33,8 @@ import {
   sanitizePhoneNumber,
   generateSessionId,
   updateSessionUserInfo,
+  getActivitySettings,
+  getMessageRaw,
 } from "..";
 import { useSessionAuth } from "./session";
 import { type Session, SessionErrorType, StatusType } from "./types";
@@ -314,10 +317,30 @@ class SessionManager {
       }
 
       if (events["messages.delete"]) {
-        log.debug(
-          `Session ${sessionId} message deleted:`,
-          events["messages.delete"],
-        );
+        const deletions = events["messages.delete"];
+        const { auto_recover_deleted_messages } =
+          getActivitySettings(sessionId);
+
+        if (auto_recover_deleted_messages) {
+          if ("keys" in deletions) {
+            for (const key of deletions.keys) {
+              if (key.fromMe) return;
+
+              const message = await getMessageRaw(sessionId, key);
+
+              if (message) {
+                await new Message(sock, message, sessionId).forward(
+                  jidNormalizedUser(sock.user.id),
+                  message,
+                );
+              }
+            }
+          }
+        }
+      }
+
+      if (events.call) {
+        
       }
     });
   }

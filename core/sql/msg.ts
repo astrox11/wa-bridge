@@ -22,7 +22,25 @@ export const getMessage = async (sessionId: string, key: WAMessageKey) => {
       [id],
     );
     const row = result[0];
-    return row ? proto.Message.fromObject(JSON.parse(row.msg)) : undefined;
+    return row
+      ? proto.Message.fromObject(JSON.parse(row.msg).message)
+      : undefined;
+  }
+  return undefined;
+};
+
+export const getMessageRaw = async (sessionId: string, key: WAMessageKey) => {
+  const id = key?.id;
+  if (id) {
+    const tableName = getMessagesTable(sessionId);
+    const result = bunql.query<{ msg: string }>(
+      `SELECT msg FROM "${tableName}" WHERE id = ?`,
+      [id],
+    );
+    const row = result[0];
+    return row
+      ? (proto.WebMessageInfo.fromObject(JSON.parse(row.msg)) as WAMessage)
+      : undefined;
   }
   return undefined;
 };
