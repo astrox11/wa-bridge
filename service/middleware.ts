@@ -56,9 +56,7 @@ class RuntimeStats {
         const hoursAgo = Math.floor((now - timestamp) / (60 * 60 * 1000));
         if (hoursAgo >= 0 && hoursAgo < 24) {
           const index = 23 - hoursAgo;
-          if (hourlyData[index] !== undefined) {
-            hourlyData[index]++;
-          }
+          hourlyData[index] = (hourlyData[index] ?? 0) + 1;
         }
       }
     }

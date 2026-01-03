@@ -93,7 +93,7 @@ function rollDice(exclude?: number) {
   const pool = [1, 2, 3, 4, 5, 6].filter((v) => v !== exclude);
   if (!pool.length) throw new Error("No valid dice values left");
 
-  const value = pool[(Math.random() * pool.length) | 0] ?? 1;
+  const value = pool[(Math.random() * pool.length) | 0]!;
   return { value, emoji: diceEmojis[value] };
 }
 

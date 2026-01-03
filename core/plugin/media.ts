@@ -61,9 +61,7 @@ export default [
         );
       }
 
-      const parts = args.split(" ");
-      const start = parts[0];
-      const end = parts[1];
+      const [start, end] = args.split(" ");
 
       if (!start || !end) {
         return await msg.reply(
