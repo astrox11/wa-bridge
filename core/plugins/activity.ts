@@ -2,7 +2,50 @@ import {
   type CommandProperty,
   getActivitySettings,
   setActivitySettings,
+  isAdmin,
+  Group,
 } from "..";
+import { jidNormalizedUser } from "baileys";
+
+// Spam tracking: Map<sessionId, Map<sender, { timestamps: number[], warned: boolean }>>
+const spamTracker: Map<
+  string,
+  Map<string, { timestamps: number[]; warned: boolean }>
+> = new Map();
+
+// Spam detection settings
+const SPAM_WINDOW_MS = 3000; // 3 seconds
+const SPAM_MESSAGE_THRESHOLD = 2; // More than 1 message per window (i.e., 2+)
+
+function getOrCreateSpamEntry(
+  sessionId: string,
+  sender: string,
+): { timestamps: number[]; warned: boolean } {
+  if (!spamTracker.has(sessionId)) {
+    spamTracker.set(sessionId, new Map());
+  }
+  const sessionMap = spamTracker.get(sessionId)!;
+  if (!sessionMap.has(sender)) {
+    sessionMap.set(sender, { timestamps: [], warned: false });
+  }
+  return sessionMap.get(sender)!;
+}
+
+function resetSpamEntry(sessionId: string, sender: string): void {
+  const sessionMap = spamTracker.get(sessionId);
+  if (sessionMap) {
+    sessionMap.set(sender, { timestamps: [], warned: false });
+  }
+}
+
+function isSpamming(entry: { timestamps: number[]; warned: boolean }): boolean {
+  const now = Date.now();
+  // Filter to only keep timestamps within the window
+  entry.timestamps = entry.timestamps.filter(
+    (t) => now - t < SPAM_WINDOW_MS,
+  );
+  return entry.timestamps.length >= SPAM_MESSAGE_THRESHOLD;
+}
 
 export default [
   {
@@ -293,7 +336,78 @@ export default [
       }
 
       if (activity.auto_antispam) {
-        // Implement anti-spam logic here
+        // Skip if message is from self
+        if (msg.key.fromMe) return;
+
+        const sender = msg.sender;
+
+        // Skip if sender is sudo
+        if (msg.sudo) return;
+
+        // Get bot's JID
+        const botId = jidNormalizedUser(sock.user?.id);
+        const botLid = sock.user?.lid
+          ? jidNormalizedUser(sock.user.lid)
+          : undefined;
+
+        if (msg.isGroup) {
+          // Check if bot is admin in the group
+          const isBotAdmin =
+            isAdmin(msg.sessionId, msg.chat, botId) ||
+            (botLid && isAdmin(msg.sessionId, msg.chat, botLid));
+
+          if (!isBotAdmin) return; // Bot is not admin, skip
+
+          // Check if sender is admin
+          const isSenderAdmin = isAdmin(msg.sessionId, msg.chat, sender);
+          if (isSenderAdmin) return; // Sender is admin, skip
+        }
+
+        // Track message timestamp
+        const spamEntry = getOrCreateSpamEntry(msg.sessionId, sender);
+        spamEntry.timestamps.push(Date.now());
+
+        // Check if user is spamming
+        if (isSpamming(spamEntry)) {
+          if (!spamEntry.warned) {
+            // First time warning
+            spamEntry.warned = true;
+
+            if (msg.isGroup) {
+              await msg.reply(
+                "```⚠️ Warning: Stop spamming or you will be kicked from this group!```",
+              );
+            } else {
+              await msg.reply(
+                "```⚠️ Hey, stop the spam or you will be blocked!```",
+              );
+            }
+
+            // Reset the timestamps after warning
+            spamEntry.timestamps = [];
+          } else {
+            // User was already warned, take action
+            if (msg.isGroup) {
+              await msg.reply(
+                "```🚫 You have been kicked from this group for spamming.```",
+              );
+              try {
+                const group = new Group(msg.sessionId, msg.chat, sock);
+                await group.Remove(sender);
+              } catch (error) {
+                // Failed to kick, might not have permissions
+              }
+            } else {
+              await msg.reply(
+                "```🚫 You have been blocked for spamming.```",
+              );
+              await msg.block(sender);
+            }
+
+            // Reset the spam entry after action
+            resetSpamEntry(msg.sessionId, sender);
+          }
+        }
       }
     },
   },

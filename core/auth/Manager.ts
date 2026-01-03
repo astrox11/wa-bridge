@@ -35,6 +35,8 @@ import {
   updateSessionUserInfo,
   getActivitySettings,
   getMessageRaw,
+  isSudo,
+  isAdmin,
 } from "..";
 import { useSessionAuth } from "./session";
 import { type Session, SessionErrorType, StatusType } from "./types";
@@ -340,7 +342,26 @@ class SessionManager {
       }
 
       if (events.call) {
-        
+        const calls = events.call;
+        const { auto_reject_calls } = getActivitySettings(sessionId);
+
+        if (auto_reject_calls) {
+          for (const call of calls) {
+            if (call.status === "offer") {
+              try {
+                await sock.rejectCall(call.id, call.from);
+                log.info(
+                  `Session ${sessionId} rejected ${call.isVideo ? "video" : "voice"} call from ${call.from}`,
+                );
+              } catch (error) {
+                log.error(
+                  `Session ${sessionId} failed to reject call:`,
+                  error,
+                );
+              }
+            }
+          }
+        }
       }
     });
   }

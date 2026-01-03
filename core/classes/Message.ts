@@ -206,4 +206,8 @@ export class Message {
       { quoted: this },
     );
   }
+
+  async delete() {
+    return await this.client.sendMessage(this.chat, { delete: this.key });
+  }
 }
