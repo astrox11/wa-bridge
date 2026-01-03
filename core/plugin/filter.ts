@@ -1,82 +1,14 @@
-import type { CommandProperty } from "..";
 import {
+  replacePlaceholders,
   setFilter,
   getAllFilters,
   getFilterByTrigger,
   deleteFilter,
-} from "../sql";
+  type CommandProperty,
+} from "..";
 import config from "../../config";
 
 const STATUS_FILTER = "_status";
-
-async function fetchFact(): Promise<string> {
-  try {
-    const res = await fetch(
-      "https://uselessfacts.jsph.pl/random.json?language=en",
-    );
-    const data = await res.json();
-    return data.text || "Did you know facts are fun?";
-  } catch {
-    return "Did you know facts are fun?";
-  }
-}
-
-async function fetchQuote(): Promise<string> {
-  try {
-    const res = await fetch("https://api.quotable.io/random");
-    const data = await res.json();
-    if (data.content && data.author) {
-      return `${data.content} - ${data.author}`;
-    }
-    return "Stay positive!";
-  } catch {
-    return "Stay positive!";
-  }
-}
-
-async function fetchJoke(): Promise<string> {
-  try {
-    const res = await fetch(
-      "https://official-joke-api.appspot.com/random_joke",
-    );
-    const data = await res.json();
-    if (data.setup && data.punchline) {
-      return `${data.setup} ${data.punchline}`;
-    }
-    return "Why don't scientists trust atoms? Because they make up everything!";
-  } catch {
-    return "Why don't scientists trust atoms? Because they make up everything!";
-  }
-}
-
-async function replacePlaceholders(
-  message: string,
-  sender: string,
-  ownerId: string,
-  botName: string,
-): Promise<string> {
-  let result = message
-    .replace(/@user/g, sender.split("@")[0])
-    .replace(/@owner/g, ownerId.split("@")[0])
-    .replace(/@botname/g, botName);
-
-  if (result.includes("@facts")) {
-    const fact = await fetchFact();
-    result = result.replace(/@facts/g, fact);
-  }
-
-  if (result.includes("@quotes")) {
-    const quote = await fetchQuote();
-    result = result.replace(/@quotes/g, quote);
-  }
-
-  if (result.includes("@jokes")) {
-    const joke = await fetchJoke();
-    result = result.replace(/@jokes/g, joke);
-  }
-
-  return result;
-}
 
 export default [
   {

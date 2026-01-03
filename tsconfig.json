@@ -1,18 +1,29 @@
 {
   "compilerOptions": {
-    "lib": ["ESNext"],
-    "target": "ESNext",
+    "target": "esnext",
     "module": "ESNext",
 
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "noEmit": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
 
-    "strict": false,
+    "moduleResolution": "bundler",
+    "verbatimModuleSyntax": true,
+
+    "strict": true,
     "skipLibCheck": true,
+
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true
+    "noImplicitOverride": true,
+
+    "useDefineForClassFields": true,
+    "isolatedModules": true,
+
+    "outDir": "dist",
+
+    "baseUrl": ".",
+    "paths": {
+      "baileys": ["node_modules/baileys/lib"],
+      "baileys/*": ["node_modules/baileys/lib/*"]
+    }
   }
 }
