@@ -1,5 +1,5 @@
 import { readdirSync } from "fs";
-import { join, dirname } from "path";
+import { join, dirname, resolve } from "path";
 import { pathToFileURL, fileURLToPath } from "url";
 import { type MessageUpsertType, type WASocket } from "baileys";
 import type { Message } from "./Message";
@@ -112,7 +112,7 @@ export class Plugins {
 
     for (const file of files) {
       try {
-        const filePath = join(pluginsFolder, file);
+        const filePath = resolve(join(pluginsFolder, file));
         const fileUrl = pathToFileURL(filePath).href;
         const imported = await import(fileUrl);
         const commandData = imported.default;
