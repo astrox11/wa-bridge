@@ -1,11 +1,12 @@
 import { readdirSync } from "fs";
-import { join, resolve } from "path";
-import { pathToFileURL } from "url";
+import { join, dirname } from "path";
+import { pathToFileURL, fileURLToPath } from "url";
 import { type MessageUpsertType, type WASocket } from "baileys";
 import type { Message } from "./Message";
 import { isAdmin, log } from "..";
 
 const processedMessages = new Set<string>();
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export class Plugins {
   message: Message;
@@ -98,8 +99,12 @@ export class Plugins {
     }
   }
 
-  async load(pluginsFolder: string) {
+  async load() {
     if (Plugins.isLoaded) return;
+
+    // Resolve plugin folder relative to this module's location
+    // This works for both TypeScript (core/class) and compiled JS (dist/core/class)
+    const pluginsFolder = join(__dirname, "..", "plugin");
 
     const files = readdirSync(pluginsFolder).filter(
       (file) => file.endsWith(".js") || file.endsWith(".ts"),
@@ -107,7 +112,7 @@ export class Plugins {
 
     for (const file of files) {
       try {
-        const filePath = resolve(join(pluginsFolder, file));
+        const filePath = join(pluginsFolder, file);
         const fileUrl = pathToFileURL(filePath).href;
         const imported = await import(fileUrl);
         const commandData = imported.default;

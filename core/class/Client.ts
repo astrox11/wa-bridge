@@ -249,7 +249,7 @@ class Client {
               }
 
               const cmd = new Plugins(msg, sock);
-              await cmd.load("./core/plugin");
+              await cmd.load();
               await Promise.allSettled([cmd.text(), cmd.eventUser(type)]);
             } catch (error) {
               log.error(
