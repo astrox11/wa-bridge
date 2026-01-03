@@ -1,5 +1,5 @@
 import type { CommandProperty } from "..";
-import { Plugins } from "../classes";
+import { Plugins } from "../class";
 import {
   saveSticker,
   getStickerByName,

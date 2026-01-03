@@ -32,8 +32,14 @@ const ASTRO_SERVER_URL = `http://localhost:${ASTRO_PORT}`;
 let astroProcess: ReturnType<typeof spawn> | null = null;
 
 function startAstroServer(): void {
-  const entryPath = join(import.meta.dir, "service", "dist", "server", "entry.mjs");
-  
+  const entryPath = join(
+    import.meta.dir,
+    "service",
+    "dist",
+    "server",
+    "entry.mjs",
+  );
+
   astroProcess = spawn("node", [entryPath], {
     cwd: join(import.meta.dir, "service"),
     env: {
@@ -49,7 +55,8 @@ function startAstroServer(): void {
     log.debug("[Astro]", msg);
     // Log when Astro is ready
     if (msg.includes("Server listening")) {
-      log.info(`Astro SSR server ready on internal port ${ASTRO_PORT}`);
+      log.info(`Astro SSR server ready`);
+      log.info(`Visit http://192.168.0.187:8000`);
     }
   });
 
@@ -271,7 +278,7 @@ const server = Bun.serve({
 log.debug("Debug mode:", config.DEBUG ? "enabled" : "disabled");
 
 sessionManager
-  .restoreAllSessions()
+  .restore_all()
   .then(() => {
     log.info("Session restoration complete");
   })

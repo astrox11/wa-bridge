@@ -3,7 +3,7 @@ import { join, resolve } from "path";
 import { pathToFileURL } from "url";
 import { type MessageUpsertType, type WASocket } from "baileys";
 import type { Message } from "./Message";
-import { isAdmin, log } from "../";
+import { isAdmin, log } from "..";
 
 const processedMessages = new Set<string>();
 
@@ -34,7 +34,10 @@ export class Plugins {
       }
       // Strip all leading prefix symbols from the text
       let prefixCount = 0;
-      while (prefixCount < text.length && prefix.includes(text.charAt(prefixCount))) {
+      while (
+        prefixCount < text.length &&
+        prefix.includes(text.charAt(prefixCount))
+      ) {
         prefixCount++;
       }
       text = text.slice(prefixCount).trim();

@@ -48,7 +48,11 @@ function getOrCreateSpamEntry(
   }
   const sessionMap = spamTracker.get(sessionId)!;
   if (!sessionMap.has(sender)) {
-    sessionMap.set(sender, { timestamps: [], warned: false, lastActivity: Date.now() });
+    sessionMap.set(sender, {
+      timestamps: [],
+      warned: false,
+      lastActivity: Date.now(),
+    });
   }
   const entry = sessionMap.get(sender)!;
   entry.lastActivity = Date.now();
@@ -58,14 +62,24 @@ function getOrCreateSpamEntry(
 function resetSpamEntry(sessionId: string, sender: string): void {
   const sessionMap = spamTracker.get(sessionId);
   if (sessionMap) {
-    sessionMap.set(sender, { timestamps: [], warned: false, lastActivity: Date.now() });
+    sessionMap.set(sender, {
+      timestamps: [],
+      warned: false,
+      lastActivity: Date.now(),
+    });
   }
 }
 
-function cleanupAndCheckSpam(entry: { timestamps: number[]; warned: boolean; lastActivity: number }): boolean {
+function cleanupAndCheckSpam(entry: {
+  timestamps: number[];
+  warned: boolean;
+  lastActivity: number;
+}): boolean {
   const now = Date.now();
   // Filter to only keep timestamps within the window and update the entry
-  const recentTimestamps = entry.timestamps.filter((t) => now - t < SPAM_WINDOW_MS);
+  const recentTimestamps = entry.timestamps.filter(
+    (t) => now - t < SPAM_WINDOW_MS,
+  );
   entry.timestamps = recentTimestamps;
   return recentTimestamps.length >= SPAM_MESSAGE_THRESHOLD;
 }
@@ -424,9 +438,7 @@ export default [
                 );
               }
             } else {
-              await msg.reply(
-                "```🚫 You have been blocked for spamming.```",
-              );
+              await msg.reply("```🚫 You have been blocked for spamming.```");
               await msg.block(sender);
             }
 

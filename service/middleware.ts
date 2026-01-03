@@ -593,7 +593,8 @@ export async function executeGroupAction(
       if (!isBotAdmin) {
         return {
           success: false,
-          error: "Bot is not an admin in this group. Admin privileges required.",
+          error:
+            "Bot is not an admin in this group. Admin privileges required.",
         };
       }
     }

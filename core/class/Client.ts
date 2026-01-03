@@ -6,7 +6,6 @@ import makeWASocket, {
   makeCacheableSignalKeyStore,
   type CacheStore,
   type WASocket,
-  isJidGroup,
 } from "baileys";
 import { Boom } from "@hapi/boom";
 import MAIN_LOGGER from "pino";
@@ -19,58 +18,52 @@ import {
   getMessage,
   addContact,
   saveMessage,
-  cacheGroupMetadata,
-  cachedGroupMetadata,
-  syncGroupMetadata,
-  createSession,
   getSession,
-  getAllSessions,
   deleteSession,
-  updateSessionStatus,
-  sessionExists,
-  initializeSql,
-  deleteUserTables,
-  sanitizePhoneNumber,
-  generateSessionId,
-  updateSessionUserInfo,
-  getActivitySettings,
+  useSessionAuth,
   getMessageRaw,
-  isSudo,
-  isAdmin,
+  sessionExists,
+  createSession,
+  deleteUserTables,
+  initializeSql,
+  syncGroupMetadata,
+  cachedGroupMetadata,
+  cacheGroupMetadata,
+  generateSessionId,
+  updateSessionStatus,
+  StatusType,
+  SessionErrorType,
+  getAllSessions,
+  getActivitySettings,
+  sanitizePhoneNumber,
+  updateSessionUserInfo,
+  UserPausedStatus,
+  type Session,
 } from "..";
-import { useSessionAuth } from "./session";
-import { type Session, SessionErrorType, StatusType } from "./types";
-import { UserPausedStatus } from "./util";
+import type { RuntimeSession } from "./types";
 
 const logger = MAIN_LOGGER({ level: "silent" });
 
-interface RuntimeSession {
-  client: WASocket | null;
-  msgRetryCounterCache: CacheStore;
-}
-
-class SessionManager {
+class Client {
   private runtimeData: Map<string, RuntimeSession> = new Map();
-  private static instance: SessionManager | null = null;
+  private static instance: Client | null = null;
 
-  static getInstance(): SessionManager {
-    if (!SessionManager.instance) {
-      SessionManager.instance = new SessionManager();
+  static getInstance(): Client {
+    if (!Client.instance) {
+      Client.instance = new Client();
     }
-    return SessionManager.instance;
+    return Client.instance;
   }
 
-  async create(
-    phone: string,
-  ): Promise<{ success: boolean; code?: string; error?: string; id?: string }> {
-    const phone_number = sanitizePhoneNumber(phone);
+  async create(id: string) {
+    id = sanitizePhoneNumber(id);
 
-    if (!phone_number) {
-      log.debug("Invalid phone number format:", phone);
+    if (!id) {
+      log.debug("Invalid phone number format:", id);
       return { success: false, error: "Invalid phone number format" };
     }
 
-    const sessionId = generateSessionId(phone_number);
+    const sessionId = generateSessionId(id);
 
     log.debug("Creating new session:", sessionId);
 
@@ -82,8 +75,8 @@ class SessionManager {
       };
     }
 
-    initializeSql(phone_number);
-    log.debug("Initialized user tables for:", phone_number);
+    initializeSql(id);
+    log.debug("Initialized user tables for:", id);
 
     const runtime: RuntimeSession = {
       client: null,
@@ -92,18 +85,13 @@ class SessionManager {
     this.runtimeData.set(sessionId, runtime);
 
     try {
-      const code = await this.initializeSession(
-        sessionId,
-        phone_number,
-        runtime,
-        true,
-      );
-      createSession(sessionId, phone_number);
+      const code = await this.init(sessionId, id, runtime, true);
+      createSession(sessionId, id);
       log.debug("Session created:", sessionId);
       return { success: true, code, id: sessionId };
     } catch (error) {
       this.runtimeData.delete(sessionId);
-      deleteUserTables(phone_number);
+      deleteUserTables(id);
 
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
@@ -113,7 +101,7 @@ class SessionManager {
     }
   }
 
-  private async initializeSession(
+  private async init(
     sessionId: string,
     phoneNumber: string,
     runtime: RuntimeSession,
@@ -173,12 +161,12 @@ class SessionManager {
       );
     }
 
-    this.setupEventHandlers(sessionId, phoneNumber, runtime, sock, saveCreds);
+    this.events(sessionId, phoneNumber, runtime, sock, saveCreds);
 
     return pairingCode;
   }
 
-  private setupEventHandlers(
+  private events(
     sessionId: string,
     phoneNumber: string,
     runtime: RuntimeSession,
@@ -218,12 +206,7 @@ class SessionManager {
 
             updateSessionStatus(sessionId, StatusType.Connecting);
             log.info(`Session ${sessionId} reconnecting...`);
-            this.initializeSession(
-              sessionId,
-              phoneNumber,
-              runtime,
-              false,
-            ).catch((error) => {
+            this.init(sessionId, phoneNumber, runtime, false).catch((error) => {
               log.error(`Session ${sessionId} reconnection failed:`, error);
             });
           } else {
@@ -264,7 +247,7 @@ class SessionManager {
               }
 
               const cmd = new Plugins(msg, sock);
-              await cmd.load("./core/plugins");
+              await cmd.load("./core/plugin");
               await Promise.allSettled([cmd.text(), cmd.eventUser(type)]);
             } catch (error) {
               log.error(
@@ -331,10 +314,10 @@ class SessionManager {
               const message = await getMessageRaw(sessionId, key);
 
               if (message) {
-                await new Message(sock, message, sessionId).forward(
-                  jidNormalizedUser(sock.user.id),
-                  message,
-                );
+                await sock.sendMessage(sock.user.id, {
+                  forward: message,
+                  contextInfo: { forwardingScore: 0, isForwarded: false },
+                });
               }
             }
           }
@@ -354,10 +337,7 @@ class SessionManager {
                   `Session ${sessionId} rejected ${call.isVideo ? "video" : "voice"} call from ${call.from}`,
                 );
               } catch (error) {
-                log.error(
-                  `Session ${sessionId} failed to reject call:`,
-                  error,
-                );
+                log.error(`Session ${sessionId} failed to reject call:`, error);
               }
             }
           }
@@ -366,10 +346,8 @@ class SessionManager {
     });
   }
 
-  async delete(
-    idOrPhone: string,
-  ): Promise<{ success: boolean; error?: string }> {
-    const dbSession = this.get(idOrPhone);
+  async delete(id: string): Promise<{ success: boolean; error?: string }> {
+    const dbSession = this.get(id);
     if (!dbSession) {
       return { success: false, error: SessionErrorType.SessionNotFound };
     }
@@ -394,20 +372,8 @@ class SessionManager {
     log.info(`Session ${sessionId} deleted`);
     return { success: true };
   }
-
-  list(): Session[] {
-    return getAllSessions();
-  }
-
-  get(idOrPhone: string): Session | null {
-    const i = sanitizePhoneNumber(idOrPhone);
-    return getSession(i || idOrPhone);
-  }
-
-  async pause(
-    idOrPhone: string,
-  ): Promise<{ success: boolean; error?: string }> {
-    const dbSession = this.get(idOrPhone);
+  async pause(id: string): Promise<{ success: boolean; error?: string }> {
+    const dbSession = this.get(id);
     if (!dbSession) {
       return { success: false, error: "Session not found" };
     }
@@ -436,10 +402,8 @@ class SessionManager {
     return { success: true };
   }
 
-  async resume(
-    idOrPhone: string,
-  ): Promise<{ success: boolean; error?: string }> {
-    const dbSession = this.get(idOrPhone);
+  async resume(id: string): Promise<{ success: boolean; error?: string }> {
+    const dbSession = this.get(id);
     if (!dbSession) {
       return { success: false, error: "Session not found" };
     }
@@ -480,12 +444,7 @@ class SessionManager {
     updateSessionStatus(sessionId, StatusType.Connecting);
 
     try {
-      await this.initializeSession(
-        sessionId,
-        dbSession.phone_number,
-        runtime,
-        false,
-      );
+      await this.init(sessionId, dbSession.phone_number, runtime, false);
       log.info(`Session ${sessionId} resumed`);
       return { success: true };
     } catch (error) {
@@ -499,7 +458,7 @@ class SessionManager {
     }
   }
 
-  async restoreAllSessions(): Promise<void> {
+  async restore_all(): Promise<void> {
     const sessions = getAllSessions();
 
     const sessionsToRestore = sessions.filter(
@@ -524,7 +483,7 @@ class SessionManager {
       this.runtimeData.set(sessionRecord.id, runtime);
 
       try {
-        await this.initializeSession(
+        await this.init(
           sessionRecord.id,
           sessionRecord.phone_number,
           runtime,
@@ -539,17 +498,10 @@ class SessionManager {
     await Promise.allSettled(restorationPromises);
   }
 
-  getActiveCount(): number {
-    return getAllSessions().filter(
-      (s) =>
-        s.status === StatusType.Connected || s.status === StatusType.Active,
-    ).length;
-  }
-
   listExtended(): Session[] {
     const dbSessions = getAllSessions();
     log.debug("Listing extended sessions, count:", dbSessions.length);
-    log.debug("session object:", dbSessions);
+    log.debug("Retrived Sessions:", dbSessions);
 
     return dbSessions.map((dbSession) => {
       const runtime = this.runtimeData.get(dbSession.id);
@@ -560,9 +512,18 @@ class SessionManager {
     });
   }
 
+  list(): Session[] {
+    return getAllSessions();
+  }
+
+  get(idOrPhone: string): Session | null {
+    const i = sanitizePhoneNumber(idOrPhone);
+    return getSession(i || idOrPhone);
+  }
+
   getClient(sessionId: string): WASocket | null {
     return this.runtimeData.get(sessionId)?.client ?? null;
   }
 }
 
-export const sessionManager = SessionManager.getInstance();
+export const sessionManager = Client.getInstance();

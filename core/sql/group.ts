@@ -160,9 +160,7 @@ export const syncGroupMetadata = async (
   return;
 };
 
-export const getAllGroups = function (
-  sessionId: string,
-): Array<{
+export const getAllGroups = function (sessionId: string): Array<{
   id: string;
   subject: string;
   participantCount: number;
