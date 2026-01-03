@@ -23,7 +23,9 @@ import type { ApiResponse, WsRequest } from "./api";
 
 const wsClients: Set<any> = new Set();
 
-const STATIC_DIR = join(import.meta.dir, "service", "dist", "client");
+// Use project root (cwd) to locate service/dist, works both in dev and production
+const PROJECT_ROOT = process.cwd();
+const STATIC_DIR = join(PROJECT_ROOT, "service", "dist", "client");
 const ASTRO_PORT = 4321;
 const ASTRO_SERVER_URL = `http://localhost:${ASTRO_PORT}`;
 
@@ -31,7 +33,7 @@ let astroProcess: ReturnType<typeof spawn> | null = null;
 
 function startAstroServer(): void {
   const entryPath = join(
-    import.meta.dir,
+    PROJECT_ROOT,
     "service",
     "dist",
     "server",
@@ -39,7 +41,7 @@ function startAstroServer(): void {
   );
 
   astroProcess = spawn("node", [entryPath], {
-    cwd: join(import.meta.dir, "service"),
+    cwd: join(PROJECT_ROOT, "service"),
     env: {
       ...process.env,
       PORT: String(ASTRO_PORT),
