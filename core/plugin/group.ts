@@ -188,7 +188,7 @@ export default [
           "ᴘʀᴏᴠɪᴅᴇ ᴀ ᴠᴀʟɪᴅ ᴛɪᴍᴇ ɪɴ sᴇᴄᴏɴᴅs\n(0 ᴛᴏ ɪɴsᴛᴀɴᴛ ᴅɪsᴀʙʟᴇ).\n86400 (1 ᴅᴀʏ).\n604800 (7 ᴅᴀʏs)\n7776000 (90 ᴅᴀʏs)",
         );
 
-      const result = await new Group(msg.sessionId, msg.chat, sock).ephermal(
+      const result = await new Group(msg.sessionId, msg.chat, sock).ephemeral(
         duration,
       );
       if (!result)
