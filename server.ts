@@ -23,7 +23,6 @@ import type { ApiResponse, WsRequest } from "./api";
 
 const wsClients: Set<any> = new Set();
 
-// Use project root (cwd) to locate service/dist, works both in dev and production
 const PROJECT_ROOT = process.cwd();
 const STATIC_DIR = join(PROJECT_ROOT, "service", "dist", "client");
 const ASTRO_PORT = 4321;
