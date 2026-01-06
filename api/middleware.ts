@@ -305,8 +305,13 @@ export function getMessages(
 
   const messages = getAllMessages(sessionId, limit, offset);
   const total = getMessagesCount(sessionId);
-  const received = messages.filter((m) => m.message?.key?.fromMe === false).length;
-  const sent = messages.filter((m) => m.message?.key?.fromMe === true).length;
+  
+  let sent = 0;
+  let received = 0;
+  for (const m of messages) {
+    if (m.message?.key?.fromMe === true) sent++;
+    else if (m.message?.key?.fromMe === false) received++;
+  }
 
   return {
     success: true,
@@ -326,11 +331,12 @@ export function getMessagesStats() {
   let totalReceived = 0;
 
   for (const session of sessions) {
-    const count = getMessagesCount(session.id);
-    totalMessages += count;
-    const messages = getAllMessages(session.id, 1000, 0);
-    totalSent += messages.filter((m) => m.message?.key?.fromMe === true).length;
-    totalReceived += messages.filter((m) => m.message?.key?.fromMe === false).length;
+    totalMessages += getMessagesCount(session.id);
+    const messages = getAllMessages(session.id, 500, 0);
+    for (const m of messages) {
+      if (m.message?.key?.fromMe === true) totalSent++;
+      else if (m.message?.key?.fromMe === false) totalReceived++;
+    }
   }
 
   return {
