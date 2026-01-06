@@ -227,6 +227,37 @@
           </div>
         </div>
 
+        <!-- CPU Chart -->
+        <div class="bg-gh-bg border border-gh-border rounded-gh">
+          <div class="p-3 sm:p-4 border-b border-gh-border flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-gh-text flex items-center gap-2">
+              <svg class="w-4 h-4 text-gh-accent" viewBox="0 0 16 16" fill="currentColor"><path d="M6.5.75V2h3V.75a.75.75 0 0 1 1.5 0V2h1.25c.966 0 1.75.784 1.75 1.75V5h1.25a.75.75 0 0 1 0 1.5H14v3h1.25a.75.75 0 0 1 0 1.5H14v1.25A1.75 1.75 0 0 1 12.25 14H11v1.25a.75.75 0 0 1-1.5 0V14h-3v1.25a.75.75 0 0 1-1.5 0V14H3.75A1.75 1.75 0 0 1 2 12.25V11H.75a.75.75 0 0 1 0-1.5H2v-3H.75a.75.75 0 0 1 0-1.5H2V3.75C2 2.784 2.784 2 3.75 2H5V.75a.75.75 0 0 1 1.5 0Zm5.75 11.75a.25.25 0 0 0 .25-.25v-8.5a.25.25 0 0 0-.25-.25h-8.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25ZM5.75 5h4.5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-.75.75h-4.5a.75.75 0 0 1-.75-.75v-4.5A.75.75 0 0 1 5.75 5Zm.75 4.5h3v-3h-3Z"></path></svg>
+              CPU / Goroutines
+            </h2>
+            <span id="cpu-current" class="text-xs font-mono text-gh-text">-- goroutines</span>
+          </div>
+          <div class="p-3 sm:p-4">
+            <div class="relative h-20 sm:h-24 bg-gh-bg-secondary rounded overflow-hidden">
+              <svg id="cpu-chart" class="w-full h-full" viewBox="0 0 300 80" preserveAspectRatio="none">
+                <path id="cpu-area" class="chart-area fill-gh-accent" d=""></path>
+                <path id="cpu-line" class="chart-line stroke-gh-accent" stroke-width="2" d=""></path>
+              </svg>
+              <div id="cpu-skeleton" class="absolute inset-0 flex items-center justify-center bg-gh-bg-secondary">
+                <div class="w-3/4 h-2 bg-gh-bg-tertiary rounded animate-ghost-pulse"></div>
+              </div>
+            </div>
+            <div class="mt-2 flex justify-between text-[10px] text-gh-text-muted">
+              <span>60s ago</span>
+              <span>Now</span>
+            </div>
+            <div class="mt-2 grid grid-cols-3 gap-2 text-center">
+              <div><p class="text-[10px] text-gh-text-muted">Peak</p><p id="cpu-peak" class="text-xs font-medium text-gh-text">--</p></div>
+              <div><p class="text-[10px] text-gh-text-muted">Avg</p><p id="cpu-avg" class="text-xs font-medium text-gh-text">--</p></div>
+              <div><p class="text-[10px] text-gh-text-muted">CPUs</p><p id="cpu-count" class="text-xs font-medium text-gh-text">--</p></div>
+            </div>
+          </div>
+        </div>
+
         <!-- Network Status -->
         <div class="bg-gh-bg border border-gh-border rounded-gh">
           <div class="p-3 sm:p-4 border-b border-gh-border flex items-center justify-between">
@@ -391,6 +422,8 @@
     const processStatusBadge = $('process-status-badge'), processError = $('process-error'), restartBtn = $('restart-process-btn');
     const memoryCurrentEl = $('memory-current'), memoryPeakEl = $('memory-peak'), memoryAvgEl = $('memory-avg'), memoryGcEl = $('memory-gc');
     const memoryChart = $('memory-chart'), memoryLine = $('memory-line'), memoryArea = $('memory-area'), memorySkeleton = $('memory-skeleton');
+    const cpuCurrentEl = $('cpu-current'), cpuPeakEl = $('cpu-peak'), cpuAvgEl = $('cpu-avg'), cpuCountEl = $('cpu-count');
+    const cpuChart = $('cpu-chart'), cpuLine = $('cpu-line'), cpuArea = $('cpu-area'), cpuSkeleton = $('cpu-skeleton');
     const networkStatusBadge = $('network-status-badge'), wsIndicator = $('ws-indicator'), wsStatus = $('ws-status'), apiIndicator = $('api-indicator'), apiStatus = $('api-status');
     const networkLatency = $('network-latency'), netRequests = $('net-requests'), netSuccess = $('net-success'), netFailed = $('net-failed');
     const sysPlatform = $('sys-platform'), sysArch = $('sys-arch'), sysGo = $('sys-go'), sysCpus = $('sys-cpus'), sysGoroutines = $('sys-goroutines');
@@ -399,10 +432,25 @@
     const logsModal = $('logs-modal'), logsModalBackdrop = $('logs-modal-backdrop'), closeLogsModal = $('close-logs-modal'), logsContainer = $('logs-container');
     const createSessionBtn = $('create-session-btn'), mobileLogsBtn = $('mobile-logs-btn');
     const themeToggle = $('theme-toggle'), themeIconAuto = $('theme-icon-auto'), themeIconLight = $('theme-icon-light'), themeIconDark = $('theme-icon-dark');
+    const submitBtn = sessionForm?.querySelector('button[type="submit"]');
 
-    // Memory chart data
+    // Chart data
     const memoryData = [];
-    const maxMemoryPoints = 60;
+    const cpuData = [];
+    const maxChartPoints = 60;
+
+    // Format uptime
+    function formatUptime(seconds) {
+      if (!seconds && seconds !== 0) return '--';
+      const days = Math.floor(seconds / 86400);
+      const hrs = Math.floor((seconds % 86400) / 3600);
+      const mins = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+      if (days > 0) return `${days}d ${hrs}h`;
+      if (hrs > 0) return `${hrs}h ${mins}m`;
+      if (mins > 0) return `${mins}m ${secs}s`;
+      return `${secs}s`;
+    }
 
     // Update Network UI
     function updateNetworkUI() {
@@ -424,7 +472,7 @@
     // Update Memory Chart
     function updateMemoryChart(memMB, numGC) {
       memoryData.push(memMB);
-      if (memoryData.length > maxMemoryPoints) memoryData.shift();
+      if (memoryData.length > maxChartPoints) memoryData.shift();
       
       if (memorySkeleton) memorySkeleton.classList.add('hidden');
       if (memoryCurrentEl) memoryCurrentEl.textContent = `${memMB} MB`;
@@ -441,7 +489,7 @@
         const min = Math.max(0, Math.min(...memoryData) - 10);
         const max = Math.max(...memoryData) + 10;
         const range = max - min || 1;
-        const divisor = Math.max(1, maxMemoryPoints - 1);
+        const divisor = Math.max(1, maxChartPoints - 1);
         
         const points = memoryData.map((v, i) => {
           const x = padding + (i / divisor) * (w - 2 * padding);
@@ -452,6 +500,40 @@
         const linePath = 'M' + points.join(' L');
         memoryLine.setAttribute('d', linePath);
         memoryArea.setAttribute('d', linePath + ` L${w - padding},${h - padding} L${padding},${h - padding} Z`);
+      }
+    }
+
+    // Update CPU/Goroutines Chart
+    function updateCpuChart(goroutines, cpus) {
+      cpuData.push(goroutines);
+      if (cpuData.length > maxChartPoints) cpuData.shift();
+      
+      if (cpuSkeleton) cpuSkeleton.classList.add('hidden');
+      if (cpuCurrentEl) cpuCurrentEl.textContent = `${goroutines} goroutines`;
+      if (cpuCountEl) cpuCountEl.textContent = cpus;
+      
+      const peak = Math.max(...cpuData);
+      const avg = Math.round(cpuData.reduce((a, b) => a + b, 0) / cpuData.length);
+      if (cpuPeakEl) cpuPeakEl.textContent = peak;
+      if (cpuAvgEl) cpuAvgEl.textContent = avg;
+      
+      // Draw chart
+      if (cpuLine && cpuArea && cpuData.length > 1) {
+        const w = 300, h = 80, padding = 5;
+        const min = Math.max(0, Math.min(...cpuData) - 2);
+        const max = Math.max(...cpuData) + 2;
+        const range = max - min || 1;
+        const divisor = Math.max(1, maxChartPoints - 1);
+        
+        const points = cpuData.map((v, i) => {
+          const x = padding + (i / divisor) * (w - 2 * padding);
+          const y = h - padding - ((v - min) / range) * (h - 2 * padding);
+          return `${x},${y}`;
+        });
+        
+        const linePath = 'M' + points.join(' L');
+        cpuLine.setAttribute('d', linePath);
+        cpuArea.setAttribute('d', linePath + ` L${w - padding},${h - padding} L${padding},${h - padding} Z`);
       }
     }
 
@@ -534,6 +616,8 @@
       try {
         const res = await api.getSystemStats();
         if (res.memory) updateMemoryChart(res.memory.heapAlloc, res.memory.numGC);
+        if (res.goroutines && res.cpus) updateCpuChart(res.goroutines, res.cpus);
+        if (uptimeEl) uptimeEl.textContent = formatUptime(res.uptime);
         if (sysPlatform) sysPlatform.textContent = res.platform || '--';
         if (sysArch) sysArch.textContent = res.arch || '--';
         if (sysGo) sysGo.textContent = res.goVersion?.replace('go', '') || '--';
@@ -549,11 +633,6 @@
         if (totalSessionsEl) totalSessionsEl.textContent = s.totalSessions || 0;
         if (activeSessionsEl) activeSessionsEl.textContent = s.activeSessions || 0;
         if (totalMessagesEl) totalMessagesEl.textContent = s.totalMessages || 0;
-        if (uptimeEl && s.uptime) {
-          const mins = Math.floor(s.uptime / 60);
-          const hrs = Math.floor(mins / 60);
-          uptimeEl.textContent = hrs > 0 ? `${hrs}h ${mins % 60}m` : `${mins}m`;
-        }
         if (s.sessions) renderSessions(s.sessions);
       }
     });
@@ -586,21 +665,46 @@
     closeLogsModal?.addEventListener('click', () => logsModal?.classList.add('hidden'));
     logsModalBackdrop?.addEventListener('click', () => logsModal?.classList.add('hidden'));
 
-    // Form Submit
+    // Form Submit with countdown
+    let createCountdown = null;
     sessionForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
       formError?.classList.add('hidden');
       const fd = new FormData(sessionForm);
+      
+      // Start countdown
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        let seconds = 10;
+        submitBtn.textContent = `Creating Session (${seconds}s)`;
+        createCountdown = setInterval(() => {
+          seconds--;
+          if (seconds > 0) {
+            submitBtn.textContent = `Creating Session (${seconds}s)`;
+          } else {
+            clearInterval(createCountdown);
+            submitBtn.textContent = 'Create Session';
+            submitBtn.disabled = false;
+          }
+        }, 1000);
+      }
+      
       try {
         const res = await api.createSession(fd.get('phoneNumber'), fd.get('botName'));
         if (res.success) {
+          if (createCountdown) clearInterval(createCountdown);
+          if (submitBtn) { submitBtn.textContent = 'Create Session'; submitBtn.disabled = false; }
           createModal?.classList.add('hidden');
           sessionForm.reset();
           if (res.data?.pairingCode) window.location.href = `/pairing.html?id=${res.data.sessionId}&code=${res.data.pairingCode}`;
         } else {
+          if (createCountdown) clearInterval(createCountdown);
+          if (submitBtn) { submitBtn.textContent = 'Create Session'; submitBtn.disabled = false; }
           if (formError) { formError.textContent = res.error || 'Failed to create session'; formError.classList.remove('hidden'); }
         }
       } catch (err) {
+        if (createCountdown) clearInterval(createCountdown);
+        if (submitBtn) { submitBtn.textContent = 'Create Session'; submitBtn.disabled = false; }
         if (formError) { formError.textContent = 'Network error. Please try again.'; formError.classList.remove('hidden'); }
       }
     });

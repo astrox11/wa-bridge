@@ -24,6 +24,9 @@ const (
 	bunBackendPort = processmanager.BunBackendPort
 )
 
+// Server start time for uptime calculation
+var serverStartTime = time.Now()
+
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -89,6 +92,8 @@ func main() {
 		runtime.ReadMemStats(&m)
 
 		const bytesToMB = 1024 * 1024
+		uptimeSeconds := int64(time.Since(serverStartTime).Seconds())
+
 		stats := map[string]interface{}{
 			"memory": map[string]interface{}{
 				"alloc":      m.Alloc / bytesToMB,
@@ -104,6 +109,7 @@ func main() {
 			"platform":   runtime.GOOS,
 			"arch":       runtime.GOARCH,
 			"timestamp":  time.Now().UnixMilli(),
+			"uptime":     uptimeSeconds,
 		}
 
 		w.Header().Set("Content-Type", "application/json")
