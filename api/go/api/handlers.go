@@ -1,8 +1,8 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
-	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -35,6 +35,40 @@ func (h *Handlers) writeJSON(w http.ResponseWriter, status int, data interface{}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(data)
+}
+
+func (h *Handlers) callService(action string, params map[string]interface{}) (interface{}, error) {
+	payload := map[string]interface{}{
+		"action": action,
+		"params": params,
+	}
+	body, _ := json.Marshal(payload)
+	
+	client := &http.Client{Timeout: 30 * time.Second}
+	resp, err := client.Post(h.bunBackend+"/api/action", "application/json", bytes.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	
+	var result APIResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+	
+	if !result.Success {
+		return nil, &ServiceError{Message: result.Error}
+	}
+	
+	return result.Data, nil
+}
+
+type ServiceError struct {
+	Message string
+}
+
+func (e *ServiceError) Error() string {
+	return e.Message
 }
 
 func (h *Handlers) HandleGetSessions(w http.ResponseWriter, r *http.Request) {
@@ -71,21 +105,21 @@ func (h *Handlers) HandleCreateSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := http.Post(h.bunBackend+"/api/sessions", "application/json", r.Body)
-	if err != nil {
-		h.writeJSON(w, http.StatusBadGateway, APIResponse{Success: false, Error: "Backend unavailable"})
+	var req struct {
+		PhoneNumber string `json:"phoneNumber"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.writeJSON(w, http.StatusBadRequest, APIResponse{Success: false, Error: "Invalid request body"})
 		return
 	}
-	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
+	result, err := h.callService("createSession", map[string]interface{}{"phoneNumber": req.PhoneNumber})
 	if err != nil {
-		h.writeJSON(w, http.StatusInternalServerError, APIResponse{Success: false, Error: "Failed to read response"})
+		h.writeJSON(w, http.StatusBadGateway, APIResponse{Success: false, Error: err.Error()})
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(resp.StatusCode)
-	w.Write(body)
+
+	h.writeJSON(w, http.StatusOK, APIResponse{Success: true, Data: result})
 }
 
 func (h *Handlers) HandleDeleteSession(w http.ResponseWriter, r *http.Request) {
@@ -96,25 +130,14 @@ func (h *Handlers) HandleDeleteSession(w http.ResponseWriter, r *http.Request) {
 
 	id := strings.TrimPrefix(r.URL.Path, "/api/sessions/")
 
-	req, _ := http.NewRequest(http.MethodDelete, h.bunBackend+"/api/sessions/"+id, nil)
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
+	result, err := h.callService("deleteSession", map[string]interface{}{"id": id})
 	if err != nil {
-		h.writeJSON(w, http.StatusBadGateway, APIResponse{Success: false, Error: "Backend unavailable"})
+		h.writeJSON(w, http.StatusBadGateway, APIResponse{Success: false, Error: err.Error()})
 		return
 	}
-	defer resp.Body.Close()
 
 	h.store.DeleteSession(id)
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		h.writeJSON(w, http.StatusInternalServerError, APIResponse{Success: false, Error: "Failed to read response"})
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(resp.StatusCode)
-	w.Write(body)
+	h.writeJSON(w, http.StatusOK, APIResponse{Success: true, Data: result})
 }
 
 func (h *Handlers) HandlePauseSession(w http.ResponseWriter, r *http.Request) {
@@ -126,23 +149,13 @@ func (h *Handlers) HandlePauseSession(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/api/sessions/")
 	id := strings.TrimSuffix(path, "/pause")
 
-	req, _ := http.NewRequest(http.MethodPost, h.bunBackend+"/api/sessions/"+id+"/pause", nil)
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
+	result, err := h.callService("pauseSession", map[string]interface{}{"id": id})
 	if err != nil {
-		h.writeJSON(w, http.StatusBadGateway, APIResponse{Success: false, Error: "Backend unavailable"})
+		h.writeJSON(w, http.StatusBadGateway, APIResponse{Success: false, Error: err.Error()})
 		return
 	}
-	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		h.writeJSON(w, http.StatusInternalServerError, APIResponse{Success: false, Error: "Failed to read response"})
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(resp.StatusCode)
-	w.Write(body)
+	h.writeJSON(w, http.StatusOK, APIResponse{Success: true, Data: result})
 }
 
 func (h *Handlers) HandleResumeSession(w http.ResponseWriter, r *http.Request) {
@@ -154,23 +167,13 @@ func (h *Handlers) HandleResumeSession(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/api/sessions/")
 	id := strings.TrimSuffix(path, "/resume")
 
-	req, _ := http.NewRequest(http.MethodPost, h.bunBackend+"/api/sessions/"+id+"/resume", nil)
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
+	result, err := h.callService("resumeSession", map[string]interface{}{"id": id})
 	if err != nil {
-		h.writeJSON(w, http.StatusBadGateway, APIResponse{Success: false, Error: "Backend unavailable"})
+		h.writeJSON(w, http.StatusBadGateway, APIResponse{Success: false, Error: err.Error()})
 		return
 	}
-	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		h.writeJSON(w, http.StatusInternalServerError, APIResponse{Success: false, Error: "Failed to read response"})
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(resp.StatusCode)
-	w.Write(body)
+	h.writeJSON(w, http.StatusOK, APIResponse{Success: true, Data: result})
 }
 
 func (h *Handlers) HandleGetStats(w http.ResponseWriter, r *http.Request) {
@@ -381,21 +384,13 @@ func (h *Handlers) HandleGetGroups(w http.ResponseWriter, r *http.Request) {
 	id := strings.TrimPrefix(path, "/api/sessions/")
 	id = strings.TrimSuffix(id, "/groups")
 
-	resp, err := http.Get(h.bunBackend + "/api/sessions/" + id + "/groups")
+	result, err := h.callService("getGroups", map[string]interface{}{"sessionId": id})
 	if err != nil {
-		h.writeJSON(w, http.StatusBadGateway, APIResponse{Success: false, Error: "Backend unavailable"})
+		h.writeJSON(w, http.StatusBadGateway, APIResponse{Success: false, Error: err.Error()})
 		return
 	}
-	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		h.writeJSON(w, http.StatusInternalServerError, APIResponse{Success: false, Error: "Failed to read response"})
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(resp.StatusCode)
-	w.Write(body)
+	h.writeJSON(w, http.StatusOK, APIResponse{Success: true, Data: result})
 }
 
 func (h *Handlers) HandleGetGroupMetadata(w http.ResponseWriter, r *http.Request) {
@@ -413,21 +408,13 @@ func (h *Handlers) HandleGetGroupMetadata(w http.ResponseWriter, r *http.Request
 	sessionId := parts[0]
 	groupId := parts[2]
 
-	resp, err := http.Get(h.bunBackend + "/api/sessions/" + sessionId + "/groups/" + groupId + "/metadata")
+	result, err := h.callService("getGroupMetadata", map[string]interface{}{"sessionId": sessionId, "groupId": groupId})
 	if err != nil {
-		h.writeJSON(w, http.StatusBadGateway, APIResponse{Success: false, Error: "Backend unavailable"})
+		h.writeJSON(w, http.StatusBadGateway, APIResponse{Success: false, Error: err.Error()})
 		return
 	}
-	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		h.writeJSON(w, http.StatusInternalServerError, APIResponse{Success: false, Error: "Failed to read response"})
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(resp.StatusCode)
-	w.Write(body)
+	h.writeJSON(w, http.StatusOK, APIResponse{Success: true, Data: result})
 }
 
 func (h *Handlers) HandleGroupAction(w http.ResponseWriter, r *http.Request) {
@@ -445,26 +432,44 @@ func (h *Handlers) HandleGroupAction(w http.ResponseWriter, r *http.Request) {
 	sessionId := parts[0]
 	groupId := parts[2]
 
-	req, err := http.NewRequest(http.MethodPost, h.bunBackend+"/api/sessions/"+sessionId+"/groups/"+groupId+"/action", r.Body)
-	if err != nil {
-		h.writeJSON(w, http.StatusInternalServerError, APIResponse{Success: false, Error: "Failed to create request"})
+	var actionReq struct {
+		Action string                 `json:"action"`
+		Params map[string]interface{} `json:"params"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&actionReq); err != nil {
+		h.writeJSON(w, http.StatusBadRequest, APIResponse{Success: false, Error: "Invalid request body"})
 		return
 	}
-	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{Timeout: 30 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		h.writeJSON(w, http.StatusBadGateway, APIResponse{Success: false, Error: "Backend unavailable"})
-		return
-	}
-	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
+	result, err := h.callService("executeGroupAction", map[string]interface{}{
+		"sessionId": sessionId,
+		"groupId":   groupId,
+		"action":    actionReq.Action,
+		"params":    actionReq.Params,
+	})
 	if err != nil {
-		h.writeJSON(w, http.StatusInternalServerError, APIResponse{Success: false, Error: "Failed to read response"})
+		h.writeJSON(w, http.StatusBadGateway, APIResponse{Success: false, Error: err.Error()})
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(resp.StatusCode)
-	w.Write(body)
+
+	h.writeJSON(w, http.StatusOK, APIResponse{Success: true, Data: result})
+}
+
+func (h *Handlers) HandleGetMessages(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		h.writeJSON(w, http.StatusMethodNotAllowed, APIResponse{Success: false, Error: "Method not allowed"})
+		return
+	}
+
+	path := r.URL.Path
+	id := strings.TrimPrefix(path, "/api/sessions/")
+	id = strings.TrimSuffix(id, "/messages")
+
+	result, err := h.callService("getMessages", map[string]interface{}{"sessionId": id, "limit": 100, "offset": 0})
+	if err != nil {
+		h.writeJSON(w, http.StatusBadGateway, APIResponse{Success: false, Error: err.Error()})
+		return
+	}
+
+	h.writeJSON(w, http.StatusOK, APIResponse{Success: true, Data: result})
 }
