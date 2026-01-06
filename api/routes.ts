@@ -16,7 +16,11 @@ import {
   getGroupMetadata,
   executeGroupAction,
 } from "./middleware";
-import type { ApiResponse, SessionCreateRequest, GroupActionRequest } from "./types";
+import type {
+  ApiResponse,
+  SessionCreateRequest,
+  GroupActionRequest,
+} from "./types";
 import { ApiResponseErrors } from "./errors";
 import { validatePhoneNumber, validatePagination } from "./predicates";
 import { parseBody, matchRoute, createApiError } from "./handler";
@@ -56,12 +60,13 @@ const routes: Record<
 
   "POST /api/sessions/:id/groups/:groupId/action": async (req, params) => {
     const body = await parseBody<GroupActionRequest>(req);
-    if (!body || !body.action) return createApiError(ApiResponseErrors.INVALID_PARAMETERS);
+    if (!body || !body.action)
+      return createApiError(ApiResponseErrors.INVALID_PARAMETERS);
     return executeGroupAction(
       params?.id as string,
       params?.groupId as string,
       body.action,
-      body.params
+      body.params,
     );
   },
 
