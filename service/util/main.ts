@@ -35,27 +35,27 @@ export const additionalNodes = [
 
 export const log = {
   info(...args: any[]) {
-    const prefix = `\x1b[1m${COLORS.info}${timestamp()} [INFO]`;
+    const prefix = `\x1b[1m${COLORS.info}} [INFO]`;
     console.log(prefix, ...args.map(formatArg), COLORS.reset);
   },
   warn(...args: any[]) {
     if (!config.DEBUG) return;
-    const prefix = `\x1b[1m${COLORS.warn}${timestamp()} [WARN]`;
+    const prefix = `\x1b[1m${COLORS.warn}} [WARN]`;
     console.warn(prefix, ...args.map(formatArg), COLORS.reset);
   },
   error(...args: any[]) {
     if (!config.DEBUG) return;
-    const prefix = `\x1b[1m${COLORS.error}${timestamp()} [ERROR]`;
+    const prefix = `\x1b[1m${COLORS.error}} [ERROR]`;
     console.error(prefix, ...args.map(formatArg), COLORS.reset);
   },
   debug(...args: any[]) {
     if (!config.DEBUG) return;
-    const prefix = `\x1b[1m${COLORS.debug}${timestamp()} [DEBUG]`;
+    const prefix = `\x1b[1m${COLORS.debug}} [DEBUG]`;
     console.log(prefix, ...args.map(formatArg), COLORS.reset);
   },
   trace(...args: any[]) {
     if (!config.DEBUG) return;
-    const prefix = `\x1b[1m${COLORS.trace}${timestamp()} [TRACE]`;
+    const prefix = `\x1b[1m${COLORS.trace}} [TRACE]`;
     console.log(prefix, ...args.map(formatArg), COLORS.reset);
   },
 };
