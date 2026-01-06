@@ -1,6 +1,6 @@
 # Whatsaly
 
-Whatsaly is an open source WhatsApp Web runtime built on Baileys and Astro.js. It implements these libraries to create a privacy focused web client with automated session lifecycle management, messaging, authentication, and statistical reporting. A modern web dashboard provides visibility and control over WhatsApp connections, and system state.
+Whatsaly is an open-source WhatsApp client for automated messaging, event scheduling, group management, and built-in analytics.
 
 ## Features
 
@@ -31,9 +31,8 @@ Whatsaly uses a two-tier architecture:
 
 Ensure these are installed on your system.
 
-- [Go](https://golang.org) (1.21+)
+- [Go](https://golang.org)
 - [Bun.js](https://bun.sh)
-- [Node.js](https://nodejs.org)
 - [FFmpeg](https://ffmpeg.org)
 - [libwebp](https://developers.google.com/speed/webp)
 
@@ -43,15 +42,6 @@ Ensure these are installed on your system.
 git clone https://github.com/astrox11/Whatsaly
 cd Whatsaly
 bun i
-```
-
-#### Build Astro Frontend
-
-```bash
-cd service
-bun i
-bun run build
-cd ..
 ```
 
 #### Starting with Go Server (Recommended)
@@ -72,29 +62,14 @@ bun run start
 bun run dev
 ```
 
-## API Endpoints
-
-### Process Management (Go Server)
-
-- `GET /api/process/status` - Get BunJS process status
-- `POST /api/process/restart` - Restart BunJS process
-- `GET /api/go/health` - Go server health check
-
-### Core API (Bun Backend)
-
-- `GET /health` - Health check
-- `GET /api/stats/full` - Full statistics
-- WebSocket `/ws/stats` - Real-time stats and session management
-
 ## Contributing
 
 Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting pull requests.
 
 ## Acknowledgements
 
-This project uses the following open-source libraries:
+This project uses the Baileys library:
 
 - [Baileys](https://github.com/WhiskeySockets/Baileys) - WhatsApp Web API
-- [Astro.js](https://astro.build/) - Web framework
 
 Special thanks to all contributors and the open-source community.

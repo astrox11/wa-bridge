@@ -42,7 +42,7 @@ func main() {
 	hub := websocket.NewHub()
 	go hub.Run()
 
-	bunManager := processmanager.NewBunJSManager("server.ts")
+	bunManager := processmanager.NewBunJSManager("./api/server.ts")
 	if err := bunManager.Start(); err != nil {
 		log.Printf("Warning: Failed to start BunJS process: %v", err)
 	}
@@ -52,7 +52,7 @@ func main() {
 	bunBackendURL := "http://127.0.0.1:" + bunBackendPort
 	handlers := api.NewHandlers(store, hub, bunBackendURL)
 
-	staticFs := http.FileServer(http.Dir("./public"))
+	staticFs := http.FileServer(http.Dir("./service"))
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/ws/stats", func(w http.ResponseWriter, r *http.Request) {
@@ -243,32 +243,32 @@ func main() {
 	})
 
 	mux.HandleFunc("/favicon.png", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./public/favicon.png")
+		http.ServeFile(w, r, "./service/favicon.png")
 	})
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
 		if path == "/" {
-			http.ServeFile(w, r, "./public/index.html")
+			http.ServeFile(w, r, "./service/index.html")
 			return
 		}
 		if strings.HasSuffix(path, ".html") {
-			http.ServeFile(w, r, "./public"+path)
+			http.ServeFile(w, r, "./service"+path)
 			return
 		}
-		filePath := "./public" + path
+		filePath := "./service" + path
 		if _, err := os.Stat(filePath); err == nil {
 			staticFs.ServeHTTP(w, r)
 			return
 		}
 		if !strings.Contains(path, ".") {
-			htmlPath := "./public" + path + ".html"
+			htmlPath := "./service" + path + ".html"
 			if _, err := os.Stat(htmlPath); err == nil {
 				http.ServeFile(w, r, htmlPath)
 				return
 			}
 		}
-		http.ServeFile(w, r, "./public/index.html")
+		http.ServeFile(w, r, "./service/index.html")
 	})
 
 	handler := recoveryMiddleware(loggingMiddleware(corsMiddleware(mux)))

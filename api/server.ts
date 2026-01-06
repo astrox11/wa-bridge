@@ -14,10 +14,10 @@ if (wsListener) {
   if (WebSocket.prototype.addListener) WebSocket.prototype.addListener = patch;
 }
 
-import { log, sessionManager } from "./core";
-import config from "./config";
-import { handleApiRequest } from "./api";
-import type { ApiResponse } from "./api";
+import { log, sessionManager } from "../core";
+import config from "../config";
+import type { ApiResponse } from "./types";
+import { handleApiRequest } from "./routes";
 
 const GO_SERVER = "http://127.0.0.1:8000";
 
