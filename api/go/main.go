@@ -56,7 +56,7 @@ func main() {
 	hub := websocket.NewHub()
 	go hub.Run()
 
-	bunManager := processmanager.NewBunJSManager("./api/server.ts")
+	bunManager := processmanager.NewBunJSManager("./service/worker.ts")
 	if err := bunManager.Start(); err != nil {
 		log.Printf("Warning: Failed to start BunJS process: %v", err)
 	}
