@@ -59,6 +59,12 @@
     .animate-ghost-pulse { animation: ghost-pulse 1.5s ease-in-out infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    [data-tooltip] { position: relative; }
+    .custom-tooltip { position: absolute; z-index: 9999; padding: 6px 10px; font-size: 12px; font-weight: 500; color: #fff; background: #24292f; border-radius: 6px; white-space: nowrap; pointer-events: none; opacity: 0; transform: translateX(-50%) translateY(4px); transition: opacity 0.15s, transform 0.15s; bottom: 100%; left: 50%; margin-bottom: 6px; }
+    .custom-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #24292f transparent transparent transparent; }
+    .dark .custom-tooltip { background: #f0f0f0; color: #24292f; }
+    .dark .custom-tooltip::after { border-color: #f0f0f0 transparent transparent transparent; }
+    [data-tooltip]:hover .custom-tooltip { opacity: 1; transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 <body class="bg-gh-bg font-sans text-gh-text min-h-screen antialiased">
