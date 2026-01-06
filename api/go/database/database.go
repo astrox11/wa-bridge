@@ -23,7 +23,7 @@ var once sync.Once
 
 func GetDatabase() *Database {
 	once.Do(func() {
-		db, err := sql.Open("sqlite", "whatsaly.db?_journal=WAL&_busy_timeout=5000")
+		db, err := sql.Open("sqlite", "database.db?_journal=WAL&_busy_timeout=5000")
 		if err != nil {
 			log.Fatalf("Failed to open database: %v", err)
 		}
