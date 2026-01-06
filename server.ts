@@ -45,7 +45,7 @@ async function pushStatsToGo() {
   try {
     const sessions = sessionManager.listExtended();
     const activeSessions = sessions.filter(
-      (s) => s.status === 1 || s.status === 2,
+      (s) => s.status === 1 || s.status === 2 || s.status === 7,
     ).length;
 
     const payload = {
@@ -77,12 +77,20 @@ async function pushStatsToGo() {
 function getStatusString(status: number): string {
   switch (status) {
     case 1:
+      return "connecting";
     case 2:
       return "connected";
     case 3:
-      return "pairing";
+      return "disconnected";
     case 4:
+      return "pairing";
+    case 5:
+    case 6:
       return "paused";
+    case 7:
+      return "connected";
+    case 8:
+      return "inactive";
     default:
       return "inactive";
   }

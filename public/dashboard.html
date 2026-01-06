@@ -67,6 +67,12 @@
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--gh-border); border-radius: 4px; }
+    [data-tooltip] { position: relative; }
+    .custom-tooltip { position: absolute; z-index: 9999; padding: 6px 10px; font-size: 12px; font-weight: 500; color: #fff; background: #24292f; border-radius: 6px; white-space: nowrap; pointer-events: none; opacity: 0; transform: translateX(-50%) translateY(4px); transition: opacity 0.15s, transform 0.15s; bottom: 100%; left: 50%; margin-bottom: 6px; }
+    .custom-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #24292f transparent transparent transparent; }
+    .dark .custom-tooltip { background: #f0f0f0; color: #24292f; }
+    .dark .custom-tooltip::after { border-color: #f0f0f0 transparent transparent transparent; }
+    [data-tooltip]:hover .custom-tooltip { opacity: 1; transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 <body class="bg-gh-bg font-sans text-gh-text min-h-screen antialiased">
@@ -179,7 +185,7 @@
           </div>
           <div class="flex justify-between items-center">
             <span class="text-gh-text-secondary">Session ID</span>
-            <span id="session-id-display" class="text-gh-text font-mono text-xs bg-gh-bg-secondary px-1.5 py-0.5 rounded">--</span>
+            <span id="session-id-display" class="text-gh-text font-mono text-xs bg-gh-bg-secondary px-1.5 py-0.5 rounded cursor-pointer" data-tooltip="session-id">--<span class="custom-tooltip" id="session-id-tooltip">--</span></span>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-gh-text-secondary">Messages Sent</span>
@@ -267,8 +273,9 @@
     }
 
     if (sessionIdDisplay) {
-      sessionIdDisplay.textContent = hashSessionId(sessionId);
-      sessionIdDisplay.title = sessionId;
+      sessionIdDisplay.childNodes[0].textContent = hashSessionId(sessionId);
+      const tooltipEl = document.getElementById('session-id-tooltip');
+      if (tooltipEl) tooltipEl.textContent = sessionId;
     }
 
     let ws = null;
