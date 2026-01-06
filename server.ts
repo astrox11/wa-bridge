@@ -1,7 +1,5 @@
 import { WebSocket } from "ws";
 import Bun from "bun";
-import { join } from "path";
-import { spawn } from "child_process";
 
 const wsListener = WebSocket.prototype.on || WebSocket.prototype.addListener;
 const mockEvent = (event: string) =>
@@ -23,102 +21,8 @@ import type { ApiResponse, WsRequest } from "./api";
 
 const wsClients: Set<any> = new Set();
 
-const PROJECT_ROOT = process.cwd();
-const STATIC_DIR = join(PROJECT_ROOT, "service", "dist", "client");
-const ASTRO_PORT = 4321;
-const ASTRO_SERVER_URL = `http://localhost:${ASTRO_PORT}`;
-
-let astroProcess: ReturnType<typeof spawn> | null = null;
-
-function startAstroServer(): void {
-  const entryPath = join(
-    PROJECT_ROOT,
-    "service",
-    "dist",
-    "server",
-    "entry.mjs",
-  );
-
-  astroProcess = spawn("node", [entryPath], {
-    cwd: join(PROJECT_ROOT, "service"),
-    env: {
-      ...process.env,
-      PORT: String(ASTRO_PORT),
-      HOST: "127.0.0.1",
-    },
-    stdio: "pipe",
-  });
-
-  astroProcess.stdout?.on("data", (data) => {
-    const msg = data.toString().trim();
-    log.debug("[Astro]", msg);
-    if (msg.includes("Server listening")) {
-      log.info(`Astro SSR server ready`);
-      log.info(`Visit http://192.168.0.187:8000`);
-    }
-  });
-
-  astroProcess.stderr?.on("data", (data) => {
-    log.error("[Astro]", data.toString().trim());
-  });
-
-  astroProcess.on("error", (err) => {
-    log.error("Failed to start Astro server:", err);
-  });
-
-  astroProcess.on("exit", (code) => {
-    if (code !== 0 && code !== null) {
-      log.error(`Astro server exited with code ${code}`);
-    }
-    astroProcess = null;
-  });
-
-  log.info(`Starting Astro SSR server on internal port ${ASTRO_PORT}...`);
-}
-
-function cleanup(): void {
-  if (astroProcess) {
-    astroProcess.kill();
-    astroProcess = null;
-  }
-}
-
-process.on("exit", cleanup);
-process.on("SIGINT", () => {
-  cleanup();
-  process.exit(0);
-});
-process.on("SIGTERM", () => {
-  cleanup();
-  process.exit(0);
-});
-
-startAstroServer();
-
-const MIME_TYPES: Record<string, string> = {
-  ".html": "text/html",
-  ".css": "text/css",
-  ".js": "application/javascript",
-  ".json": "application/json",
-  ".png": "image/png",
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".gif": "image/gif",
-  ".svg": "image/svg+xml",
-  ".ico": "image/x-icon",
-  ".woff": "font/woff",
-  ".woff2": "font/woff2",
-  ".ttf": "font/ttf",
-};
-
-function getMimeType(filePath: string): string {
-  const dotIndex = filePath.lastIndexOf(".");
-  if (dotIndex === -1) {
-    return "application/octet-stream";
-  }
-  const ext = filePath.substring(dotIndex).toLowerCase();
-  return MIME_TYPES[ext] || "application/octet-stream";
-}
+// Note: Astro SSR is no longer used - frontend is served as static HTML from Go server
+log.info("Starting Bun API server (no Astro SSR)...");
 
 function getHttpStatusCode(data: ApiResponse): number {
   if (data.success) {
@@ -142,46 +46,15 @@ function createResponse(data: ApiResponse): Response {
   });
 }
 
-async function serveStaticFile(filePath: string): Promise<Response | null> {
-  try {
-    const file = Bun.file(filePath);
-    const exists = await file.exists();
-    if (exists) {
-      return new Response(file, {
-        headers: {
-          "Content-Type": getMimeType(filePath),
-        },
-      });
-    }
-  } catch {}
-  return null;
-}
-
-async function proxyToAstro(req: Request): Promise<Response> {
-  try {
-    log.debug("Proxying request to Astro SSR server:", req.url);
-    const url = new URL(req.url);
-    const astroUrl = new URL(url.pathname + url.search, ASTRO_SERVER_URL);
-
-    const proxyReq = new Request(astroUrl.toString(), {
-      method: req.method,
-      headers: req.headers,
-      body: req.body,
-    });
-
-    const response = await fetch(proxyReq);
-    return response;
-  } catch (error) {
-    log.error("Failed to proxy to Astro server:", error);
-    return new Response(
-      "Frontend server is starting up, please wait a moment and refresh...",
-      {
-        status: 503,
-        headers: { "Content-Type": "text/plain" },
-      },
-    );
-  }
-}
+// Signal handlers for graceful shutdown
+process.on("SIGINT", () => {
+  log.info("Received SIGINT, shutting down...");
+  process.exit(0);
+});
+process.on("SIGTERM", () => {
+  log.info("Received SIGTERM, shutting down...");
+  process.exit(0);
+});
 
 const server = Bun.serve({
   port: config.API_PORT,
@@ -192,6 +65,7 @@ const server = Bun.serve({
 
     log.debug("Received request:", req.method, path);
 
+    // WebSocket upgrade for stats
     if (path === "/ws/stats" && req.headers.get("upgrade") === "websocket") {
       log.debug("WebSocket upgrade requested");
       const success = server.upgrade(req);
@@ -199,6 +73,7 @@ const server = Bun.serve({
       return new Response("WebSocket upgrade failed", { status: 500 });
     }
 
+    // Health check
     if (path === "/health" && req.method === "GET") {
       log.debug("Health check requested");
       return createResponse({
@@ -210,6 +85,7 @@ const server = Bun.serve({
       });
     }
 
+    // API routes
     if (path.startsWith("/api/")) {
       if (req.method === "OPTIONS") {
         return new Response(null, {
@@ -226,18 +102,11 @@ const server = Bun.serve({
       return createResponse(result);
     }
 
-    if (path.startsWith("/_astro/")) {
-      const clientPath = join(STATIC_DIR, path);
-      const response = await serveStaticFile(clientPath);
-      if (response) return response;
-    }
-
-    if (path === "/favicon.png") {
-      const response = await serveStaticFile(join(STATIC_DIR, "favicon.png"));
-      if (response) return response;
-    }
-
-    return proxyToAstro(req);
+    // All other routes - return 404 (frontend is served by Go)
+    return new Response("Not Found - Frontend is served by Go server", {
+      status: 404,
+      headers: { "Content-Type": "text/plain" },
+    });
   },
   websocket: {
     open(ws) {
@@ -269,6 +138,7 @@ const server = Bun.serve({
   },
 });
 
+log.info(`Bun API server listening on port ${config.API_PORT}`);
 log.debug("Debug mode:", config.DEBUG ? "enabled" : "disabled");
 
 sessionManager
