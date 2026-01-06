@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -42,7 +43,7 @@ func main() {
 	// Wait for Bun server to be ready
 	waitForBunServer()
 
-	// Create reverse proxy for Bun backend
+	// Create reverse proxy for Bun backend (API only)
 	bunBackendURL, _ := url.Parse("http://127.0.0.1:" + bunBackendPort)
 	proxy := httputil.NewSingleHostReverseProxy(bunBackendURL)
 
@@ -58,6 +59,9 @@ func main() {
 		log.Printf("Proxy error: %v", err)
 		http.Error(w, "Backend unavailable. Bun process may be starting or crashed.", http.StatusBadGateway)
 	}
+
+	// Static file server for the raw HTML frontend
+	staticFs := http.FileServer(http.Dir("./public"))
 
 	// Create HTTP mux
 	mux := http.NewServeMux()
@@ -77,9 +81,55 @@ func main() {
 		w.Write([]byte(`{"status":"ok","server":"go","bunStatus":"` + string(bunManager.GetStatus()) + `"}`))
 	})
 
-	// All other routes - proxy to Bun backend
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	// Health check - proxy to Bun
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		proxy.ServeHTTP(w, r)
+	})
+
+	// API routes - proxy to Bun backend
+	mux.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {
+		proxy.ServeHTTP(w, r)
+	})
+
+	// Favicon - serve from public folder
+	mux.HandleFunc("/favicon.png", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./public/favicon.png")
+	})
+
+	// Root and static files - serve from public folder
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
+
+		// Serve index.html for root
+		if path == "/" {
+			http.ServeFile(w, r, "./public/index.html")
+			return
+		}
+
+		// Serve .html files directly
+		if strings.HasSuffix(path, ".html") {
+			http.ServeFile(w, r, "./public"+path)
+			return
+		}
+
+		// Check if file exists in public folder
+		filePath := "./public" + path
+		if _, err := os.Stat(filePath); err == nil {
+			staticFs.ServeHTTP(w, r)
+			return
+		}
+
+		// For paths without extension, try to serve .html file
+		if !strings.Contains(path, ".") {
+			htmlPath := "./public" + path + ".html"
+			if _, err := os.Stat(htmlPath); err == nil {
+				http.ServeFile(w, r, htmlPath)
+				return
+			}
+		}
+
+		// Fallback: serve index.html for SPA-like behavior
+		http.ServeFile(w, r, "./public/index.html")
 	})
 
 	// Create middleware chain
@@ -113,8 +163,9 @@ func main() {
 	}()
 
 	// Start server
-	log.Println("Starting Go proxy server on port 8000...")
-	log.Println("Bun backend running on internal port " + bunBackendPort)
+	log.Println("Starting Go server on port 8000...")
+	log.Println("Static files served from ./public")
+	log.Println("API proxied to Bun backend on internal port " + bunBackendPort)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("Failed to start server: %v", err)
 	}
