@@ -1,28 +1,20 @@
-import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 import { defineConfig } from "eslint/config";
 
 export default defineConfig([
   {
-    ignores: [
-      "**/dist/**",
-      "**/.astro/**",
-      "**/.vercel/**",
-      "**/.output/**",
-      "**/node_modules/**",
-    ],
+    ignores: ["**/dist/**", "**/node_modules/**"],
   },
 
   tseslint.configs.recommended,
 
   {
-    files: ["**/*.{ts,js,mjs,cjs}"],
+    files: ["**/*.{ts}"],
     languageOptions: {
-      globals: globals["shared-node-browser"],
+      globals: globals["es2026"],
     },
     rules: {
-      "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-empty-object-type": "off",

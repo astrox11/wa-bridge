@@ -223,7 +223,10 @@
       }
       /* Card hover effects */
       .card-hover {
-        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease,
+          border-color 0.2s ease;
       }
       .card-hover:hover {
         transform: translateY(-2px);
@@ -241,7 +244,9 @@
         transition: opacity 0.2s ease;
       }
       .modal-content {
-        transition: transform 0.2s ease, opacity 0.2s ease;
+        transition:
+          transform 0.2s ease,
+          opacity 0.2s ease;
       }
       .modal-enter {
         animation: modalEnter 0.2s ease-out;
@@ -272,11 +277,21 @@
         }
       }
       /* Stagger animation for list items */
-      .session-item:nth-child(1) { animation-delay: 0ms; }
-      .session-item:nth-child(2) { animation-delay: 50ms; }
-      .session-item:nth-child(3) { animation-delay: 100ms; }
-      .session-item:nth-child(4) { animation-delay: 150ms; }
-      .session-item:nth-child(5) { animation-delay: 200ms; }
+      .session-item:nth-child(1) {
+        animation-delay: 0ms;
+      }
+      .session-item:nth-child(2) {
+        animation-delay: 50ms;
+      }
+      .session-item:nth-child(3) {
+        animation-delay: 100ms;
+      }
+      .session-item:nth-child(4) {
+        animation-delay: 150ms;
+      }
+      .session-item:nth-child(5) {
+        animation-delay: 200ms;
+      }
       /* Loading spinner */
       .loading-spinner {
         width: 24px;
@@ -288,7 +303,8 @@
       }
       /* Pulse animation for status indicators */
       @keyframes pulse {
-        0%, 100% {
+        0%,
+        100% {
           opacity: 1;
         }
         50% {
@@ -308,13 +324,19 @@
         overflow: hidden;
       }
       .ripple::after {
-        content: '';
+        content: "";
         position: absolute;
         inset: 0;
-        background: radial-gradient(circle, rgba(255,255,255,0.3) 10%, transparent 10.01%);
+        background: radial-gradient(
+          circle,
+          rgba(255, 255, 255, 0.3) 10%,
+          transparent 10.01%
+        );
         transform: scale(10);
         opacity: 0;
-        transition: transform 0.3s, opacity 0.3s;
+        transition:
+          transform 0.3s,
+          opacity 0.3s;
       }
       .ripple:active::after {
         transform: scale(0);
@@ -629,7 +651,9 @@
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6 pb-20 lg:pb-6 page-transition">
+    <main
+      class="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6 pb-20 lg:pb-6 page-transition"
+    >
       <!-- Page Header -->
       <div
         class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6"
@@ -655,7 +679,9 @@
 
       <!-- Stats Grid -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
-        <div class="bg-gh-bg border border-gh-border rounded-gh p-3 sm:p-4 card-hover">
+        <div
+          class="bg-gh-bg border border-gh-border rounded-gh p-3 sm:p-4 card-hover"
+        >
           <div class="flex items-center gap-2 mb-1">
             <svg
               class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gh-text-secondary"
@@ -1694,7 +1720,7 @@
 
         sessionsListEl.innerHTML = sessions
           .map((s, index) => {
-            const name = s.user_info?.name || s.phone_number || "Unknown";
+            const name = s.user_info?.name || s.phone_number;
             const initial = name.charAt(0).toUpperCase();
             const isConnected = s.status === "connected";
             const isPaused = s.status === "paused";

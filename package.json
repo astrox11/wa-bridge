@@ -4,14 +4,13 @@
   "description": "Simple WA Runtime",
   "type": "module",
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
     "@types/bun": "latest",
     "@types/ws": "^8.18.1",
     "eslint": "^9.39.2",
-    "globals": "^16.5.0",
+    "globals": "^17.0.0",
     "jiti": "^2.6.1",
     "prettier": "3.7.4",
-    "typescript-eslint": "^8.51.0"
+    "typescript-eslint": "^8.52.0"
   },
   "peerDependencies": {
     "typescript": "latest"
@@ -24,7 +23,6 @@
   "dependencies": {
     "baileys": "https://github.com/WhiskeySockets/Baileys",
     "cheerio": "^1.1.2",
-    "libphonenumber-js": "^1.12.33",
     "whatsapp-rust-bridge": "0.5.0-alpha.0"
   }
 }

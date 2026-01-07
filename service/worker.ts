@@ -244,23 +244,7 @@ async function handleGoRequest(
         }
       }
 
-      return {
-        id: metadata.id,
-        subject: metadata.subject || "Unknown Group",
-        owner: metadata.owner,
-        creation: metadata.creation,
-        desc: metadata.desc,
-        isCommunity: metadata.isCommunity,
-        isBotAdmin,
-        size: metadata.size || metadata.participants?.length || 0,
-        participants: (metadata.participants || []).map(
-          (p: { id: string; admin?: string | null }) => ({
-            id: p.id,
-            admin: p.admin,
-            isAdmin: p.admin === "admin" || p.admin === "superadmin",
-          }),
-        ),
-      };
+      return { ...metadata, isBotAdmin };
     }
 
     case "executeGroupAction": {
