@@ -9,22 +9,22 @@ db.exec("PRAGMA journal_mode = WAL;");
 const createdTables = new Set<string>();
 
 export const bunql = {
-  query: <T>(sql: string, params: unknown[] = []): T[] => {
+  query: <T>(sql: string, params: SQLQueryBindings[] = []): T[] => {
     const stmt = db.prepare(sql);
     return stmt.all(...params) as T[];
   },
   exec: (sql: string) => {
-    db.exec(sql);
+    db.run(sql);
   },
   getDatabase: () => db,
 };
 
-export function execWithParams(sql: string, params: unknown[] = []): void {
+export function execWithParams(sql: string, params: SQLQueryBindings[] = []): void {
   const stmt = db.prepare(sql);
   stmt.run(...params);
 }
 
-export function queryWithParams<T>(sql: string, params: unknown[] = []): T[] {
+export function queryWithParams<T>(sql: string, params: SQLQueryBindings[] = []): T[] {
   return bunql.query<T>(sql, params);
 }
 
@@ -955,6 +955,7 @@ db.exec(`CREATE TABLE IF NOT EXISTS sessions (
 
 import { StatusType, type Session } from "./auth/types";
 import { VALID_STATUSES } from "./auth/util";
+import type { SQLQueryBindings } from "@realastrox11/bunql";
 
 export const createSession = (id: string, phoneNumber: string): Session => {
   const record: Session = {
@@ -966,7 +967,7 @@ export const createSession = (id: string, phoneNumber: string): Session => {
   };
   execWithParams(
     `INSERT OR REPLACE INTO sessions (id, phone_number, status, user_info, created_at) VALUES (?, ?, ?, ?, ?)`,
-    [record.id, record.phone_number, record.status, null, record.created_at],
+    [record.id, record.phone_number, record.status, null, record.created_at!],
   );
   return record;
 };
