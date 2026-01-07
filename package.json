@@ -16,7 +16,7 @@
     "typescript": "latest"
   },
   "scripts": {
-    "postinstall": "bun run hooks/index.ts",
+    "postinstall": "bun run install.ts",
     "lint": "eslint . --ext .ts --fix",
     "format": "prettier --write ."
   },
