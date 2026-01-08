@@ -38,11 +38,11 @@ func GetUserSettings(phone string) (*UserSettings, error) {
 }
 
 // UpdateUserSetting updates a specific field for a user
-func UpdateUserSetting(phone string, column string, value interface{}) error {
+func UpdateUserSetting(phone string, column string, value any) error {
 	return DB.Model(&UserSettings{}).Where("user = ?", phone).Update(column, value).Error
 }
 
 // UpdateFullSettings updates multiple fields at once
-func UpdateFullSettings(phone string, updates map[string]interface{}) error {
+func UpdateFullSettings(phone string, updates map[string]any) error {
 	return DB.Model(&UserSettings{}).Where("user = ?", phone).Updates(updates).Error
 }

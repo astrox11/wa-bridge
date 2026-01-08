@@ -79,6 +79,23 @@ func RegisterRoutes(app *fiber.App, sm *manager.SessionManager) {
 		}
 		return c.JSON(fiber.Map{"message": "Redis cleared. You can now request a new pairing code."})
 	})
+
+	api.Post("instances/:phone/contacts", func(c *fiber.Ctx) error {
+		contact, err := database.GetContacts(c.Params("phone"))
+		if err == nil {
+			return c.JSON(contact)
+		}
+		return c.JSON(fiber.Map{"error": "Unable to get instance contacts"})
+	})
+
+	api.Post("instances/:phone/groups", func(c *fiber.Ctx) error {
+		groups, err := database.GetGroupMetaDataAll(c.Params("phone"))
+		if err == nil {
+			return c.JSON(groups)
+		}
+		return c.JSON(fiber.Map{"error": "Unable to get instance groups"})
+	})
+
 	api.Get("/settings/:phone", func(c *fiber.Ctx) error {
 		phone := c.Params("phone")
 
@@ -100,8 +117,8 @@ func RegisterRoutes(app *fiber.App, sm *manager.SessionManager) {
 		phone := c.Params("phone")
 
 		type UpdateReq struct {
-			Key   string      `json:"key"`
-			Value interface{} `json:"value"`
+			Key   string `json:"key"`
+			Value any    `json:"value"`
 		}
 		var req UpdateReq
 		if err := c.BodyParser(&req); err != nil {
