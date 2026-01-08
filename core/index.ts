@@ -18,6 +18,7 @@ import pino from "pino";
 import NodeCache from "@cacheable/node-cache";
 import { createClient } from "redis";
 import seralize from "seralize";
+import { logForGo } from "./util";
 
 const logger = pino({
   level: "silent",
@@ -56,7 +57,7 @@ const Client = async (phone = process.argv?.[2]) => {
     await delay(5000);
     console.log("Client not registered");
     const code = await sock.requestPairingCode(phone, "12345678");
-    console.log("Pairing code:", code);
+    logForGo("PAIRING_CODE", { code });
   }
 
   sock.ev.process(async (events) => {
@@ -68,16 +69,19 @@ const Client = async (phone = process.argv?.[2]) => {
           (lastDisconnect?.error as any)?.output?.statusCode !==
           DisconnectReason.loggedOut
         ) {
+          logForGo("CONNECTION_UPDATE", { status: "needs_restart", phone });
+          await delay(10000);
           Client();
         } else {
+          logForGo("CONNECTION_UPDATE", { status: "logged_out", phone });
           console.log("Connection closed. You are logged out.");
         }
       }
       if (connection === "open") {
+        logForGo("CONNECTION_UPDATE", { status: "connected", phone });
         await delay(15000);
         await syncGroupMetadata(phone, sock);
       }
-      console.log("connection update", update);
     }
     if (events["creds.update"]) {
       await saveCreds();
@@ -91,7 +95,7 @@ const Client = async (phone = process.argv?.[2]) => {
           sock
         );
         await saveMessage(m, phone);
-        console.log("Received message:", m);
+        logForGo("MESSAGES", { m });
       }
     }
 
