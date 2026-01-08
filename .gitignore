@@ -119,3 +119,5 @@ core/whatsaly_dev.sqlite-wal
 core/whatsaly_dev.sqlite-shm
 core/wa-logs.txt
 api/sessions.txt
+whatsaly_dev.sqlite-shm
+whatsaly_dev.sqlite-wal
