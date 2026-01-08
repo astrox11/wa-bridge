@@ -15,9 +15,9 @@ RUN git clone https://github.com/astrox11/Whatsaly /root/Whatsaly
 
 WORKDIR /root/Whatsaly
 
-RUN bun install
-RUN go mod download
-RUN chmod +x ./start.sh
+RUN cd core && bun install && cd ..
+
+RUN cd api && go mod download
 
 EXPOSE 8000
 

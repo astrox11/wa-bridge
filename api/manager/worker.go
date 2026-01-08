@@ -1,7 +1,6 @@
 package manager
 
 import (
-	"fmt"
 	"os/exec"
 	"sync"
 	"time"
@@ -71,7 +70,6 @@ func (sm *SessionManager) supervisor(w *Worker) {
 		w.IsRunning = false
 		w.mu.Unlock()
 
-		fmt.Printf("Process for %s stopped. Checking next state...\n", w.Phone)
 		time.Sleep(2 * time.Second) // Small cooldown before restarting
 	}
 }
