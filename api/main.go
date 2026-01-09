@@ -15,14 +15,18 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+const (
+	// memoryLimitBytes sets a 1GB soft memory limit for the GC
+	memoryLimitBytes = 1024 * 1024 * 1024
+)
+
 func main() {
 	// Optimize GC to reduce blocking and ensure smooth process management
 	// Set GC percent to 200 to reduce GC frequency and blocking pauses
 	debug.SetGCPercent(200)
-	
-	// Set a soft memory limit (e.g., 1GB) to prevent aggressive GC under memory pressure
+	// Set a soft memory limit to prevent aggressive GC under memory pressure
 	// This helps maintain predictable performance even with multiple instances
-	debug.SetMemoryLimit(1024 * 1024 * 1024) // 1GB soft limit
+	debug.SetMemoryLimit(memoryLimitBytes)
 
 	database.InitDB()
 
