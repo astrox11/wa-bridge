@@ -6,6 +6,8 @@ import (
 	"api/routes"
 	"log"
 	"os"
+	"runtime"
+	"runtime/debug"
 
 	"bufio"
 	"bytes"
@@ -15,6 +17,17 @@ import (
 )
 
 func main() {
+	// Optimize GC to reduce blocking and ensure smooth process management
+	// Set GC percent to 200 to reduce GC frequency and blocking pauses
+	debug.SetGCPercent(200)
+	
+	// Set a soft memory limit (e.g., 1GB) to prevent aggressive GC under memory pressure
+	// This helps maintain predictable performance even with multiple instances
+	debug.SetMemoryLimit(1024 * 1024 * 1024) // 1GB soft limit
+	
+	// Increase GOMAXPROCS to utilize available CPU cores efficiently
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
 	database.InitDB()
 
 	sm := manager.NewSessionManager()
