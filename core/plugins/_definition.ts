@@ -11,6 +11,7 @@ export interface Command {
   isGroup?: boolean;
   category?: CommandCategory;
   event?: boolean;
+  dontAddToCommandList?: boolean;
   function: (message: SerializedMessage, args?: string) => CommandExecution;
 }
 
