@@ -39,6 +39,8 @@ func (sm *SessionManager) supervisor(w *Worker) {
 		w.mu.RUnlock()
 
 		if status == "logged_out" {
+			// Clear all session data when logged out
+			sm.ClearSession(w.Phone)
 			break
 		}
 
