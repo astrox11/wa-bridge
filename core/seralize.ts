@@ -52,6 +52,13 @@ const serialize = async (
     audio: Boolean(message?.audioMessage),
     document: Boolean(message?.documentMessage),
     sticker: Boolean(message?.stickerMessage),
+    media: Boolean(
+      message?.imageMessage ||
+        message?.videoMessage ||
+        message?.audioMessage ||
+        message?.documentMessage ||
+        message?.stickerMessage
+    ),
     quoted:
       quoted && quotedMessage && quotedType
         ? {
@@ -134,6 +141,43 @@ const serialize = async (
           text,
         });
       }
+    },
+    forward: async function (
+      jid: string,
+      msg: WAMessage,
+      opts?: { forceForward?: boolean; forwardScore?: number }
+    ) {
+      await this.client.sendMessage(
+        jid,
+        {
+          forward: msg,
+          contextInfo: {
+            forwardingScore: opts?.forwardScore,
+            isForwarded: opts?.forceForward,
+          },
+        },
+        { quoted: this }
+      );
+    },
+    delete: async function () {
+      const key = this?.quoted?.key || this.key;
+
+      if (!key.fromMe) {
+        return await this.client.chatModify(
+          {
+            deleteForMe: {
+              key: this?.quoted?.key || this.key,
+              timestamp: Number(this.messageTimestamp),
+              deleteMedia: this.media,
+            },
+          },
+          this.chat!
+        );
+      }
+
+      return await this.client.sendMessage(this.chat!, {
+        delete: this?.quoted?.key || this.key,
+      });
     },
     client,
   };
