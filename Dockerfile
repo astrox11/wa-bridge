@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-COPY core/package.json core/bun.lockb ./core/
+COPY core/package.json core/bun.lock ./core/
 RUN cd core && bun install
 
 COPY api/go.mod api/go.sum ./api/
