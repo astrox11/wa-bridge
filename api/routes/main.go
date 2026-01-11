@@ -14,6 +14,7 @@ import (
 
 func CastRoutes(app *fiber.App, sm *manager.SessionManager) {
 	api := app.Group("/api")
+	app.Static("/", "../interface")
 
 	api.Post("/instances/:phone/pair", func(c *fiber.Ctx) error {
 		phone := c.Params("phone")

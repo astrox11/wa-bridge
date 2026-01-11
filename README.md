@@ -1,6 +1,8 @@
 # Whatsaly
 
-Whatsaly is an open-source WhatsApp client for automated messaging, event scheduling, group management, and built-in analytics.
+<a href="https://golang.org/"><img src="./interface/logo.png" width="250" height="150" /></a>
+
+An automated WhatsApp client featuring event scheduling, group management, and built-in analytics.
 
 ## Features
 
@@ -16,21 +18,28 @@ Whatsaly is an open-source WhatsApp client for automated messaging, event schedu
 
 Ensure these are installed on your system.
 
-- [Go](https://golang.org)
-- [Bun.js](https://bun.sh)
-- [Ffmpeg](https://ffmpeg.org)
-- [libwebp](https://developers.google.com/speed/webp)
+- [Docker](https://www.docker.com/get-started)
+
+- [Docker Compose](https://docs.docker.com/compose/install/)
 
 #### Installation
+
+The easiest way to get Whatsaly running is using Docker Compose. This packages the Go core and the Bun environment into a single deployment.
+
+**Clone the repository:**
 
 ```bash
 git clone https://github.com/astrox11/Whatsaly
 cd Whatsaly
-cd core bun i
-cd ..
-cd api
-go run .
 ```
+
+**Start the container:**
+
+```bash
+docker-compose up -d
+```
+
+Access the application: The API will be available at http://localhost:8080 (or your configured port).
 
 ## Contributing
 
