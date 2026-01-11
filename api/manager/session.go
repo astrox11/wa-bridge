@@ -1,7 +1,7 @@
 package manager
 
 import (
-	"api/database"
+	"api/sql"
 	"fmt"
 	"os/exec"
 	"sync"
@@ -80,12 +80,9 @@ func (sm *SessionManager) SaveState(w *Worker) {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
 
-	// This looks for a session with the phone number.
-	// If found, it updates; if not, it creates.
 	err := database.DB.Where(database.Session{Phone: w.Phone}).
 		Assign(database.Session{
-			Status:      w.Status,
-			PairingCode: w.PairingCode,
+			Status: w.Status,
 		}).
 		FirstOrCreate(&database.Session{}).Error
 

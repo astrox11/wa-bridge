@@ -34,15 +34,16 @@ func (sm *SessionManager) EventStreamData(w *Worker, data GoData) {
 	switch data.Tag {
 	case "PAIRING_CODE":
 		w.PairingCode = fmt.Sprintf("%v", data.Payload["code"])
-		// We stay in 'pairing' status, but now we have the code
 	case "CONNECTION_UPDATE":
 		newStatus := fmt.Sprintf("%v", data.Payload["status"])
 		switch newStatus {
 		case "connected":
 			w.Status = "active"
-			w.PairingCode = "" // Clear the code once connected
+			w.PairingCode = ""
 		case "logged_out":
 			w.Status = "logged_out"
+		case "qr_code":
+			// we are not handling qr codes currently
 		default:
 			w.Status = newStatus
 		}

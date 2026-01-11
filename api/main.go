@@ -1,9 +1,9 @@
 package main
 
 import (
-	"api/database"
 	"api/manager"
 	"api/routes"
+	"api/sql"
 	"log"
 	"os"
 	"runtime/debug"

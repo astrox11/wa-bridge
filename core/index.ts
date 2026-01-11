@@ -66,7 +66,12 @@ const Client = async (phone = process.argv?.[2]) => {
   sock.ev.process(async (events) => {
     if (events["connection.update"]) {
       const update = events["connection.update"];
-      const { connection, lastDisconnect } = update;
+      const { connection, lastDisconnect, qr } = update;
+
+      if (qr) {
+        logForGo("QR_CODE", { status: "qr_code", qr, phone });
+      }
+
       if (connection === "close") {
         if (
           (lastDisconnect?.error as any)?.output?.statusCode !==
