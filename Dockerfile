@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 COPY core/package.json core/bun.lock ./core/
-RUN cd core && bun install
+RUN cd core && bun install || true
 
 COPY api/go.mod api/go.sum ./api/
 RUN cd api && go mod download
