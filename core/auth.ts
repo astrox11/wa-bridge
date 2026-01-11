@@ -1,6 +1,6 @@
 import { Database } from "bun:sqlite";
 import { SQL } from "bun";
-import { proto, initAuthCreds, BufferJSON } from "baileys";
+import { proto, initAuthCreds, BufferJSON, isPnUser } from "baileys";
 import type {
   AuthenticationCreds,
   AuthenticationState,
@@ -199,6 +199,7 @@ export const saveContact = async (
   lid: string,
   sessionPhone: string
 ) => {
+  if (!isPnUser(pn)) return;
   if (isProd) {
     await (db as any)`INSERT INTO user_contacts (pn, session_phone, lid) VALUES (${pn}, ${sessionPhone}, ${lid}) ON CONFLICT (pn, session_phone) DO UPDATE SET lid = EXCLUDED.lid`;
   } else {
