@@ -40,7 +40,7 @@ func main() {
 	// The GC will be more aggressive as the application approaches this limit
 	debug.SetMemoryLimit(memoryLimitBytes)
 
-	database.InitDB()
+	database.SyncDB()
 
 	sm := manager.CreateSession()
 	sm.SyncSessionState()

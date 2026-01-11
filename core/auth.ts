@@ -16,7 +16,7 @@ export const getDb = () => {
   if (isProd) {
     return new SQL(process.env.DATABASE_URL!);
   } else {
-    const sqlite = new Database("../whatsaly_dev.sqlite");
+    const sqlite = new Database("../dev.sqlite");
     sqlite.run("PRAGMA journal_mode = WAL;");
     sqlite.run("PRAGMA synchronous = NORMAL;");
     sqlite.run(
