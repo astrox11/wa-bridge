@@ -1,6 +1,6 @@
-import { findCommand, getAllEvents } from "./plugins/_definition";
+import { findCommand, getAllEvents } from "./plugins";
 import type { SerializedMessage } from "./seralize";
-import config from "../config"
+import config from "./config";
 
 export const logForGo = (tag: string, data: any) => {
   const output = {

@@ -18,7 +18,7 @@ import pino from "pino";
 import NodeCache from "@cacheable/node-cache";
 import { createClient } from "redis";
 import { handleCommand, handleEvent, logForGo } from "./util";
-import { loadPlugins } from "./plugins/_definition";
+import { loadPlugins } from "./plugins";
 import serialize from "./seralize";
 
 const logger = pino({
