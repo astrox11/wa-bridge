@@ -28,10 +28,11 @@ CREATE TABLE
 CREATE TABLE
     IF NOT EXISTS auth_tokens (
         sessionId TEXT NOT NULL,
-        token TEXT PRIMARY KEY,
+        token TEXT NOT NULL,
         value TEXT NOT NULL,
         createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (sessionId) REFERENCES sessions (id) ON DELETE CASCADE
+        FOREIGN KEY (sessionId) REFERENCES sessions (id) ON DELETE CASCADE,
+        PRIMARY KEY (sessionId, token)
     );
 
 -- 4. Session Contacts Table

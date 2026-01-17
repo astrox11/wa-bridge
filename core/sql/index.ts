@@ -139,9 +139,8 @@ export const AuthTokenManager = {
     await db`
       INSERT INTO auth_tokens (sessionId, token, value)
       VALUES (${data.sessionId}, ${data.token}, ${data.value})
-      -- This allows multiple tokens per session. 
-      -- It only updates if the specific token string already exists.
-      ON CONFLICT (token) DO UPDATE SET
+      -- Target both columns in the conflict check
+      ON CONFLICT (sessionId, token) DO UPDATE SET
         value = EXCLUDED.value
     `;
   },
