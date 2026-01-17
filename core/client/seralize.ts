@@ -10,7 +10,7 @@ import {
 
 const serialize = async (
   msg: WAMessage & { session: string },
-  client: WASocket
+  client: WASocket,
 ) => {
   const { key, message, messageTimestamp } = msg;
 
@@ -29,9 +29,11 @@ const serialize = async (
       : jidNormalizedUser(client.user?.id)
     : key.participant;
 
-  const senderAlt = await getAlternateId(sender!, msg.session);
+  const senderAlt = await getAlternateId(msg.session, sender!);
   const session = msg.session;
-  const isAdmin = isGroup ? await is_admin(key.remoteJid!, sender!) : null;
+  const isAdmin = isGroup
+    ? await is_admin(session, key.remoteJid!, sender!)
+    : null;
   const text = extract_text_from_message(message);
 
   return {
@@ -53,10 +55,10 @@ const serialize = async (
     sticker: Boolean(message?.stickerMessage),
     media: Boolean(
       message?.imageMessage ||
-        message?.videoMessage ||
-        message?.audioMessage ||
-        message?.documentMessage ||
-        message?.stickerMessage
+      message?.videoMessage ||
+      message?.audioMessage ||
+      message?.documentMessage ||
+      message?.stickerMessage,
     ),
     quoted:
       quoted && quotedMessage && quotedType
@@ -87,7 +89,7 @@ const serialize = async (
       return await client.sendMessage(
         this.chat!,
         { text },
-        { quoted: this?.quoted || msg }
+        { quoted: this?.quoted || msg },
       );
     },
     send: async function (i: any) {
@@ -144,7 +146,7 @@ const serialize = async (
     forward: async function (
       jid: string,
       msg: WAMessage,
-      opts?: { forceForward?: boolean; forwardScore?: number }
+      opts?: { forceForward?: boolean; forwardScore?: number },
     ) {
       await this.client.sendMessage(
         jid,
@@ -155,7 +157,7 @@ const serialize = async (
             isForwarded: opts?.forceForward,
           },
         },
-        { quoted: this }
+        { quoted: this },
       );
     },
     delete: async function () {
@@ -170,7 +172,7 @@ const serialize = async (
               deleteMedia: this.media,
             },
           },
-          this.chat!
+          this.chat!,
         );
       }
 

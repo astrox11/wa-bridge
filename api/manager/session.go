@@ -80,7 +80,7 @@ func (sm *SessionManager) SaveState(w *Worker) {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
 
-	err := database.DB.Where(database.Session{Phone: w.Phone}).
+	err := database.DB.Where(database.Session{ID: w.Phone}).
 		Assign(database.Session{
 			Status: w.Status,
 		}).
@@ -165,8 +165,6 @@ func (sm *SessionManager) ClearSession(phone string) error {
 		fmt.Printf("Error flushing Redis data: %v\n", err)
 		return err
 	}
-
-	fmt.Printf("Successfully cleared all data for phone: %s\n", phone)
 	return nil
 }
 
@@ -178,12 +176,12 @@ func (sm *SessionManager) SyncSessionState() {
 	for _, s := range sessions {
 		if s.Status != "paused" {
 			// Auto-start active sessions
-			sm.StartInstance(s.Phone, "starting")
+			sm.StartInstance(s.ID, "starting")
 		} else {
 			// Keep paused sessions in memory
 			sm.mu.Lock()
-			sm.Workers[s.Phone] = &Worker{
-				Phone:  s.Phone,
+			sm.Workers[s.ID] = &Worker{
+				Phone:  s.ID,
 				Status: "paused",
 			}
 			sm.mu.Unlock()

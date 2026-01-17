@@ -1,24 +1,36 @@
 package database
 
+import (
+	"time"
+)
+
+// UserContact matches the 'session_contacts' table schema
 type UserContact struct {
-	SessionPhone string `gorm:"column:session_phone;index"` // The owner of the contacts
-	PN           string `gorm:"column:pn"`                  // Phone Number
-	LID          string `gorm:"column:lid"`                 // List ID or Label ID
+	SessionID   string    `gorm:"column:sessionId;primaryKey"`
+	ContactInfo string    `gorm:"column:contactInfo"`
+	AddedAt     time.Time `gorm:"column:addedAt;default:CURRENT_TIMESTAMP"`
+	CreatedAt   time.Time `gorm:"column:createdAt;default:CURRENT_TIMESTAMP"`
 }
 
+// ContactResult represents the specific data you want to retrieve
 type ContactResult struct {
-	PN  string `gorm:"column:pn"`
-	LID string `gorm:"column:lid"`
+	ContactInfo string `json:"contact_info"`
 }
 
-// GetContacts returns all pn and lid belonging to the session_phone
-func GetContacts(session string) ([]ContactResult, error) {
+// TableName overrides the default GORM table name to match your SQL schema
+func (UserContact) TableName() string {
+	return "session_contacts"
+}
+
+// GetContacts returns all contact info belonging to the sessionId
+func GetContacts(sessionID string) ([]ContactResult, error) {
 	var contacts []ContactResult
 
+	// Using the TableName or Model to ensure it hits 'session_contacts'
 	err := DB.Model(&UserContact{}).
-		Select("pn, lid").
-		Where("session_phone = ?", session).
-		Find(&contacts).Error
+		Select("contactInfo").
+		Where("sessionId = ?", sessionID).
+		Scan(&contacts).Error
 
 	if err != nil {
 		return nil, err

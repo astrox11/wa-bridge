@@ -29,7 +29,6 @@ func CastRoutes(app *fiber.App, sm *manager.SessionManager) {
 				fmt.Fprintf(w, "data: %s\n\n", string(data))
 
 				if err := w.Flush(); err != nil {
-					fmt.Println("Client disconnected from stream")
 					return
 				}
 

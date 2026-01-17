@@ -1,109 +1,51 @@
-import { Database } from "bun:sqlite";
-import { SQL } from "bun";
 import { proto, initAuthCreds, BufferJSON, isPnUser } from "baileys";
 import type {
   AuthenticationCreds,
   AuthenticationState,
   GroupMetadata,
   SignalDataTypeMap,
+  WAMessage,
   WAMessageContent,
   WAMessageKey,
+  WASocket,
 } from "baileys";
-
-const isProd = process.env.NODE_ENV === "production";
-
-export const getDb = () => {
-  if (isProd) {
-    return new SQL(process.env.DATABASE_URL!);
-  } else {
-    const sqlite = new Database("../dev.sqlite");
-    sqlite.run("PRAGMA journal_mode = WAL;");
-    sqlite.run("PRAGMA synchronous = NORMAL;");
-    sqlite.run(
-      `CREATE TABLE IF NOT EXISTS sessions (phone TEXT PRIMARY KEY, status TEXT, updated_at TEXT);`
-    );
-    sqlite.run(
-      `CREATE TABLE IF NOT EXISTS auth_data (id TEXT PRIMARY KEY, data TEXT, updated_at TEXT);`
-    );
-    sqlite.run(`
-      CREATE TABLE IF NOT EXISTS user_messages (
-        id TEXT, 
-        session_phone TEXT, 
-        data TEXT, 
-        timestamp TEXT, 
-        PRIMARY KEY (id, session_phone)
-      );
-    `);
-    sqlite.run(`
-      CREATE TABLE IF NOT EXISTS user_contacts (
-        pn TEXT, 
-        session_phone TEXT, 
-        lid TEXT, 
-        PRIMARY KEY (pn, session_phone)
-      );
-    `);
-    sqlite.run(
-      `CREATE INDEX IF NOT EXISTS idx_user_contacts_lid ON user_contacts (lid);`
-    );
-    sqlite.run(
-      `CREATE INDEX IF NOT EXISTS idx_user_messages_timestamp ON user_messages (timestamp);`
-    );
-    sqlite.run(`
-      CREATE TABLE IF NOT EXISTS group_metadata (
-        id TEXT, 
-        session_phone TEXT, 
-        metadata TEXT, 
-        updated_at TEXT, 
-        PRIMARY KEY (id, session_phone)
-      );
-    `);
-    return sqlite;
-  }
-};
-
-const db = getDb();
+import {
+  AuthTokenManager,
+  ContactManager,
+  GroupManager,
+  MessageManager,
+  SessionManager,
+} from "../sql";
+import { SessionStatus } from "../sql/types";
 
 export const useHybridAuthState = async (client: any, phone: string) => {
   const keyPrefix = `session:${phone}:`;
   const saveToSQL = async (key: string, value: any) => {
-    if (!value) return;
-    const data = JSON.stringify(value, BufferJSON.replacer);
-    const now = new Date().toISOString();
-    const id = `${keyPrefix}${key}`;
-    if (isProd) {
-      await (db as any)`
-        INSERT INTO auth_data (id, data, updated_at) 
-        VALUES (${id}, ${data}, ${now})
-        ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated_at = EXCLUDED.updated_at
-      `;
-    } else {
-      (db as Database).run(
-        "INSERT OR REPLACE INTO auth_data (id, data, updated_at) VALUES (?, ?, ?)",
-        [id, data, now]
-      );
-    }
+    await AuthTokenManager.set({
+      sessionId: phone,
+      token: key,
+      value: JSON.stringify(value, BufferJSON.replacer),
+      createdAt: new Date(),
+    });
   };
 
   const redisAuth = await useRedisAuthState(
     client,
     keyPrefix,
     saveToSQL,
-    phone
+    phone,
   );
 
   return {
     ...redisAuth,
     saveCreds: async () => {
       await redisAuth.saveCreds();
-      const now = new Date().toISOString();
-      if (isProd) {
-        await (db as any)`INSERT INTO sessions (phone, status, updated_at) VALUES (${phone}, 'connected', ${now}) ON CONFLICT (phone) DO UPDATE SET updated_at = EXCLUDED.updated_at`;
-      } else {
-        (db as Database).run(
-          "INSERT OR REPLACE INTO sessions (phone, status, updated_at) VALUES (?, ?, ?)",
-          [phone, "connected", now]
-        );
-      }
+      await SessionManager.set({
+        id: phone,
+        status: SessionStatus.ACTIVE,
+        isBusinessAccount: false,
+        createdAt: new Date(),
+      });
       await saveToSQL("creds", redisAuth.state.creds);
     },
   };
@@ -113,7 +55,7 @@ export const useRedisAuthState = async (
   client: any,
   keyPrefix: string,
   onWrite: (key: string, data: any) => Promise<void>,
-  phone: string
+  phone: string,
 ): Promise<{ state: AuthenticationState; saveCreds: () => Promise<void> }> => {
   const getRedisKey = (key?: string) => {
     const safeKey = key?.replace(/\//g, "__")?.replace(/:/g, "-");
@@ -154,7 +96,7 @@ export const useRedisAuthState = async (
                 value = proto.Message.AppStateSyncKeyData.fromObject(value);
               }
               data[id] = value;
-            })
+            }),
           );
           return data;
         },
@@ -180,62 +122,48 @@ export const useRedisAuthState = async (
   };
 };
 
-export const saveMessage = async (msg: any, sessionPhone: string) => {
-  const data = JSON.stringify(msg);
-  const id = msg.key.id;
-  const time = new Date().toISOString();
-  if (isProd) {
-    await (db as any)`INSERT INTO user_messages (id, session_phone, data, timestamp) VALUES (${id}, ${sessionPhone}, ${data}, ${time}) ON CONFLICT (id, session_phone) DO NOTHING`;
-  } else {
-    (db as Database).run(
-      "INSERT OR IGNORE INTO user_messages (id, session_phone, data, timestamp) VALUES (?, ?, ?, ?)",
-      [id, sessionPhone, data, time]
-    );
-  }
+export const saveMessage = async (msg: WAMessage, sessionPhone: string) => {
+  const m = JSON.stringify(msg);
+
+  await MessageManager.set({
+    sessionId: sessionPhone,
+    messageId: msg.key.id as string,
+    messageContent: m,
+    createdAt: new Date(),
+  });
 };
 
-export const saveContact = async (
-  pn: string,
-  lid: string,
-  sessionPhone: string
-) => {
+export const saveContact = async (pn: string, lid: string, session: string) => {
   if (!isPnUser(pn)) return;
-  if (isProd) {
-    await (db as any)`INSERT INTO user_contacts (pn, session_phone, lid) VALUES (${pn}, ${sessionPhone}, ${lid}) ON CONFLICT (pn, session_phone) DO UPDATE SET lid = EXCLUDED.lid`;
-  } else {
-    (db as Database).run(
-      "INSERT OR REPLACE INTO user_contacts (pn, session_phone, lid) VALUES (?, ?, ?)",
-      [pn, sessionPhone, lid]
-    );
-  }
+  await ContactManager.set({
+    sessionId: session,
+    contactInfo: JSON.stringify({ pn, lid }),
+    addedAt: new Date(),
+    createdAt: new Date(),
+  });
 };
 
 export async function getMessage(
-  key: WAMessageKey
+  session: string,
+  key: WAMessageKey,
 ): Promise<WAMessageContent | undefined> {
-  const id = key.id;
-  let rawData: string | undefined;
-  if (isProd) {
-    const result =
-      await (db as any)`SELECT data FROM user_messages WHERE id = ${id} LIMIT 1`;
-    rawData = result[0]?.data;
-  } else {
-    const result = (db as Database)
-      .query("SELECT data FROM user_messages WHERE id = ? LIMIT 1")
-      .get(id!) as { data: string } | undefined;
-    rawData = result?.data;
+  const id = key.id as string;
+
+  const m = await MessageManager.get(session);
+  if (m != null) {
+    for (const msg of m) {
+      if (msg.messageId === id) {
+        const content: WAMessage = JSON.parse(msg.messageContent || "{}");
+        return content.message || undefined;
+      }
+    }
   }
-  if (rawData) {
-    const msg = JSON.parse(rawData);
-    return msg.message || undefined;
-  }
-  return undefined;
 }
 
 export function handleLidMapping(
   key: string,
   value: string,
-  sessionPhone: string
+  sessionPhone: string,
 ) {
   const isPn = !key.includes("reverse");
   const cleanedValue = value.replace(/^"|"$/g, "");
@@ -245,7 +173,7 @@ export function handleLidMapping(
       saveContact(
         `${pnKey}@s.whatsapp.net`,
         `${cleanedValue}@lid`,
-        sessionPhone
+        sessionPhone,
       );
   } else {
     const keyPart = key.split("-")[2];
@@ -254,104 +182,70 @@ export function handleLidMapping(
       saveContact(
         `${cleanedValue}@lid`,
         `${lidKey}@s.whatsapp.net`,
-        sessionPhone
+        sessionPhone,
       );
   }
 }
 
 export async function cachedGroupMetadata(
-  jid: string
+  session: string,
+  jid: string,
 ): Promise<GroupMetadata | undefined> {
-  const id = jid;
-  let raw: any;
+  const res = await GroupManager.get(session);
 
-  if (isProd) {
-    raw =
-      await (db as any)`SELECT metadata FROM group_metadata WHERE id = ${id} LIMIT 1`;
-    raw = raw[0]?.metadata;
-  } else {
-    raw = (db as Database)
-      .query("SELECT metadata FROM group_metadata WHERE id = ?")
-      .get(id);
-    raw = raw?.metadata;
+  if (res != null) {
+    for (const group of res) {
+      const metadata: GroupMetadata = JSON.parse(group.groupInfo);
+      if (metadata.id === jid) {
+        return metadata;
+      }
+    }
   }
-
-  return raw ? JSON.parse(raw) : undefined;
 }
 
 export const cacheGroupMetadata = async (
-  sessionPhone: string,
-  metadata: GroupMetadata
+  session: string,
+  metadata: GroupMetadata,
 ) => {
-  const data = JSON.stringify(metadata);
-  const now = new Date().toISOString();
-
-  if (isProd) {
-    await (db as any)`
-      INSERT INTO group_metadata (id, session_phone, metadata, updated_at) 
-      VALUES (${metadata.id}, ${sessionPhone}, ${data}, ${now}) 
-      ON CONFLICT (id, session_phone) DO UPDATE SET metadata = EXCLUDED.metadata, updated_at = EXCLUDED.updated_at
-    `;
-  } else {
-    (db as Database).run(
-      "INSERT OR REPLACE INTO group_metadata (id, session_phone, metadata, updated_at) VALUES (?, ?, ?, ?)",
-      [metadata.id, sessionPhone, data, now]
-    );
-  }
+  await GroupManager.set({
+    sessionId: session,
+    groupInfo: JSON.stringify(metadata),
+    createdAt: new Date(),
+  });
 };
 
 export const isAdmin = async (
+  session: string,
   chat: string,
-  participantId: string
+  participantId: string,
 ): Promise<boolean> => {
-  let raw: any;
-
-  if (isProd) {
-    raw = await (db as any)`
-      SELECT metadata FROM group_metadata 
-      WHERE id = ${chat} 
-      LIMIT 1
-    `;
-    raw = raw[0]?.metadata;
-  } else {
-    const result = (db as Database)
-      .query("SELECT metadata FROM group_metadata WHERE id = ? LIMIT 1")
-      .get(chat) as { metadata: string } | undefined;
-    raw = result?.metadata;
-  }
-
-  if (!raw) return false;
-
-  const metadata: GroupMetadata =
-    typeof raw === "string" ? JSON.parse(raw) : raw;
-
-  const participant = metadata.participants.find(
-    (p) => p.id === participantId || p.phoneNumber === participantId
+  const metadata = await cachedGroupMetadata(session, chat);
+  if (!metadata) return false;
+  return metadata.participants.some(
+    (participant) =>
+      participant.id === participantId && participant.admin !== null,
   );
-
-  return !!participant?.admin;
 };
 
 export const syncGroupParticipantsToContactList = async (
   sessionPhone: string,
-  metadata: GroupMetadata
+  metadata: GroupMetadata,
 ) => {
   const tasks: Promise<void>[] = [];
 
   for (const participant of metadata.participants) {
     tasks.push(
-      saveContact(participant.phoneNumber!, participant.id!, sessionPhone)
+      saveContact(participant.phoneNumber!, participant.id!, sessionPhone),
     );
   }
 
   await Promise.all(tasks);
 };
 
-export const syncGroupMetadata = async (phone: string, sock: any) => {
+export const syncGroupMetadata = async (phone: string, sock: WASocket) => {
   try {
     const groups = await sock.groupFetchAllParticipating();
-    for (const jid in groups) {
-      const metadata = groups[jid];
+    for (const metadata of Object.values(groups)) {
       await cacheGroupMetadata(phone, metadata);
       await syncGroupParticipantsToContactList(phone, metadata);
     }
@@ -361,41 +255,29 @@ export const syncGroupMetadata = async (phone: string, sock: any) => {
 };
 
 export async function getAlternateId(
+  session: string,
   id: string,
-  sessionPhone: string
 ): Promise<string | undefined> {
-  const isLid = id?.endsWith("@lid");
-  let result: any;
+  id = id.replace(/\D/g, "");
 
-  if (isProd) {
-    if (isLid) {
-      result = await (db as any)`
-        SELECT pn FROM user_contacts 
-        WHERE lid = ${id} AND session_phone = ${sessionPhone} 
-        LIMIT 1`;
-      return result[0]?.pn;
-    } else {
-      result = await (db as any)`
-        SELECT lid FROM user_contacts 
-        WHERE pn = ${id} AND session_phone = ${sessionPhone} 
-        LIMIT 1`;
-      return result[0]?.lid;
+  const jid = `${id}@s.whatsapp.net`;
+  const lid = `${id}@lid`;
+
+  const contactByPn = await ContactManager.get(session);
+
+  if (contactByPn != null) {
+    for (const contact of contactByPn) {
+      const info = contact.contactInfo ? JSON.parse(contact.contactInfo) : null;
+      if (info && info.pn === jid) return info.lid;
     }
-  } else {
-    if (isLid) {
-      result = (db as Database)
-        .query(
-          "SELECT pn FROM user_contacts WHERE lid = ? AND session_phone = ? LIMIT 1"
-        )
-        .get(id, sessionPhone) as { pn: string } | undefined;
-      return result?.pn;
-    } else {
-      result = (db as Database)
-        .query(
-          "SELECT lid FROM user_contacts WHERE pn = ? AND session_phone = ? LIMIT 1"
-        )
-        .get(id, sessionPhone) as { lid: string } | undefined;
-      return result?.lid;
+  }
+
+  const contactByLid = await ContactManager.get(session);
+
+  if (contactByLid != null) {
+    for (const contact of contactByLid) {
+      const info = contact.contactInfo ? JSON.parse(contact.contactInfo) : null;
+      if (info && info.lid === lid) return info.pn;
     }
   }
 }

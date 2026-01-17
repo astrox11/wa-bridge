@@ -69,7 +69,7 @@ func InstanceRoutes(app *fiber.App, sm *manager.SessionManager) {
 	})
 
 	api.Post("instances/:phone/groups", func(c *fiber.Ctx) error {
-		groups, err := database.GetAllGroups(c.Params("phone"))
+		groups, err := database.GetAllGroupsMap(c.Params("phone"))
 		if err == nil {
 			return c.JSON(groups)
 		}

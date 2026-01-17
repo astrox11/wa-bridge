@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -32,7 +32,11 @@
       }
 
       body {
-        font-family: "Plus Jakarta Sans", -apple-system, system-ui, sans-serif;
+        font-family:
+          "Plus Jakarta Sans",
+          -apple-system,
+          system-ui,
+          sans-serif;
         background-color: var(--bg);
         color: var(--fg);
         margin: 0;
@@ -310,8 +314,8 @@
                 box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
                 transition: background 0.2s;
               "
-              onmouseover="this.style.background='#f9fafb'"
-              onmouseout="this.style.background='#fff'"
+              onmouseover="this.style.background = '#f9fafb'"
+              onmouseout="this.style.background = '#fff'"
             >
               Refresh
             </button>
@@ -491,18 +495,16 @@
                   (s) => `
         <div class="Box-row" style="display:flex; justify-content:space-between; align-items:center;">
           <div>
-            <div style="font-weight:600; font-family:monospace;">+${
-              s.Phone
-            }</div>
+            <div style="font-weight:600; font-family:monospace;">${s.Name}</div>
             <div style="font-size:11px; color:var(--fg-muted);">Updated: ${new Date(
-              s.UpdatedAt
+              s.CreatedAt,
             ).toLocaleTimeString()}</div>
           </div>
           <span class="badge ${
             s.Status === "connected" ? "badge-success" : "badge-warn"
           }">${s.Status}</span>
         </div>
-      `
+      `,
                 )
                 .join("")
             : '<div class="Box-row">No sessions.</div>';
@@ -528,7 +530,7 @@
             n.date
           }</div>
         </div>
-      `
+      `,
             )
             .join("");
         } catch (e) {
@@ -564,9 +566,8 @@
             let att = 0;
             const poll = setInterval(async () => {
               att++;
-              document.getElementById(
-                "poll-status"
-              ).innerText = `Attempting to retrieve code (${att}/15)...`;
+              document.getElementById("poll-status").innerText =
+                `Attempting to retrieve code (${att}/15)...`;
               const check = await fetch(`/api/instances/${full}`);
               const d = await check.json();
               if (d.pairing_code) {

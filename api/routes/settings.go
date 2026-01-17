@@ -14,7 +14,7 @@ func SettingsRoutes(app *fiber.App, sm *manager.SessionManager) {
 	api.Get("/settings/:phone", func(c *fiber.Ctx) error {
 		phone := c.Params("phone")
 
-		settings, err := database.GetUserSettings(phone)
+		settings, err := database.GetAllSettingsForSession(phone)
 		if err != nil {
 			return c.Status(500).JSON(fiber.Map{
 				"error": "Failed to retrieve user settings",
@@ -35,6 +35,7 @@ func SettingsRoutes(app *fiber.App, sm *manager.SessionManager) {
 			Key   string `json:"key"`
 			Value any    `json:"value"`
 		}
+
 		var req UpdateReq
 		if err := c.BodyParser(&req); err != nil {
 			return c.Status(400).JSON(fiber.Map{"error": "Invalid request body"})
@@ -47,11 +48,15 @@ func SettingsRoutes(app *fiber.App, sm *manager.SessionManager) {
 			"antilink_spam": true, "welcome_msg": true, "goodbye_msg": true,
 			"group_events": true, "autokick": true,
 		}
+
 		if !allowedKeys[req.Key] {
 			return c.Status(400).JSON(fiber.Map{"error": "Invalid setting key"})
 		}
 
-		if err := database.UpdateUserSetting(phone, req.Key, req.Value); err != nil {
+		// Convert 'any' to 'string' using fmt.Sprintf to satisfy the function signature
+		valStr := fmt.Sprintf("%v", req.Value)
+
+		if err := database.UpdateUserSetting(phone, req.Key, valStr); err != nil {
 			return c.Status(500).JSON(fiber.Map{"error": "Failed to update setting"})
 		}
 

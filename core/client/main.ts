@@ -22,6 +22,8 @@ import {
   cachedGroupMetadata,
   syncGroupParticipantsToContactList,
 } from "../util/index.ts";
+import { initSql, SessionManager } from "../sql/index.ts";
+import { SessionStatus } from "../sql/types.ts";
 
 const logger = pino({
   level: "trace",
@@ -35,6 +37,7 @@ const logger = pino({
 const redis = createClient({ url: "redis://localhost:6379" });
 redis.on("error", (err) => console.log("Redis Client Error", err));
 
+await initSql("main.sql");
 await redis.connect();
 await loadPlugins();
 
@@ -53,8 +56,12 @@ const Client = async (phone = process.argv?.[2]) => {
     },
     msgRetryCounterCache,
     generateHighQualityLinkPreview: true,
-    getMessage,
-    cachedGroupMetadata,
+    getMessage: async (key) => {
+      return getMessage(phone, key);
+    },
+    cachedGroupMetadata: async (jid) => {
+      return cachedGroupMetadata(phone, jid);
+    },
   });
 
   if (!sock.authState?.creds?.registered) {
@@ -90,6 +97,19 @@ const Client = async (phone = process.argv?.[2]) => {
         logForGo("CONNECTION_UPDATE", { status: "connected", phone });
         await delay(15000);
         await syncGroupMetadata(phone, sock);
+        await SessionManager.set({
+          id: phone,
+          status: SessionStatus.CONNECTED,
+          name: sock.user?.name,
+          isBusinessAccount: await sock
+            .getBusinessProfile(sock.user?.id!)
+            .then((r) => !!r)
+            .catch(() => false),
+          profileUrl: await sock
+            .profilePictureUrl(sock.user?.id!, "preview")
+            .catch(() => null),
+          createdAt: new Date(),
+        });
       }
     }
     if (events["creds.update"]) {
