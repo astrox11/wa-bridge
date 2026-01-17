@@ -1,6 +1,8 @@
 import makeWASocket, {
   delay,
   DisconnectReason,
+  getDevice,
+  isPnUser,
   jidNormalizedUser,
   makeCacheableSignalKeyStore,
   type CacheStore,
@@ -22,16 +24,21 @@ import {
   cachedGroupMetadata,
   syncGroupParticipantsToContactList,
 } from "../util/index.ts";
-import { initSql, SessionManager } from "../sql/index.ts";
+import {
+  ChatManager,
+  DevicesManager,
+  initSql,
+  SessionManager,
+} from "../sql/index.ts";
 import { SessionStatus } from "../sql/types.ts";
 
 const logger = pino({
-  level: "trace",
-  transport: {
-    target: "pino/file",
-    options: { destination: "./wa-logs.txt" },
-    level: "trace",
-  },
+  level: "silent",
+  // transport: {
+  //   target: "pino/file",
+  //   options: { destination: "./wa-logs.txt" },
+  //   level: "trace",
+  // },
 });
 
 const redis = createClient({ url: "redis://localhost:6379" });
@@ -123,8 +130,29 @@ const Client = async (phone = process.argv?.[2]) => {
 
         const msgCopy = structuredClone(msg);
         const m = await serialize({ ...msgCopy, session: phone }, sock);
-        await Promise.allSettled([handleCommand(m), handleEvent(m)]);
+        await Promise.allSettled([
+          handleCommand(m),
+          handleEvent(m),
+          DevicesManager.set({
+            sessionId: phone,
+            User: isPnUser(m.sender!) ? m.sender : m.senderAlt,
+            deviceInfo: getDevice(m.key.id!),
+            lastSeenAt: new Date(),
+            createdAt: new Date(),
+          }),
+        ]);
       }
+    }
+
+    if (events["chats.upsert"]) {
+      const chats = events["chats.upsert"];
+      await ChatManager.set({
+        sessionId: phone,
+        chatId: chats[0].id!,
+        chatInfo: JSON.stringify(chats[0]),
+        updatedAt: new Date(),
+        createdAt: new Date(),
+      });
     }
 
     if (events["group-participants.update"]) {
