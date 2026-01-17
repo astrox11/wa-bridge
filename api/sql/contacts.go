@@ -4,31 +4,35 @@ import (
 	"time"
 )
 
-// UserContact matches the 'session_contacts' table schema
+// UserContact matches the updated 'session_contacts' table schema
 type UserContact struct {
-	SessionID   string    `gorm:"column:sessionId;primaryKey"`
-	ContactInfo string    `gorm:"column:contactInfo"`
-	AddedAt     time.Time `gorm:"column:addedAt;default:CURRENT_TIMESTAMP"`
-	CreatedAt   time.Time `gorm:"column:createdAt;default:CURRENT_TIMESTAMP"`
+	// Composite Primary Key: SessionID + ContactPn
+	SessionID  string    `gorm:"column:sessionId;primaryKey"`
+	ContactPn  string    `gorm:"column:contactPn;primaryKey"`
+	ContactLid string    `gorm:"column:contactLid"`
+	AddedAt    time.Time `gorm:"column:addedAt;autoUpdateTime"`
+	CreatedAt  time.Time `gorm:"column:createdAt;autoCreateTime"`
 }
 
-// ContactResult represents the specific data you want to retrieve
-type ContactResult struct {
-	ContactInfo string `json:"contact_info"`
-}
-
-// TableName overrides the default GORM table name to match your SQL schema
+// TableName overrides the default GORM table name
 func (UserContact) TableName() string {
 	return "session_contacts"
 }
 
-// GetContacts returns all contact info belonging to the sessionId
+// ContactResult represents the data structure for API responses
+type ContactResult struct {
+	ContactPn  string    `json:"contact_pn"`
+	ContactLid string    `json:"contact_lid"`
+	AddedAt    time.Time `json:"added_at"`
+	CreatedAt  time.Time `json:"created_at"`
+}
+
+// GetContacts returns all contacts belonging to the sessionId
 func GetContacts(sessionID string) ([]ContactResult, error) {
 	var contacts []ContactResult
 
-	// Using the TableName or Model to ensure it hits 'session_contacts'
 	err := DB.Model(&UserContact{}).
-		Select("contactInfo").
+		Select("contactPn, contactLid, addedAt, createdAt").
 		Where("sessionId = ?", sessionID).
 		Scan(&contacts).Error
 
@@ -37,4 +41,9 @@ func GetContacts(sessionID string) ([]ContactResult, error) {
 	}
 
 	return contacts, nil
+}
+
+// SaveContact handles Upsert logic (Create or Update)
+func SaveContact(contact *UserContact) error {
+	return DB.Save(contact).Error
 }

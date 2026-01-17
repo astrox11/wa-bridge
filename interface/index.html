@@ -3,272 +3,366 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Control Panel</title>
+    <title>Whatsaly | Control Panel</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="shortcut icon" href="./favicon.png" type="image/png" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
       :root {
-        --bg: #ffffff;
-        --bg-subtle: #f6f8fa;
-        --border: #d0d7de;
-        --fg: #1f2328;
-        --fg-muted: #656d76;
-        --accent: #0969da;
-        --success: #1a7f37;
-        --danger: #cf222e;
-        --attention: #9a6700;
-        --radius: 6px;
+        --bg: #f8fafc;
+        --surface: #ffffff;
+        --border: #e2e8f0;
+        --fg: #0f172a;
+        --fg-muted: #64748b;
+        --accent: #4f46e5;
+        --accent-soft: #eef2ff;
+        --success: #10b981;
+        --success-soft: #ecfdf5;
+        --warning: #f59e0b;
+        --warning-soft: #fffbeb;
+        --radius-lg: 12px;
+        --radius-md: 8px;
+        --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        --skeleton: #f1f5f9;
       }
 
       * {
         box-sizing: border-box;
         -webkit-tap-highlight-color: transparent;
+        outline: none;
       }
 
       body {
-        font-family:
-          "Plus Jakarta Sans",
-          -apple-system,
-          system-ui,
-          sans-serif;
+        font-family: "Plus Jakarta Sans", sans-serif;
         background-color: var(--bg);
         color: var(--fg);
         margin: 0;
         font-size: 14px;
-        line-height: 1.5;
+        line-height: 1.6;
+        transition: background 0.3s ease;
       }
 
       header {
+        background-color: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
         border-bottom: 1px solid var(--border);
-        background-color: var(--bg-subtle);
         position: sticky;
         top: 0;
         z-index: 50;
       }
+
       .header-container {
-        max-width: 1000px;
+        max-width: 1100px;
         margin: 0 auto;
-        padding: 12px 16px 0;
+        padding: 0 20px;
       }
+
+      .brand-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 64px;
+      }
+
       .brand {
         display: flex;
         align-items: center;
-        gap: 8px;
-        margin-bottom: 12px;
+        gap: 10px;
+        color: var(--accent);
       }
       .brand h1 {
         font-size: 18px;
-        font-weight: 600;
+        font-weight: 700;
         margin: 0;
+        letter-spacing: -0.5px;
+        color: var(--fg);
       }
 
       nav {
         display: flex;
-        overflow-x: auto;
-        gap: 4px;
-        scrollbar-width: none;
-      }
-      nav::-webkit-scrollbar {
-        display: none;
+        gap: 20px;
       }
       .nav-link {
-        padding: 8px 12px;
-        color: var(--fg);
+        padding: 20px 0;
+        color: var(--fg-muted);
         text-decoration: none;
-        border-bottom: 2px solid transparent;
+        font-weight: 600;
         cursor: pointer;
-        white-space: nowrap;
-        transition: all 0.2s;
+        position: relative;
+        font-size: 13px;
+        transition: all 0.3s ease;
+      }
+
+      .nav-link:hover {
+        color: var(--accent);
       }
       .nav-link.active {
-        border-bottom-color: #fd8c73;
-        font-weight: 600;
+        color: var(--accent);
+      }
+      .nav-link.active::after {
+        content: "";
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--accent);
+        border-radius: 2px;
       }
 
       .container {
-        max-width: 1000px;
+        max-width: 1100px;
         margin: 0 auto;
-        padding: 20px 16px;
+        padding: 24px 16px;
       }
+
       .content-section {
         display: none;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       }
       .content-section.active {
         display: block;
-        animation: fadeIn 0.3s ease;
+        opacity: 1;
+        transform: translateY(0);
       }
 
       .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 12px;
-        margin-bottom: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
       }
+
       .stat-card {
+        background: var(--surface);
+        padding: 20px;
+        border-radius: var(--radius-lg);
         border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 12px;
-        background: white;
+        box-shadow: var(--shadow);
+        transition: transform 0.2s ease;
       }
-      .stat-val {
-        font-size: 18px;
-        font-weight: 600;
-        color: var(--accent);
-        display: block;
-      }
+
       .stat-lbl {
         font-size: 11px;
         color: var(--fg-muted);
+        font-weight: 700;
         text-transform: uppercase;
-        font-weight: 500;
+        letter-spacing: 0.05em;
+        margin-bottom: 4px;
+        display: block;
+      }
+      .stat-val {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--fg);
       }
 
       .Box {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
         border: 1px solid var(--border);
-        border-radius: var(--radius);
-        background: white;
-        margin-bottom: 20px;
+        box-shadow: var(--shadow);
+        margin-bottom: 24px;
         overflow: hidden;
       }
+
       .Box-header {
-        background: var(--bg-subtle);
-        padding: 12px 16px;
+        padding: 16px 20px;
         border-bottom: 1px solid var(--border);
         display: flex;
         justify-content: space-between;
         align-items: center;
       }
       .Box-title {
-        font-size: 14px;
-        font-weight: 600;
+        font-size: 15px;
+        font-weight: 700;
         margin: 0;
       }
+
       .Box-row {
-        padding: 16px;
+        padding: 16px 20px;
         border-top: 1px solid var(--border);
-        transition: background 0.1s;
+        transition: background 0.2s ease;
       }
       .Box-row:first-child {
         border-top: 0;
       }
 
+      /* Ghost Loaders (Skeletons) */
+      .skeleton {
+        background: linear-gradient(
+          90deg,
+          var(--skeleton) 25%,
+          #e2e8f0 50%,
+          var(--skeleton) 75%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite linear;
+        border-radius: 4px;
+      }
+
+      @keyframes shimmer {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+
+      .sk-text {
+        height: 14px;
+        width: 80%;
+        margin-bottom: 8px;
+      }
+      .sk-val {
+        height: 28px;
+        width: 40%;
+      }
+      .sk-row {
+        height: 60px;
+        margin: 10px 0;
+        width: 100%;
+        border-radius: var(--radius-md);
+      }
+
       .btn {
-        padding: 6px 14px;
-        font-size: 14px;
-        font-weight: 500;
-        border-radius: var(--radius);
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        border-radius: var(--radius-md);
         border: 1px solid var(--border);
-        background: var(--bg-subtle);
+        background: var(--surface);
         cursor: pointer;
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .btn:hover {
+        background: var(--bg);
+        transform: translateY(-1px);
+        border-color: #cbd5e1;
+      }
+      .btn:active {
+        transform: translateY(0);
       }
       .btn-primary {
-        background: #1f883d;
+        background: var(--accent);
         color: white;
-        border-color: rgba(31, 35, 40, 0.15);
+        border: none;
       }
-      input,
-      select {
-        width: 100%;
-        padding: 8px 12px;
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        font-size: 14px;
-        margin: 8px 0 16px;
+      .btn-primary:hover {
+        background: #4338ca;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
       }
 
       .badge {
-        font-size: 12px;
-        padding: 2px 8px;
-        border-radius: 12px;
-        font-weight: 500;
-        border: 1px solid transparent;
+        font-size: 11px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-weight: 700;
+        text-transform: capitalize;
       }
       .badge-success {
-        background: #dafbe1;
+        background: var(--success-soft);
         color: var(--success);
       }
       .badge-warn {
-        background: #fff8c5;
-        color: var(--attention);
+        background: var(--warning-soft);
+        color: var(--warning);
       }
 
       .modal-overlay {
         position: fixed;
         inset: 0;
-        background: rgba(31, 35, 40, 0.5);
+        background: rgba(15, 23, 42, 0.4);
         display: none;
         align-items: center;
         justify-content: center;
         z-index: 100;
+        backdrop-filter: blur(8px);
         padding: 16px;
-        backdrop-filter: blur(2px);
-      }
-      .modal-card {
-        background: white;
-        width: 100%;
-        max-width: 400px;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-      }
-
-      /* News Specific */
-      .news-title {
-        font-weight: 600;
-        color: var(--accent);
-        text-decoration: none;
-        display: block;
-        margin-bottom: 4px;
-      }
-      .news-desc {
-        font-size: 13px;
-        color: var(--fg-muted);
+        animation: fadeIn 0.3s ease;
       }
 
       @keyframes fadeIn {
         from {
           opacity: 0;
-          transform: translateY(5px);
         }
         to {
           opacity: 1;
-          transform: translateY(0);
         }
       }
 
+      .modal-card {
+        background: var(--surface);
+        width: 100%;
+        max-width: 400px;
+        border-radius: var(--radius-lg);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        transform: scale(0.95);
+        transition: transform 0.3s ease;
+      }
+      .modal-overlay[style*="display: flex"] .modal-card {
+        transform: scale(1);
+      }
+
       .chart-container {
-        height: 200px;
+        height: 260px;
         padding: 10px;
+        position: relative;
+      }
+
+      @media (max-width: 640px) {
+        .brand h1 {
+          display: none;
+        }
+        .nav-link {
+          font-size: 12px;
+        }
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+        .header-container {
+          padding: 0 12px;
+        }
       }
     </style>
   </head>
   <body>
     <header>
       <div class="header-container">
-        <div class="brand">
-          <svg height="24" viewBox="0 0 16 16" width="24" fill="currentColor">
-            <path
-              d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"
-            ></path>
-          </svg>
-          <h1>Whatsaly</h1>
-        </div>
-        <nav>
-          <div class="nav-link active" onclick="tab('dashboard', this)">
-            Dashboard
+        <div class="brand-row">
+          <div class="brand">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="m8 3 4 8 5-5 5 15H2L8 3z" />
+            </svg>
+            <h1>Whatsaly</h1>
           </div>
-          <div class="nav-link" onclick="tab('news', this)">Updates</div>
-          <div class="nav-link" onclick="tab('pair', this)">Connect</div>
-        </nav>
+          <nav>
+            <div class="nav-link active" onclick="tab('dashboard', this)">
+              Dashboard
+            </div>
+            <div class="nav-link" onclick="tab('news', this)">Updates</div>
+            <div class="nav-link" onclick="tab('pair', this)">Connect</div>
+          </nav>
+        </div>
       </div>
     </header>
 
@@ -276,16 +370,19 @@
       <section id="dashboard" class="content-section active">
         <div class="stats-grid">
           <div class="stat-card">
-            <span class="stat-lbl">CPU Load</span
-            ><span class="stat-val" id="cpu-v">0%</span>
+            <span class="stat-lbl">CPU Load</span>
+            <div id="cpu-loader" class="skeleton sk-val"></div>
+            <span class="stat-val" id="cpu-v" style="display: none">0%</span>
           </div>
           <div class="stat-card">
-            <span class="stat-lbl">Memory</span
-            ><span class="stat-val" id="mem-v">0%</span>
+            <span class="stat-lbl">Memory</span>
+            <div id="mem-loader" class="skeleton sk-val"></div>
+            <span class="stat-val" id="mem-v" style="display: none">0%</span>
           </div>
           <div class="stat-card">
-            <span class="stat-lbl">Disk</span
-            ><span class="stat-val" id="dsk-v">0%</span>
+            <span class="stat-lbl">Disk</span>
+            <div id="dsk-loader" class="skeleton sk-val"></div>
+            <span class="stat-val" id="dsk-v" style="display: none">0%</span>
           </div>
         </div>
 
@@ -293,59 +390,72 @@
           <div class="Box-header">
             <h3 class="Box-title">Live Performance</h3>
           </div>
-          <div class="chart-container"><canvas id="perfChart"></canvas></div>
+          <div class="chart-container">
+            <canvas id="perfChart"></canvas>
+          </div>
         </div>
 
         <div class="Box">
           <div class="Box-header">
             <h3 class="Box-title">Active Sessions</h3>
-            <button
-              class="btn"
-              onclick="fetchSessions()"
-              style="
-                padding: 2px 10px;
-                font-size: 11px;
-                font-weight: 600;
-                cursor: pointer;
-                background: #fff;
-                border: 1px solid #d1d5db;
-                border-radius: 4px;
-                color: #374151;
-                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-                transition: background 0.2s;
-              "
-              onmouseover="this.style.background = '#f9fafb'"
-              onmouseout="this.style.background = '#fff'"
-            >
+            <button class="btn" onclick="fetchSessions()">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                <path d="M21 3v5h-5" />
+              </svg>
               Refresh
             </button>
           </div>
-          <div id="session-list"></div>
+          <div id="session-list">
+            <div class="Box-row skeleton sk-row"></div>
+            <div class="Box-row skeleton sk-row"></div>
+          </div>
         </div>
       </section>
 
       <section id="news" class="content-section">
         <div class="Box">
           <div class="Box-header">
-            <h3 class="Box-title">WhatsApp Beta Feed</h3>
+            <h3 class="Box-title">Latest Updates</h3>
           </div>
-          <div id="news-feed"></div>
+          <div id="news-feed">
+            <div class="Box-row skeleton sk-row"></div>
+            <div class="Box-row skeleton sk-row"></div>
+          </div>
         </div>
       </section>
 
       <section id="pair" class="content-section">
-        <div class="Box">
-          <div class="Box-header">
-            <h3 class="Box-title">Add New Instance</h3>
-          </div>
-          <div class="Box-row" style="text-align: center; padding: 40px 20px">
-            <p style="color: var(--fg-muted); margin-bottom: 20px">
-              Link a phone number to start automating.
-            </p>
-            <button class="btn btn-primary" onclick="toggleModal(true)">
-              Link with Phone Number
-            </button>
-          </div>
+        <div
+          class="Box"
+          style="
+            border-style: dashed;
+            background: transparent;
+            text-align: center;
+            padding: 60px 24px;
+          "
+        >
+          <h2 style="margin: 0 0 12px; font-weight: 800">Link Device</h2>
+          <p
+            style="
+              color: var(--fg-muted);
+              max-width: 320px;
+              margin: 0 auto 24px;
+              font-size: 15px;
+            "
+          >
+            Enter your phone number to generate a secure pairing code.
+          </p>
+          <button class="btn btn-primary" onclick="toggleModal(true)">
+            Start Connection
+          </button>
         </div>
       </section>
     </main>
@@ -353,61 +463,90 @@
     <div class="modal-overlay" id="modalOverlay">
       <div class="modal-card">
         <div class="Box-header">
-          <span class="Box-title">Pair Device</span>
-          <span style="cursor: pointer" onclick="toggleModal(false)"
+          <span class="Box-title">Pairing Request</span>
+          <span
+            style="cursor: pointer; font-size: 20px"
+            onclick="toggleModal(false)"
             >&times;</span
           >
         </div>
         <div class="Box-row" id="setupView">
-          <label style="font-size: 12px; font-weight: 600">Country Code</label>
-          <select id="country">
+          <label
+            style="
+              font-size: 11px;
+              font-weight: 800;
+              color: var(--fg-muted);
+              display: block;
+              margin-bottom: 8px;
+            "
+            >COUNTRY</label
+          >
+          <select
+            id="country"
+            style="
+              width: 100%;
+              padding: 12px;
+              border: 1px solid var(--border);
+              border-radius: var(--radius-md);
+              margin-bottom: 20px;
+            "
+          >
             <option value="234">Nigeria (+234)</option>
             <option value="1">USA (+1)</option>
           </select>
-          <label style="font-size: 12px; font-weight: 600">Phone Number</label>
-          <input type="text" id="phone" placeholder="80609487542" />
+          <label
+            style="
+              font-size: 11px;
+              font-weight: 800;
+              color: var(--fg-muted);
+              display: block;
+              margin-bottom: 8px;
+            "
+            >NUMBER</label
+          >
+          <input
+            type="text"
+            id="phone"
+            placeholder="806..."
+            style="
+              width: 100%;
+              padding: 12px;
+              border: 1px solid var(--border);
+              border-radius: var(--radius-md);
+              margin-bottom: 24px;
+            "
+          />
           <button
             class="btn btn-primary"
             style="width: 100%; justify-content: center"
             onclick="doPair()"
           >
-            Request Code
+            Get Code
           </button>
         </div>
         <div
           class="Box-row"
           id="waitView"
-          style="display: none; text-align: center; padding: 30px"
+          style="display: none; text-align: center; padding: 40px"
         >
-          <p>Generating pairing code...</p>
-          <div
-            id="poll-status"
-            style="font-size: 11px; color: var(--fg-muted); margin-top: 10px"
-          >
-            Waiting for server...
+          <div class="skeleton sk-val" style="margin: 0 auto 16px"></div>
+          <div id="poll-status" style="font-size: 12px; color: var(--fg-muted)">
+            Handshaking with server...
           </div>
         </div>
         <div
           class="Box-row"
           id="resultView"
-          style="display: none; text-align: center; padding: 30px"
+          style="display: none; text-align: center; padding: 40px"
         >
-          <span
-            style="
-              font-size: 11px;
-              color: var(--fg-muted);
-              text-transform: uppercase;
-            "
-            >Your Code</span
-          >
           <div
             id="codeBox"
             style="
-              font-size: 32px;
-              font-weight: 600;
+              font-size: 42px;
+              font-weight: 800;
               color: var(--accent);
-              letter-spacing: 4px;
-              margin: 15px 0;
+              letter-spacing: 8px;
+              margin-bottom: 24px;
             "
           >
             ----
@@ -417,7 +556,7 @@
             style="width: 100%; justify-content: center"
             onclick="toggleModal(false)"
           >
-            Finish
+            Dismiss
           </button>
         </div>
       </div>
@@ -434,7 +573,8 @@
         document
           .querySelectorAll(".nav-link")
           .forEach((l) => l.classList.remove("active"));
-        document.getElementById(name).classList.add("active");
+        const target = document.getElementById(name);
+        target.classList.add("active");
         el.classList.add("active");
         if (name === "news") fetchNews();
         if (name === "dashboard") fetchSessions();
@@ -442,16 +582,19 @@
 
       function initPerf() {
         const ctx = document.getElementById("perfChart").getContext("2d");
+        const gradient = ctx.createLinearGradient(0, 0, 0, 250);
+        gradient.addColorStop(0, "rgba(79, 70, 229, 0.15)");
+        gradient.addColorStop(1, "rgba(79, 70, 229, 0)");
+
         chart = new Chart(ctx, {
           type: "line",
           data: {
             labels: Array(maxPoints).fill(""),
             datasets: [
               {
-                label: "CPU Usage %",
                 data: Array(maxPoints).fill(0),
-                borderColor: "#0969da",
-                backgroundColor: "rgba(9,105,218,0.1)",
+                borderColor: "#4f46e5",
+                backgroundColor: gradient,
                 fill: true,
                 tension: 0.4,
                 borderWidth: 2,
@@ -464,7 +607,12 @@
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-              y: { min: 0, max: 100, grid: { color: "#f0f0f0" } },
+              y: {
+                min: 0,
+                max: 100,
+                grid: { color: "#f1f5f9" },
+                ticks: { display: false },
+              },
               x: { display: false },
             },
           },
@@ -473,6 +621,12 @@
         const stream = new EventSource("/api/system/stream");
         stream.onmessage = (e) => {
           const d = JSON.parse(e.data);
+          // Hide loaders on first data
+          ["cpu", "mem", "dsk"].forEach((id) => {
+            document.getElementById(`${id}-loader`).style.display = "none";
+            document.getElementById(`${id}-v`).style.display = "block";
+          });
+
           document.getElementById("cpu-v").innerText = d.cpu.toFixed(1) + "%";
           document.getElementById("mem-v").innerText =
             d.memory.toFixed(0) + "%";
@@ -485,63 +639,62 @@
 
       async function fetchSessions() {
         const container = document.getElementById("session-list");
-        container.innerHTML = '<div class="Box-row">Loading...</div>';
+        // Maintain height with skeletons during load
+        container.innerHTML =
+          '<div class="Box-row skeleton sk-row"></div><div class="Box-row skeleton sk-row"></div>';
+
         try {
           const res = await fetch("/api/instances");
           const data = await res.json();
-          container.innerHTML = data.length
-            ? data
-                .map(
-                  (s) => `
-        <div class="Box-row" style="display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <div style="font-weight:600; font-family:monospace;">${s.Name}</div>
-            <div style="font-size:11px; color:var(--fg-muted);">Updated: ${new Date(
-              s.CreatedAt,
-            ).toLocaleTimeString()}</div>
-          </div>
-          <span class="badge ${
-            s.Status === "connected" ? "badge-success" : "badge-warn"
-          }">${s.Status}</span>
-        </div>
-      `,
-                )
-                .join("")
-            : '<div class="Box-row">No sessions.</div>';
+          setTimeout(() => {
+            // Small timeout to show ghost effect
+            container.innerHTML = data.length
+              ? data
+                  .map(
+                    (s) => `
+                <div class="Box-row" style="display:flex; justify-content:space-between; align-items:center; animation: fadeIn 0.3s ease;">
+                  <div>
+                    <div style="font-weight:700; font-family:monospace;">${s.Name}</div>
+                    <div style="font-size:12px; color:var(--fg-muted);">Active: ${new Date(s.CreatedAt).toLocaleTimeString()}</div>
+                  </div>
+                  <span class="badge ${s.Status === "connected" ? "badge-success" : "badge-warn"}">${s.Status}</span>
+                </div>
+              `,
+                  )
+                  .join("")
+              : '<div class="Box-row" style="text-align:center; color:var(--fg-muted); padding:30px">No active instances</div>';
+          }, 400);
         } catch (e) {
           container.innerHTML =
-            '<div class="Box-row">Error fetching sessions.</div>';
+            '<div class="Box-row" style="color:var(--warning)">Failed to sync</div>';
         }
       }
 
       async function fetchNews() {
         const container = document.getElementById("news-feed");
-        container.innerHTML = '<div class="Box-row">Fetching...</div>';
+        container.innerHTML =
+          '<div class="Box-row skeleton sk-row"></div><div class="Box-row skeleton sk-row"></div>';
         try {
           const res = await fetch("/util/whatsapp-news");
           const json = await res.json();
           container.innerHTML = json.data
             .map(
               (n) => `
-        <div class="Box-row">
-          <a href="${n.link}" target="_blank" class="news-title">${n.title}</a>
-          <div class="news-desc">${n.description.trim()}</div>
-          <div style="font-size:11px; color:var(--fg-muted); margin-top:8px;">${
-            n.date
-          }</div>
-        </div>
-      `,
+            <div class="Box-row" style="animation: fadeIn 0.3s ease;">
+              <a href="${n.link}" target="_blank" class="news-title">${n.title}</a>
+              <div style="font-size:13px; color:var(--fg-muted); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${n.description.trim()}</div>
+            </div>
+          `,
             )
             .join("");
         } catch (e) {
-          container.innerHTML = '<div class="Box-row">News unavailable.</div>';
+          container.innerHTML = '<div class="Box-row">Feed unavailable</div>';
         }
       }
 
       function toggleModal(s) {
-        document.getElementById("modalOverlay").style.display = s
-          ? "flex"
-          : "none";
+        const modal = document.getElementById("modalOverlay");
+        modal.style.display = s ? "flex" : "none";
         if (!s) {
           document.getElementById("setupView").style.display = "block";
           document.getElementById("waitView").style.display = "none";
@@ -567,7 +720,7 @@
             const poll = setInterval(async () => {
               att++;
               document.getElementById("poll-status").innerText =
-                `Attempting to retrieve code (${att}/15)...`;
+                `Syncing (${att}/15)...`;
               const check = await fetch(`/api/instances/${full}`);
               const d = await check.json();
               if (d.pairing_code) {
@@ -579,13 +732,11 @@
               if (att >= 15) {
                 clearInterval(poll);
                 toggleModal(false);
-                alert("Timeout");
               }
             }, 2000);
           }
         } catch (e) {
           toggleModal(false);
-          alert("Request Failed");
         }
       }
 
