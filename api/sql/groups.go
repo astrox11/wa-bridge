@@ -6,9 +6,11 @@ import (
 
 // GroupMetadata matches the 'session_groups' table
 type GroupMetadata struct {
-	SessionID string    `gorm:"column:sessionId"`
-	GroupInfo string    `gorm:"column:groupInfo"` // Contains the metadata/ID
-	CreatedAt time.Time `gorm:"column:createdAt;default:CURRENT_TIMESTAMP"`
+	GroupID   string    `gorm:"column:groupId;primaryKey"` // Added as Primary Key
+	SessionID string    `gorm:"column:sessionId;index"`
+	GroupInfo string    `gorm:"column:groupInfo"`
+	UpdatedAt time.Time `gorm:"column:updatedAt;autoUpdateTime"` // Added
+	CreatedAt time.Time `gorm:"column:createdAt;autoCreateTime"` // Keeps original timestamp
 }
 
 // TableName overrides the default GORM table name
@@ -17,19 +19,19 @@ func (GroupMetadata) TableName() string {
 }
 
 type GroupMetaDataResult struct {
+	GroupID   string    `json:"group_id" gorm:"column:groupId"`
 	GroupInfo string    `json:"group_info" gorm:"column:groupInfo"`
+	UpdatedAt time.Time `json:"updated_at" gorm:"column:updatedAt"`
 	CreatedAt time.Time `json:"created_at" gorm:"column:createdAt"`
 }
 
 // GetGroupsBySession returns all groups associated with a sessionId
-// Note: Since the schema doesn't have a separate ID column,
-// filtering by a specific Group ID usually happens in the application logic
-// by parsing the GroupInfo JSON.
 func GetGroupsBySession(sessionID string) ([]GroupMetaDataResult, error) {
 	var results []GroupMetaDataResult
 
+	// Updated to include groupId and updatedAt
 	err := DB.Model(&GroupMetadata{}).
-		Select("groupInfo, createdAt").
+		Select("groupId, groupInfo, updatedAt, createdAt").
 		Where("sessionId = ?", sessionID).
 		Find(&results).Error
 
@@ -40,9 +42,12 @@ func GetGroupsBySession(sessionID string) ([]GroupMetaDataResult, error) {
 	return results, nil
 }
 
-// GetAllGroups as a map
-// Since there is no explicit 'id' column in the schema provided,
-// this assumes you want to return the list of groups.
+// SaveGroup handles the "Upsert" logic (Create or Update)
+// This matches the 'set' logic in your TypeScript manager
+func SaveGroup(group *GroupMetadata) error {
+	return DB.Save(group).Error
+}
+
 func GetAllGroupsMap(sessionID string) ([]GroupMetaDataResult, error) {
 	return GetGroupsBySession(sessionID)
 }

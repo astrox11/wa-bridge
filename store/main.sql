@@ -16,18 +16,19 @@ CREATE INDEX IF NOT EXISTS idx_sessions_status ON sessions (status);
 -- 2. Devices Table
 CREATE TABLE
     IF NOT EXISTS devices (
-        sessionId TEXT PRIMARY KEY,
+        sessionId TEXT NOT NULL,
+        User TEXT NOT NULL,
         deviceInfo TEXT,
         lastSeenAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (sessionId) REFERENCES sessions (id) ON DELETE CASCADE
+        PRIMARY KEY (sessionId, User) FOREIGN KEY (sessionId) REFERENCES sessions (id) ON DELETE CASCADE
     );
 
 -- 3. Auth Tokens Table
 CREATE TABLE
     IF NOT EXISTS auth_tokens (
-        sessionId TEXT PRIMARY KEY,
-        token TEXT NOT NULL,
+        sessionId TEXT NOT NULL,
+        token TEXT PRIMARY KEY,
         value TEXT NOT NULL,
         createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (sessionId) REFERENCES sessions (id) ON DELETE CASCADE
@@ -35,19 +36,21 @@ CREATE TABLE
 
 -- 4. Session Contacts Table
 CREATE TABLE
-    IF NOT EXISTS session_contacts (
-        sessionId TEXT PRIMARY KEY,
-        contactInfo TEXT,
-        addedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    IF NOT EXISTS session_chats (
+        sessionId TEXT NOT NULL,
+        chatId TEXT NOT NULL,
+        chatInfo TEXT,
+        updatedAt TEXT NOT NULL,
+        createdAt TEXT NOT NULL,
+        PRIMARY KEY (sessionId, chatId),
         FOREIGN KEY (sessionId) REFERENCES sessions (id) ON DELETE CASCADE
     );
 
 -- 5. Session Messages Table
 CREATE TABLE
     IF NOT EXISTS session_messages (
-        sessionId TEXT PRIMARY KEY,
-        messageId TEXT NOT NULL,
+        sessionId TEXT NOT NULL,
+        messageId TEXT PRIMARY KEY,
         messageContent TEXT,
         createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (sessionId) REFERENCES sessions (id) ON DELETE CASCADE
@@ -79,8 +82,10 @@ CREATE INDEX IF NOT EXISTS idx_session_configurations_session_id ON session_conf
 -- 8. Session Groups Table
 CREATE TABLE
     IF NOT EXISTS session_groups (
+        groupId TEXT PRIMARY KEY,
         sessionId TEXT NOT NULL,
-        groupInfo TEXT NOT NULL,
-        createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        groupInfo TEXT,
+        updatedAt TEXT NOT NULL,
+        createdAt TEXT NOT NULL,
         FOREIGN KEY (sessionId) REFERENCES sessions (id) ON DELETE CASCADE
     );

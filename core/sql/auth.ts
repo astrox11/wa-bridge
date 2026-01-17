@@ -15,8 +15,8 @@ import {
   GroupManager,
   MessageManager,
   SessionManager,
-} from "../sql";
-import { SessionStatus } from "../sql/types";
+} from ".";
+import { SessionStatus } from "./types";
 
 export const useHybridAuthState = async (client: any, phone: string) => {
   const keyPrefix = `session:${phone}:`;
@@ -137,7 +137,8 @@ export const saveContact = async (pn: string, lid: string, session: string) => {
   if (!isPnUser(pn)) return;
   await ContactManager.set({
     sessionId: session,
-    contactInfo: JSON.stringify({ pn, lid }),
+    contactPn: pn,
+    contactLid: lid,
     addedAt: new Date(),
     createdAt: new Date(),
   });
@@ -209,7 +210,9 @@ export const cacheGroupMetadata = async (
 ) => {
   await GroupManager.set({
     sessionId: session,
+    groupId: metadata.id,
     groupInfo: JSON.stringify(metadata),
+    updatedAt: new Date(),
     createdAt: new Date(),
   });
 };
@@ -258,7 +261,7 @@ export async function getAlternateId(
   session: string,
   id: string,
 ): Promise<string | undefined> {
-  id = id.replace(/\D/g, "");
+  id = id?.replace(/\D/g, "");
 
   const jid = `${id}@s.whatsapp.net`;
   const lid = `${id}@lid`;
@@ -267,8 +270,8 @@ export async function getAlternateId(
 
   if (contactByPn != null) {
     for (const contact of contactByPn) {
-      const info = contact.contactInfo ? JSON.parse(contact.contactInfo) : null;
-      if (info && info.pn === jid) return info.lid;
+      const info = contact.contactPn ? contact.contactPn : null;
+      if (info && info === jid) return contact.contactLid;
     }
   }
 
@@ -276,8 +279,8 @@ export async function getAlternateId(
 
   if (contactByLid != null) {
     for (const contact of contactByLid) {
-      const info = contact.contactInfo ? JSON.parse(contact.contactInfo) : null;
-      if (info && info.lid === lid) return info.pn;
+      const info = contact.contactLid ? contact.contactLid : null;
+      if (info && info === lid) return contact.contactPn;
     }
   }
 }

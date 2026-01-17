@@ -1,12 +1,14 @@
 import { SQL } from "bun";
 import Database from "bun:sqlite";
 import type {
+  Devices,
   Sessions,
   AuthTokens as AuthTokensType,
   SessionContacts,
   SessionConfigurations,
   SessionMessages,
   SessionGroups,
+  SessionChats,
 } from "./types";
 import { readFileSync } from "fs";
 import { join } from "path";
@@ -40,6 +42,47 @@ export async function initSql(fileName: string) {
   }
 }
 
+export const ChatManager = {
+  async set(data: SessionChats): Promise<void> {
+    try {
+      await db`
+        INSERT INTO session_chats (sessionId, chatId, chatInfo, updatedAt, createdAt)
+        VALUES (
+          ${data.sessionId}, 
+          ${data.chatId}, 
+          ${data.chatInfo}, 
+          ${data.updatedAt.toISOString()}, 
+          ${data.createdAt.toISOString()}
+        )
+        ON CONFLICT (sessionId, chatId) DO UPDATE SET
+          chatInfo = EXCLUDED.chatInfo,
+          updatedAt = EXCLUDED.updatedAt
+      `;
+    } catch (error) {
+      console.error("Database Error in ChatManager.set:", error);
+      throw error;
+    }
+  },
+
+  async get(sessionId: string): Promise<SessionChats[] | null> {
+    const res = await db<SessionChats[]>`
+      SELECT * FROM session_chats WHERE sessionId = ${sessionId}
+    `;
+    return res.length > 0 ? res : null;
+  },
+
+  /**
+   * Deletes all chats for a session, or a specific chat if chatId is provided
+   */
+  async del(sessionId: string, chatId?: string): Promise<void> {
+    if (chatId) {
+      await db`DELETE FROM session_chats WHERE sessionId = ${sessionId} AND chatId = ${chatId}`;
+    } else {
+      await db`DELETE FROM session_chats WHERE sessionId = ${sessionId}`;
+    }
+  },
+};
+
 export const SessionManager = {
   async set(data: Sessions): Promise<void> {
     await db`
@@ -61,13 +104,44 @@ export const SessionManager = {
   },
 };
 
+export const DevicesManager = {
+  async set(data: Devices): Promise<void> {
+    await db`
+      INSERT INTO devices (sessionId, User, deviceInfo, lastSeenAt, createdAt)
+      VALUES (
+        ${data.sessionId}, 
+        ${data.User}, 
+        ${data.deviceInfo}, 
+        ${data.lastSeenAt.toISOString()}, 
+        ${data.createdAt.toISOString()}
+      )
+      -- Update ONLY if the same user exists in the same session
+      ON CONFLICT (sessionId, User) DO UPDATE SET
+        deviceInfo = EXCLUDED.deviceInfo,
+        lastSeenAt = EXCLUDED.lastSeenAt
+    `;
+  },
+
+  async get(sessionId: string): Promise<Devices | null> {
+    const res = await db<
+      Devices[]
+    >`SELECT * FROM devices WHERE sessionId = ${sessionId}`;
+    return res[0] || null;
+  },
+
+  async del(sessionId: string): Promise<void> {
+    await db`DELETE FROM devices WHERE sessionId = ${sessionId}`;
+  },
+};
+
 export const AuthTokenManager = {
   async set(data: AuthTokensType): Promise<void> {
     await db`
       INSERT INTO auth_tokens (sessionId, token, value)
       VALUES (${data.sessionId}, ${data.token}, ${data.value})
-      ON CONFLICT (sessionId) DO UPDATE SET
-        token = EXCLUDED.token,
+      -- This allows multiple tokens per session. 
+      -- It only updates if the specific token string already exists.
+      ON CONFLICT (token) DO UPDATE SET
         value = EXCLUDED.value
     `;
   },
@@ -87,8 +161,9 @@ export const MessageManager = {
     await db`
       INSERT INTO session_messages (sessionId, messageId, messageContent)
       VALUES (${data.sessionId}, ${data.messageId}, ${data.messageContent})
-      ON CONFLICT (sessionId) DO UPDATE SET
-        messageId = EXCLUDED.messageId,
+      -- Conflict on messageId so that the same message isn't duplicated,
+      -- but different messages in the same session are all saved.
+      ON CONFLICT (messageId) DO UPDATE SET
         messageContent = EXCLUDED.messageContent
     `;
   },
@@ -105,27 +180,38 @@ export const MessageManager = {
 
 export const ContactManager = {
   async set(data: SessionContacts): Promise<void> {
-    await db`
-      INSERT INTO session_contacts (sessionId, contactInfo, addedAt, createdAt)
-      VALUES (
-        ${data.sessionId}, 
-        ${data.contactInfo}, 
-        ${data.addedAt.toISOString()}, 
-        ${data.createdAt.toISOString()}
-      )
-      ON CONFLICT (sessionId) DO UPDATE SET
-        contactInfo = EXCLUDED.contactInfo,
-        addedAt = EXCLUDED.addedAt
-    `;
+    try {
+      await db`
+        INSERT INTO session_contacts (sessionId, contactPn, contactLid, addedAt, createdAt)
+        VALUES (
+          ${data.sessionId}, 
+          ${data.contactPn}, 
+          ${data.contactLid}, 
+          ${data.addedAt.toISOString()}, 
+          ${data.createdAt.toISOString()}
+        )
+        ON CONFLICT (sessionId, contactPn) DO UPDATE SET
+          contactLid = EXCLUDED.contactLid,
+          addedAt = EXCLUDED.addedAt
+      `;
+    } catch (error) {
+      console.error("Database Error in ContactManager:", error);
+      throw error;
+    }
   },
+
   async get(sessionId: string): Promise<SessionContacts[] | null> {
-    const res = await db<
-      SessionContacts[]
-    >`SELECT * FROM session_contacts WHERE sessionId = ${sessionId}`;
-    return res || null;
+    const res = await db<SessionContacts[]>`
+      SELECT * FROM session_contacts WHERE sessionId = ${sessionId}
+    `;
+    return res.length > 0 ? res : null;
   },
-  async del(sessionId: string): Promise<void> {
-    await db`DELETE FROM session_contacts WHERE sessionId = ${sessionId}`;
+
+  async del(sessionId: string, contactPn: string): Promise<void> {
+    await db`
+      DELETE FROM session_contacts 
+      WHERE sessionId = ${sessionId} AND contactPn = ${contactPn}
+    `;
   },
 };
 
@@ -153,16 +239,29 @@ export const ConfigManager = {
 export const GroupManager = {
   async set(data: SessionGroups): Promise<void> {
     await db`
-      INSERT INTO session_groups (sessionId, groupInfo, createdAt)
-      VALUES (${data.sessionId}, ${data.groupInfo}, ${data.createdAt.toISOString()})`;
+      INSERT INTO session_groups (sessionId, groupId, groupInfo, updatedAt, createdAt)
+      VALUES (
+        ${data.sessionId}, 
+        ${data.groupId}, 
+        ${data.groupInfo}, 
+        ${data.updatedAt.toISOString()}, 
+        ${data.createdAt.toISOString()}
+      )
+      ON CONFLICT (groupId) DO UPDATE SET
+        groupInfo = EXCLUDED.groupInfo,
+        updatedAt = EXCLUDED.updatedAt,
+        sessionId = EXCLUDED.sessionId
+    `;
   },
+
   async get(sessionId: string): Promise<SessionGroups[] | null> {
-    const res = await db<
-      SessionGroups[]
-    >`SELECT * FROM session_groups WHERE sessionId = ${sessionId}`;
-    return res || null;
+    const res = await db<SessionGroups[]>`
+      SELECT * FROM session_groups WHERE sessionId = ${sessionId}
+    `;
+    return res.length > 0 ? res : null;
   },
-  async del(sessionId: string): Promise<void> {
-    await db`DELETE FROM session_groups WHERE sessionId = ${sessionId}`;
+
+  async del(groupId: string): Promise<void> {
+    await db`DELETE FROM session_groups WHERE groupId = ${groupId}`;
   },
 };
