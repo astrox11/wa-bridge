@@ -14,9 +14,7 @@ import {
   ContactManager,
   GroupManager,
   MessageManager,
-  SessionManager,
 } from ".";
-import { SessionStatus } from "./types";
 
 export const useHybridAuthState = async (client: any, phone: string) => {
   const keyPrefix = `session:${phone}:`;
@@ -40,12 +38,6 @@ export const useHybridAuthState = async (client: any, phone: string) => {
     ...redisAuth,
     saveCreds: async () => {
       await redisAuth.saveCreds();
-      await SessionManager.set({
-        id: phone,
-        status: SessionStatus.ACTIVE,
-        isBusinessAccount: false,
-        createdAt: new Date(),
-      });
       await saveToSQL("creds", redisAuth.state.creds);
     },
   };

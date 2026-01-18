@@ -1,4 +1,4 @@
-import { jidNormalizedUser, normalizeMessageContent } from "baileys";
+import { getDevice, jidNormalizedUser, normalizeMessageContent } from "baileys";
 import type { WAMessage, WAContextInfo, WASocket } from "baileys";
 import {
   isAdmin as is_admin,
@@ -35,6 +35,7 @@ const serialize = async (
     ? await is_admin(session, key.remoteJid!, sender!)
     : null;
   const text = extract_text_from_message(message);
+  const device = getDevice(key.id!)
 
   return {
     chat: key.remoteJid,
@@ -46,6 +47,7 @@ const serialize = async (
     session,
     isGroup,
     isAdmin,
+    device,
     messageTimestamp,
     text,
     image: Boolean(message?.imageMessage),
@@ -72,6 +74,7 @@ const serialize = async (
                 await getAlternateId(quoted.participant!, msg.session),
               ].includes(jidNormalizedUser(client.user!.id)),
             },
+            device: getDevice(quoted.stanzaId!),
             sender: quoted.participant,
             senderAlt: await getAlternateId(quoted.participant!, msg.session),
             message: quotedMessage,
