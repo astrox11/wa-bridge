@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://golang.org/">
-    <img src="./interface/logo.jpg" width="280" height="280" />
+    <img src="./ui/logo.jpg" width="280" height="280" />
   </a>
 </div>
 
