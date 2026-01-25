@@ -9,7 +9,7 @@
 - Multi-session support
 - Automated session management
 - Live metrics utility
-- Go server orchestration with process management
+- Powerfull service orchestration with process management
 - Server-Sent Events for real-time updates
 
 ## Setup Instructions

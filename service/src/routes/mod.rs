@@ -2,6 +2,7 @@ pub mod instance;
 pub mod pair;
 pub mod settings;
 pub mod system;
+pub mod util;
 
 use crate::AppState;
 use axum::{
@@ -38,4 +39,5 @@ pub fn create_routes() -> Router<Arc<AppState>> {
             "/api/system/stream",
             get(crate::routes::system::system_stream),
         )
+        .route("/util/whatsapp-news", get(util::get_whatsapp_news))
 }

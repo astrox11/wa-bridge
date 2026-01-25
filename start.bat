@@ -1,5 +1,5 @@
 @echo off
-cd /d "api"
+cd /d "service"
 
 :: Execute the Service
 cargo run --release

@@ -1,4 +1,4 @@
-use crate::{AppState, manager::WorkerInfo, sql::Session};
+use crate::{AppState, sql::Session};
 use axum::http::StatusCode;
 use axum::{
     Json,
@@ -7,7 +7,7 @@ use axum::{
 };
 use futures::stream::{self, Stream};
 use serde_json::{Value, json};
-use std::{collections::HashMap, convert::Infallible, sync::Arc, time::Duration};
+use std::{convert::Infallible, sync::Arc, time::Duration};
 use tokio_stream::StreamExt as _;
 
 pub async fn list_instances(State(state): State<Arc<AppState>>) -> Json<Vec<Session>> {
@@ -23,10 +23,25 @@ pub async fn get_instance(
     Path(phone): Path<String>,
     State(state): State<Arc<AppState>>,
 ) -> Json<serde_json::Value> {
-    let workers: tokio::sync::RwLockReadGuard<'_, HashMap<String, WorkerInfo>> =
-        state.sm.workers.read().await;
-    match workers.get(&phone) {
-        Some(w) => Json(serde_json::json!(w)),
+    let workers = state.sm.workers.read().await;
+    if let Some(w) = workers.get(&phone) {
+        return Json(serde_json::json!(w));
+    }
+    drop(workers);
+
+    let session = sqlx::query_as::<_, Session>("SELECT * FROM sessions WHERE id = ?")
+        .bind(&phone)
+        .fetch_optional(&state.db)
+        .await
+        .unwrap_or(None);
+
+    match session {
+        Some(s) => Json(serde_json::json!({
+            "phone": s.id,
+            "status": s.status,
+            "is_running": false,
+            "pairing_code": null
+        })),
         None => Json(serde_json::json!({"error": "not found"})),
     }
 }
@@ -83,10 +98,19 @@ pub async fn resume_instance(
     Path(phone): Path<String>,
     State(state): State<Arc<AppState>>,
 ) -> Json<Value> {
-    state.sm.pause_instance(&phone, false).await;
-    Json(json!({"status": "resuming", "phone": phone}))
-}
+    let is_running = {
+        let workers = state.sm.workers.read().await;
+        workers.get(&phone).map(|w| w.is_running).unwrap_or(false)
+    };
 
+    if !is_running {
+        state.sm.start_instance(&phone, state.clone()).await;
+        Json(json!({"status": "starting", "phone": phone}))
+    } else {
+        state.sm.pause_instance(&phone, false).await;
+        Json(json!({"status": "resuming", "phone": phone}))
+    }
+}
 pub async fn reset_instance(
     Path(phone): Path<String>,
     State(state): State<Arc<AppState>>,

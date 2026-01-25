@@ -45,7 +45,6 @@ pub async fn sync_db() -> SqlitePool {
     let schema_path = "../store/main.sql";
 
     if Path::new(schema_path).exists() {
-        println!("📜 Loading schema from {}...", schema_path);
         match fs::read_to_string(schema_path) {
             Ok(schema) => {
                 if let Err(e) = sqlx::query(&schema).execute(&pool).await {

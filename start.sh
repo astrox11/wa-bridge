@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd "$(dirname "$0")/api" || { echo "Error: api directory not found"; exit 1; }
+cd "$(dirname "$0")/service" || {  exit 1; }
 
 # Supports Linux and MacOS
 cargo run --release

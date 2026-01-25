@@ -22,6 +22,12 @@ pub struct SessionManager {
 impl SessionManager {
     pub async fn start_instance(&self, phone: &str, state: Arc<AppState>) {
         let phone_clone = phone.to_string();
+
+        let _ = sqlx::query("UPDATE sessions SET status = 'starting' WHERE id = ?")
+            .bind(&phone_clone)
+            .execute(&state.db)
+            .await;
+
         {
             let mut workers = self.workers.write().await;
             workers.entry(phone_clone.clone()).or_insert(WorkerInfo {

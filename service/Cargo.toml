@@ -1,6 +1,7 @@
 [package]
 name = "whatsaly-api"
 version = "0.1.0"
+description = "API Service Client"
 edition = "2024"
 
 [dependencies]
@@ -23,3 +24,5 @@ chrono = { version = "0.4.43", features = ["serde"] }
 sysinfo = "0.32"
 prost-types = "0.13"
 anyhow = "1.0.100"
+reqwest = { version = "0.11", features = ["json"] }
+scraper = "0.17"
