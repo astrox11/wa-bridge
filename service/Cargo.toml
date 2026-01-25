@@ -8,7 +8,7 @@ edition = "2024"
 axum = { version = "0.7", features = ["macros"] }
 tokio = { version = "1", features = ["full", "net"] }
 tokio-stream = { version = "0.1", features = ["time"] }
-sqlx = { version = "0.7", features = [
+sqlx = { version = "0.8", features = [
     "runtime-tokio-rustls",
     "sqlite",
     "macros",
