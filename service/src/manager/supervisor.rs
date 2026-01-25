@@ -2,6 +2,7 @@ use crate::AppState;
 use crate::manager::events::WorkerEvent;
 use crate::manager::events::worker_event::Event;
 use prost::Message;
+use std::process::Stdio;
 use std::sync::Arc;
 use tokio::io::AsyncReadExt;
 use tokio::net::TcpListener;
@@ -33,6 +34,8 @@ pub async fn run(phone: String, state: Arc<AppState>) {
             .env("NODE_OPTIONS", "--max-old-space-size=1024")
             .current_dir("../src")
             .kill_on_drop(true)
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
             .spawn()
             .expect("Failed to spawn bun");
 
