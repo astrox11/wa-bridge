@@ -4,25 +4,17 @@
   </a>
 </div>
 
-## Features
+# Setup Instructions
 
-- Multi-session support
-- Automated session management
-- Live metrics utility
-- Powerful service orchestration with process management
-- Server-Sent Events for real-time updates
+## Prerequisites
 
-## Setup Instructions
-
-#### Prerequisites
-
-Ensure these are installed on your system.
+Install the following on your system.
 
 - [Docker](https://www.docker.com/get-started)
 
 - [Docker Compose](https://docs.docker.com/compose/install/)
 
-#### Installation
+## Installation
 
 The easiest way to get Whatsaly running is using Docker Compose. This packages the Go core and the Bun environment into a single deployment.
 
@@ -45,6 +37,6 @@ docker-compose up -d
 docker-compose logs -f whatsaly
 ```
 
-## Contributing
+# Contributing
 
 Please read the [Guidelines](CONTRIBUTING.md) before submitting pull requests.
